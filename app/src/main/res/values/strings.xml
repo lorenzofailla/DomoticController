@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">IMTest</string>
+
+    <string name="PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST">Contacting remote host...</string>
+    <string name="PROGRESSDIALOG_INFO___RETRIEVING_INFORMATION">Retrieving info from remote host...</string>
+
 </resources>

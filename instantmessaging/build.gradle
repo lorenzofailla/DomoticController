@@ -1,10 +1,10 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 25
     buildToolsVersion '25.0.2'
     defaultConfig {
-        applicationId "com.apps.lore_f.imtest"
+
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
@@ -28,6 +28,7 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.0'
     testCompile 'junit:junit:4.12'
-    compile 'com.google.android.gms:play-services:10.0.1'
-    compile project(':instantmessaging')
+    compile 'org.igniterealtime.smack:smack-android:4.2.0'
+    compile 'org.igniterealtime.smack:smack-extensions:4.2.0'
+    compile 'org.igniterealtime.smack:smack-tcp:4.2.0'
 }

@@ -1,103 +1,152 @@
 package com.apps.lore_f.imtest;
 
+import android.app.ProgressDialog;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import org.jivesoftware.smack.AbstractXMPPConnection;
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.chat.Chat;
 import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.chat.ChatManager;
-import org.jivesoftware.smack.tcp.XMPPTCPConnection;
-import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
-import org.jxmpp.jid.EntityBareJid;
-import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
-import java.io.IOException;
+import apps.lore_f.instantmessaging.InstantMessaging;
+import apps.lore_f.instantmessaging.InstantMessaging.InstantMessagingListener;
 
 public class MainActivity extends AppCompatActivity {
 
-    static final String TAG = "MainActivity";
-
-    AbstractXMPPConnection connection = null;
-    Chat chat = null;
+    private static final String TAG = "MainActivity";
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
 
-    private class ConnectionTask extends AsyncTask<Void, Void, Boolean> {
+    private ProgressDialog progressDialog;
+    private InstantMessaging instantMessaging;
+
+    private String remoteHostName;
+    private String remoteUpTime;
+    private String torrentInfo;
+    private int nOfTorrents;
+
+    private InstantMessagingListener instantMessagingListener = new InstantMessagingListener() {
 
         @Override
-        protected Boolean doInBackground(Void... empty) {
+        public void onConnected() {
 
-            // Create the configuration for this new connection
+            Log.d(TAG, "connected");
+            // nasconde il progress dialog
+            progressDialog.dismiss();
 
-            XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
-            configBuilder.setUsernameAndPassword("controller", "fornaci12Controller");
-            configBuilder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
-            try {
-                configBuilder.setXmppDomain("lorenzofailla.p1.im");
-            } catch (XmppStringprepException e) {
-                e.printStackTrace();
-            }
+            retrieveHostInfo();
 
-            try {
-
-                connection = new XMPPTCPConnection(configBuilder.build());
-                connection.connect();
-                connection.login();
-                Log.d(TAG, "connected to " + connection.getHost());
-
-            } catch (XmppStringprepException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (SmackException e) {
-                e.printStackTrace();
-            } catch (XMPPException e) {
-                e.printStackTrace();
-            }
-
-            return connection.isConnected();
         }
 
         @Override
-        protected void onPostExecute(Boolean isConnected) {
+        public void onMessageReceived(String sender, String messageBody) {
 
-            ChatManager chatManager = ChatManager.getInstanceFor(connection);
-            EntityBareJid jid = null;
+            String command = messageBody.substring(0, 23);
+            Log.i(TAG, command);
 
-            try {
+            switch (command) {
 
-                jid = JidCreate.entityBareFrom("Home@lorenzofailla.p1.im");
+                case "%%%_welcome_message_%%%":
 
-            } catch (XmppStringprepException e) {
+                    remoteHostName = messageBody.substring(23);
+                    Log.i(TAG, remoteHostName);
 
-                e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            initiateConnection();
+                        }
+                    });
+
+                    break;
+
+                case "%%%_uptime__message_%%%":
+
+                    remoteUpTime = messageBody.substring(23);
+                    Log.i(TAG, remoteUpTime);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateRemoteUpTime();
+                        }
+                    });
+
+                    break;
+
+                case "%%%_torrent_list____%%%":
+
+
+                    torrentInfo = messageBody.substring(23);
+                    Log.i(TAG, torrentInfo);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            refreshTorrentInfo();
+                        }
+                    });
+
+                    break;
             }
 
-            chat = chatManager.createChat(jid);
-            Log.d(TAG, "chat session created.");
-
         }
+
+    };
+
+    private void initiateConnection() {
+
+        TextView hostNameTextView = (TextView) findViewById(R.id.TXV___MAIN___HOSTNAME);
+        hostNameTextView.setText(remoteHostName);
 
     }
+
+    private void updateRemoteUpTime() {
+
+        TextView remoteUpTimeTextView = (TextView) findViewById(R.id.TXV___MAIN___HOSTUPTIME);
+        remoteUpTimeTextView.setText(remoteUpTime);
+    }
+
+    private void refreshTorrentInfo() {
+
+        TextView torrentInfoTectView = (TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
+        progressDialog.dismiss();
+
+        String[] responseLines = torrentInfo.split("\n");
+        nOfTorrents = responseLines.length-2;
+
+        torrentInfoTectView.setText("Torrents: " + nOfTorrents);
+
+    }
+
+    private void retrieveHostInfo() {
+
+        // inizializza, prepara e mostra il progress dialog (verrà chiuso dal callback instantMessagingListener.onConnected
+        progressDialog = new ProgressDialog(this, ProgressDialog.STYLE_SPINNER);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___RETRIEVING_INFORMATION));
+        progressDialog.show();
+        //// TODO: 28/mar/2017 inizializza timeout
+
+        sendIM("Home@lorenzofailla.p1.im", "__requestWelcomeMessage");
+        sendIM("Home@lorenzofailla.p1.im", "__listTorrents");
+
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,20 +155,23 @@ public class MainActivity extends AppCompatActivity {
 
         Button sendMessageButton = (Button) findViewById(R.id.sendMessageButton);
 
+        instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller");
+        instantMessaging.setInstantMessagingListener(instantMessagingListener);
+
+        // inizializza, prepara e mostra il progress dialog (verrà chiuso dal callback instantMessagingListener.onConnected
+        progressDialog = new ProgressDialog(this, ProgressDialog.STYLE_SPINNER);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST));
+        progressDialog.show();
+
+        instantMessaging.connect();
+
         sendMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    chat.sendMessage("Howdy!");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (SmackException.NotConnectedException e) {
-                    e.printStackTrace();
-                }
+
             }
         });
-
-        new ConnectionTask().execute(new Void[0]);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -161,4 +213,31 @@ public class MainActivity extends AppCompatActivity {
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
     }
+
+    private boolean sendIM(String recipient, String message) {
+
+        try {
+
+            instantMessaging.sendMessage(recipient, message);
+            return true;
+
+        } catch (XmppStringprepException e) {
+
+            e.printStackTrace();
+            return false;
+
+        } catch (SmackException.NotConnectedException e) {
+
+            e.printStackTrace();
+            return false;
+
+        } catch (InterruptedException e) {
+
+            e.printStackTrace();
+            return false;
+
+        }
+
+    }
+
 }
