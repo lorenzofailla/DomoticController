@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
@@ -16,6 +17,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.jivesoftware.smack.SmackException;
 import org.jxmpp.stringprep.XmppStringprepException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import apps.lore_f.instantmessaging.InstantMessaging;
 import apps.lore_f.instantmessaging.InstantMessaging.InstantMessagingListener;
@@ -36,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private String remoteUpTime;
     private String torrentInfo;
     private int nOfTorrents;
+
+    private List torrentsList = new ArrayList<TorrentInfo>();
 
     private InstantMessagingListener instantMessagingListener = new InstantMessagingListener() {
 
@@ -123,14 +129,45 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshTorrentInfo() {
 
-        TextView torrentInfoTectView = (TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
+        TextView torrentInfoTXV = (TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
         progressDialog.dismiss();
 
         String[] responseLines = torrentInfo.split("\n");
         nOfTorrents = responseLines.length-2;
 
-        torrentInfoTectView.setText("Torrents: " + nOfTorrents);
+        ListView torrenstListLVW = (ListView) findViewById(R.id.LVW___MAIN___TORRENTSLIST);
 
+        if (nOfTorrents>0){
+
+            // mostra la lista dei torrent
+            torrentInfoTXV .setText("Torrents: " + nOfTorrents);
+            torrentsList = refreshTorrentsList(responseLines);
+            TorrentsListAdapter torrentsListAdapter = new TorrentsListAdapter(this, R.layout.torrents_list_row, torrentsList);
+            torrenstListLVW.setAdapter(torrentsListAdapter);
+
+            torrenstListLVW.setVisibility(View.VISIBLE);
+
+        } else {
+
+            // nasconde la lista dei torrent
+            torrentInfoTXV .setText("No active Torrent.");
+            torrenstListLVW.setVisibility(View.GONE);
+
+        }
+
+    }
+
+    private List<TorrentInfo> refreshTorrentsList(String[] rawServerResponse){
+
+        List<TorrentInfo> tmpTorrentInfos = new ArrayList<>();
+
+        for(int i=1; i<rawServerResponse.length-1; i++){
+
+            tmpTorrentInfos.add(new TorrentInfo(rawServerResponse[i]));
+
+        }
+
+        return tmpTorrentInfos;
     }
 
     private void retrieveHostInfo() {
@@ -147,13 +184,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Button sendMessageButton = (Button) findViewById(R.id.sendMessageButton);
 
         instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller");
         instantMessaging.setInstantMessagingListener(instantMessagingListener);
@@ -166,16 +201,10 @@ public class MainActivity extends AppCompatActivity {
 
         instantMessaging.connect();
 
-        sendMessageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
     }
 
     /**
@@ -212,6 +241,14 @@ public class MainActivity extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
+    }
+
+
+    public void onPause(){
+        super.onPause();
+
+        instantMessaging.removeInstantMessagingListener();
+
     }
 
     private boolean sendIM(String recipient, String message) {

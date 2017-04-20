@@ -5,6 +5,7 @@ package com.apps.lore_f.imtest;
  */
 
 public class TorrentInfo {
+
     public String getID() {
         return ID;
     }
@@ -53,11 +54,22 @@ public class TorrentInfo {
         this.have = have;
     }
 
+    public TorrentInfo(String rawServerResponseLine){
+
+        ID=rawServerResponseLine.substring(0,6);
+        name=rawServerResponseLine.substring(70,rawServerResponseLine.length()-1);
+        status=rawServerResponseLine.substring(57,69);
+        eta=  rawServerResponseLine.substring(24,33);
+        done=rawServerResponseLine.substring(7,10);
+        have=rawServerResponseLine.substring(11,21);
+    }
+
     private String ID;
     private String name;
     private String status;
     private String eta;
     private String done;
     private String have;
+
 
 }

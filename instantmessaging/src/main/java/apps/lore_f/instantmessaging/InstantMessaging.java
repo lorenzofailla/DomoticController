@@ -114,6 +114,12 @@ public class InstantMessaging {
 
     }
 
+    public void removeInstantMessagingListener(){
+
+        instantMessagingListener=null;
+
+    }
+
     public InstantMessaging(String domainName, String username, String password){
 
         paramArrayString[0]=domainName;
