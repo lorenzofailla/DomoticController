@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">IMTest</string>
 
-    <string name="PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST">Contacting remote host...</string>
-    <string name="PROGRESSDIALOG_INFO___RETRIEVING_INFORMATION">Retrieving info from remote host...</string>
+    <string name="PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER">Connecting to IM support server...</string>
+    <string name="PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST">Connected to IM support server. Contacting remote host...</string>
+    <string name="PROGRESSDIALOG_INFO___RETRIEVING_UPTIME">Retrieving remote host uptime...</string>
 
 </resources>

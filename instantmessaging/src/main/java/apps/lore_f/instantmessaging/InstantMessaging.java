@@ -136,6 +136,12 @@ public class InstantMessaging {
 
     }
 
+    public void disconnect(){
+
+        connection.disconnect();
+
+    }
+
     public void sendMessage(String recipient, String messageText) throws XmppStringprepException, SmackException.NotConnectedException, InterruptedException {
 
         if (connection.isConnected()) {

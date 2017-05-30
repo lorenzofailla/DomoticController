@@ -1,12 +1,15 @@
 package com.apps.lore_f.imtest;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -43,14 +46,17 @@ public class MainActivity extends AppCompatActivity {
 
     private List torrentsList = new ArrayList<TorrentInfo>();
 
+    private ImageButton shutdownButton;
+    private  ImageButton rebootButton;
+
     private InstantMessagingListener instantMessagingListener = new InstantMessagingListener() {
 
         @Override
         public void onConnected() {
 
             Log.d(TAG, "connected");
-            // nasconde il progress dialog
-            progressDialog.dismiss();
+            /* modifica il testo del messaggio nel progressDialog */
+            progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST));
 
             retrieveHostInfo();
 
@@ -72,8 +78,8 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            progressDialog.dismiss();
-                            initiateConnection();
+
+                            updateHostName();
                         }
                     });
 
@@ -83,18 +89,20 @@ public class MainActivity extends AppCompatActivity {
 
                     remoteUpTime = messageBody.substring(23);
                     Log.i(TAG, remoteUpTime);
+                    progressDialog.dismiss();
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+
                             updateRemoteUpTime();
+
                         }
                     });
 
                     break;
 
                 case "%%%_torrent_list____%%%":
-
 
                     torrentInfo = messageBody.substring(23);
                     Log.i(TAG, torrentInfo);
@@ -103,8 +111,10 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
 
-                            refreshTorrentInfo();
+                            //refreshTorrentInfo();
+
                         }
+
                     });
 
                     break;
@@ -114,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
-    private void initiateConnection() {
+    private void updateHostName() {
 
         TextView hostNameTextView = (TextView) findViewById(R.id.TXV___MAIN___HOSTNAME);
         hostNameTextView.setText(remoteHostName);
@@ -125,8 +135,12 @@ public class MainActivity extends AppCompatActivity {
 
         TextView remoteUpTimeTextView = (TextView) findViewById(R.id.TXV___MAIN___HOSTUPTIME);
         remoteUpTimeTextView.setText(remoteUpTime);
+
+        releaseControls();
+
     }
 
+    /*
     private void refreshTorrentInfo() {
 
         TextView torrentInfoTXV = (TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
@@ -169,18 +183,11 @@ public class MainActivity extends AppCompatActivity {
 
         return tmpTorrentInfos;
     }
-
+    */
     private void retrieveHostInfo() {
 
-        // inizializza, prepara e mostra il progress dialog (verrà chiuso dal callback instantMessagingListener.onConnected
-        progressDialog = new ProgressDialog(this, ProgressDialog.STYLE_SPINNER);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___RETRIEVING_INFORMATION));
-        progressDialog.show();
-        //// TODO: 28/mar/2017 inizializza timeout
-
+        /* invia un instant message con il messaggio di benvenuto */
         sendIM("Home@lorenzofailla.p1.im", "__requestWelcomeMessage");
-        sendIM("Home@lorenzofailla.p1.im", "__listTorrents");
 
     }
 
@@ -190,15 +197,38 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /* inizializza l'handler ai controlli */
+        shutdownButton = (ImageButton) findViewById(R.id.BTN___MAIN___SHUTDOWN);
+        rebootButton = (ImageButton) findViewById(R.id.BTN___MAIN___REBOOT);
+
+        lockControls();
+
+        shutdownButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        rebootButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                rebootHost();
+            }
+        });
+        // inizializza una nuova istanza di InstantMessaging
         instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller");
         instantMessaging.setInstantMessagingListener(instantMessagingListener);
 
-        // inizializza, prepara e mostra il progress dialog (verrà chiuso dal callback instantMessagingListener.onConnected
-        progressDialog = new ProgressDialog(this, ProgressDialog.STYLE_SPINNER);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST));
+        // inizializza, prepara e mostra il progress dialog (verrà modificato dal callback instantMessagingListener.onConnected)
+        progressDialog = new ProgressDialog(this, ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setIndeterminate(false);
+        progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER));
+
         progressDialog.show();
 
+        // esegue il metodo per la connessione
         instantMessaging.connect();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -248,6 +278,13 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
 
         instantMessaging.removeInstantMessagingListener();
+        instantMessaging.disconnect();
+    }
+
+    public void onDestroy(){
+
+        super.onDestroy();
+        instantMessaging.disconnect();
 
     }
 
@@ -274,6 +311,48 @@ public class MainActivity extends AppCompatActivity {
             return false;
 
         }
+
+    }
+
+    private void releaseControls(){
+
+        /* abilita */
+        shutdownButton.setEnabled(true);
+        rebootButton.setEnabled(true);
+
+    }
+
+    private void lockControls(){
+
+        /* disabilita */
+        shutdownButton.setEnabled(false);
+        rebootButton.setEnabled(false);
+
+    }
+
+    private void rebootHost(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // Add the buttons
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+
+
+        // Create the AlertDialog
+        AlertDialog dialog = builder.create();
+
+        /* invia un instant message con il comando di reboot */
+        sendIM("Home@lorenzofailla.p1.im", "__reboot");
+        recreate();
 
     }
 
