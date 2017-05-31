@@ -335,14 +335,20 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         // Add the buttons
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked OK button
+
+                /* invia un instant message con il comando di reboot */
+                sendIM("Home@lorenzofailla.p1.im", "__reboot");
+                recreate();
+
             }
+
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User cancelled the dialog
+                dialog.dismiss();
             }
         });
 
@@ -350,9 +356,7 @@ public class MainActivity extends AppCompatActivity {
         // Create the AlertDialog
         AlertDialog dialog = builder.create();
 
-        /* invia un instant message con il comando di reboot */
-        sendIM("Home@lorenzofailla.p1.im", "__reboot");
-        recreate();
+
 
     }
 

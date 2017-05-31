@@ -5,4 +5,7 @@
     <string name="PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST">Connected to IM support server. Contacting remote host...</string>
     <string name="PROGRESSDIALOG_INFO___RETRIEVING_UPTIME">Retrieving remote host uptime...</string>
 
+    <string name="ALERTDIALOG_YES">Yes</string>
+    <string name="ALERTDIALOG_NO">No</string>
+
 </resources>
