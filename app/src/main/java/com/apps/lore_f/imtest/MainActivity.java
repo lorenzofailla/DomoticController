@@ -207,6 +207,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                shutdownHost();
+
             }
         });
 
@@ -352,11 +354,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        builder.setMessage(R.string.ALERTDIALOG_MESSAGE_REBOOT);
 
         // Create the AlertDialog
         AlertDialog dialog = builder.create();
+        dialog.show();
 
+    }
 
+    private void shutdownHost(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // Add the buttons
+        builder.setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+
+                /* invia un instant message con il comando di reboot */
+                sendIM("Home@lorenzofailla.p1.im", "__shutdown");
+                finish();
+
+            }
+
+        });
+        builder.setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.setMessage(R.string.ALERTDIALOG_MESSAGE_SHUTDOWN);
+
+        // Create the AlertDialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
 
     }
 

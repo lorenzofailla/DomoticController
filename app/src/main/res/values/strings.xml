@@ -7,5 +7,7 @@
 
     <string name="ALERTDIALOG_YES">Yes</string>
     <string name="ALERTDIALOG_NO">No</string>
+    <string name="ALERTDIALOG_MESSAGE_REBOOT">This will reboot the remote host.</string>
+    <string name="ALERTDIALOG_MESSAGE_SHUTDOWN">This will shutdown the remote host.</string>
 
 </resources>
