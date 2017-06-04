@@ -171,18 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private List<TorrentInfo> refreshTorrentsList(String[] rawServerResponse){
 
-        List<TorrentInfo> tmpTorrentInfos = new ArrayList<>();
-
-        for(int i=1; i<rawServerResponse.length-1; i++){
-
-            tmpTorrentInfos.add(new TorrentInfo(rawServerResponse[i]));
-
-        }
-
-        return tmpTorrentInfos;
-    }
     */
     private void retrieveHostInfo() {
 

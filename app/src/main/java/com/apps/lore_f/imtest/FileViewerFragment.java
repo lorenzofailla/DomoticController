@@ -9,10 +9,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
-import com.apps.lore_f.imtest.dummy.DummyContent;
-import com.apps.lore_f.imtest.dummy.DummyContent.DummyItem;
-
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,36 +22,21 @@ import java.util.List;
  */
 public class FileViewerFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
-    private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
-    private int mColumnCount = 1;
-    private OnListFragmentInteractionListener mListener;
-
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public FileViewerFragment() {
-    }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static FileViewerFragment newInstance(int columnCount) {
-        FileViewerFragment fragment = new FileViewerFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
-        fragment.setArguments(args);
-        return fragment;
+    List<FileInfo> fileInfoList;
+
+    public FileViewerFragment() {
+
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
     }
 
     @Override
@@ -60,36 +44,30 @@ public class FileViewerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_fileviewer_list, container, false);
 
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new MyFileViewerRecyclerViewAdapter(DummyContent.ITEMS, mListener));
-        }
-        return view;
+        ListView filesListLVW = (RecyclerView) view.findViewById(R.id.LVW___MAIN___TORRENTSLIST);
+
+        if (nOfTorrents>0){
+
+            // mostra la lista dei torrent
+            torrentInfoTXV .setText("Torrents: " + nOfTorrents);
+            torrentsList = refreshTorrentsList(responseLines);
+            TorrentsListAdapter torrentsListAdapter = new TorrentsListAdapter(this, R.layout.torrents_list_row, torrentsList);
+            torrenstListLVW.setAdapter(torrentsListAdapter);
+
+
+            return view;
     }
 
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
     /**
@@ -104,6 +82,17 @@ public class FileViewerFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(FileInfo item);
     }
+
+    private List<TorrentInfo> refreshFilesList(String[] rawServerResponse){
+
+        List<FileInfo> tmpFilesInfos = new ArrayList<>();
+
+        /* procedura di generazione */
+
+        return tmpFilesInfos;
+
+    }
+
 }
