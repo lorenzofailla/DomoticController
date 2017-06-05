@@ -28,6 +28,8 @@ public class FileViewerFragment extends Fragment {
      */
 
     List<FileInfo> fileInfoList;
+    String rawDirData;
+    String currentDirName;
 
     public FileViewerFragment() {
 
@@ -37,6 +39,9 @@ public class FileViewerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+        /* recupera gli extra dall'intent */
+
     }
 
     @Override
@@ -44,16 +49,13 @@ public class FileViewerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_fileviewer_list, container, false);
 
-        ListView filesListLVW = (RecyclerView) view.findViewById(R.id.LVW___MAIN___TORRENTSLIST);
+        ListView filesListLVW = (ListView) view.findViewById(R.id.LVW___FILELIST___MAIN);
+        FileListAdapter fileListAdapter = new FileListAdapter();
+        List<FileInfo> fileInfoList = refreshFilesList(rawDirData)
 
-        if (nOfTorrents>0){
 
-            // mostra la lista dei torrent
-            torrentInfoTXV .setText("Torrents: " + nOfTorrents);
-            torrentsList = refreshTorrentsList(responseLines);
-            TorrentsListAdapter torrentsListAdapter = new TorrentsListAdapter(this, R.layout.torrents_list_row, torrentsList);
-            torrenstListLVW.setAdapter(torrentsListAdapter);
 
+        filesListLVW.setAdapter( )
 
             return view;
     }
@@ -85,12 +87,18 @@ public class FileViewerFragment extends Fragment {
         void onListFragmentInteraction(FileInfo item);
     }
 
-    private List<TorrentInfo> refreshFilesList(String[] rawServerResponse){
+    private List<FileInfo> refreshFilesList(String rawServerResponse){
 
         List<FileInfo> tmpFilesInfos = new ArrayList<>();
+        String[] tmpFileStringLines = rawServerResponse.split("\n");
 
         /* procedura di generazione */
+        for (int i=0; i<tmpFileStringLines.length; i++){
 
+            tmpFilesInfos.add(new FileInfo(currentDirName,tmpFileStringLines[i]));
+
+
+        }
         return tmpFilesInfos;
 
     }
