@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,10 @@ public class FileViewerFragment extends Fragment {
     String rawDirData;
     String currentDirName;
 
+    TextView currentDirectoryTextView;
+    ListView currentDirectoryListView;
+
+
     public FileViewerFragment() {
 
     }
@@ -38,7 +43,6 @@ public class FileViewerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
         /* recupera gli extra dall'intent */
 
@@ -49,15 +53,18 @@ public class FileViewerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_fileviewer_list, container, false);
 
-        ListView filesListLVW = (ListView) view.findViewById(R.id.LVW___FILELIST___MAIN);
-        FileListAdapter fileListAdapter = new FileListAdapter();
-        List<FileInfo> fileInfoList = refreshFilesList(rawDirData)
+        currentDirectoryTextView = (TextView) view.findViewById(R.id.TXV___FILELIST___FOLDERNAME);
+        currentDirectoryListView = (ListView) view.findViewById(R.id.LVW___FILELIST___MAIN);
 
+        currentDirectoryTextView.setText(currentDirName);
 
+        fileInfoList = refreshFilesList();
 
-        filesListLVW.setAdapter( )
+        FileListAdapter fileListAdapter = new FileListAdapter(getContext(), R.layout.fragment_fileviewer, fileInfoList);
+        currentDirectoryListView.setAdapter(fileListAdapter);
 
             return view;
+
     }
 
 
@@ -87,18 +94,18 @@ public class FileViewerFragment extends Fragment {
         void onListFragmentInteraction(FileInfo item);
     }
 
-    private List<FileInfo> refreshFilesList(String rawServerResponse){
+    private List<FileInfo> refreshFilesList(){
 
         List<FileInfo> tmpFilesInfos = new ArrayList<>();
-        String[] tmpFileStringLines = rawServerResponse.split("\n");
+        String[] tmpFileStringLines = rawDirData.split("\n");
 
         /* procedura di generazione */
         for (int i=0; i<tmpFileStringLines.length; i++){
 
             tmpFilesInfos.add(new FileInfo(currentDirName,tmpFileStringLines[i]));
 
-
         }
+
         return tmpFilesInfos;
 
     }

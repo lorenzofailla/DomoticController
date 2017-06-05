@@ -47,7 +47,7 @@ public class FileInfo {
         this.fileInfoType = fileInfoType;
     }
 
-    private enum FileInfoType{
+    public enum FileInfoType{
 
         TYPE_FILE,
         TYPE_DIRECTORY
@@ -55,13 +55,20 @@ public class FileInfo {
 
     public FileInfo(String rootDirectory, String rawFileData){
 
-        fileRoorDir = rootDirectory;
+                fileRoorDir = rootDirectory;
 
         String[] supportString = rawFileData.split(" ");
 
-        fileName="fileName";
+
+        fileName=supportString[8];
         fileSize = 0L;
-        fileInfoType = FileInfoType.TYPE_FILE;
+
+        /* determina il tipo di file */
+        if (supportString[0].charAt(0) == 'd'){
+            fileInfoType = FileInfoType.TYPE_DIRECTORY;
+        } else {
+            fileInfoType = FileInfoType.TYPE_FILE;
+        }
 
     }
 

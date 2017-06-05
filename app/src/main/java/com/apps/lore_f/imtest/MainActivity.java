@@ -1,8 +1,10 @@
 package com.apps.lore_f.imtest;
 
+import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.net.Uri;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -41,13 +43,11 @@ public class MainActivity extends AppCompatActivity {
 
     private String remoteHostName;
     private String remoteUpTime;
-    private String torrentInfo;
-    private int nOfTorrents;
-
-    private List torrentsList = new ArrayList<TorrentInfo>();
 
     private ImageButton shutdownButton;
     private  ImageButton rebootButton;
+    private  ImageButton startFileManagerButton;
+
 
     private InstantMessagingListener instantMessagingListener = new InstantMessagingListener() {
 
@@ -104,20 +104,13 @@ public class MainActivity extends AppCompatActivity {
 
                 case "%%%_torrent_list____%%%":
 
-                    torrentInfo = messageBody.substring(23);
-                    Log.i(TAG, torrentInfo);
+                    break;
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
 
-                            //refreshTorrentInfo();
-
-                        }
-
-                    });
+                case "%%%_dircty__list____%%%":
 
                     break;
+
             }
 
         }
@@ -189,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
         /* inizializza l'handler ai controlli */
         shutdownButton = (ImageButton) findViewById(R.id.BTN___MAIN___SHUTDOWN);
         rebootButton = (ImageButton) findViewById(R.id.BTN___MAIN___REBOOT);
+        startFileManagerButton = (ImageButton) findViewById(R.id.BTN___MAIN___FILEMANAGER);
 
         lockControls();
 
@@ -208,6 +202,27 @@ public class MainActivity extends AppCompatActivity {
                 rebootHost();
             }
         });
+
+        startFileManagerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                FileViewerFragment fileViewerFragment = new FileViewerFragment();
+                fileViewerFragment.currentDirName = "/home/lore-f";
+                fileViewerFragment.rawDirData = getString(R.string.TEST_DIR_RAWDATA);
+                Log.i(TAG, fileViewerFragment.rawDirData);
+
+                fragmentTransaction.add(R.id.VIE___MAIN___SUBVIEW, fileViewerFragment);
+
+                fragmentTransaction.commit();
+
+            }
+
+        });
+
         // inizializza una nuova istanza di InstantMessaging
         instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller");
         instantMessaging.setInstantMessagingListener(instantMessagingListener);
@@ -310,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
         /* abilita */
         shutdownButton.setEnabled(true);
         rebootButton.setEnabled(true);
-
+        startFileManagerButton.setEnabled(true);
     }
 
     private void lockControls(){
@@ -318,6 +333,7 @@ public class MainActivity extends AppCompatActivity {
         /* disabilita */
         shutdownButton.setEnabled(false);
         rebootButton.setEnabled(false);
+        startFileManagerButton.setEnabled(false);
 
     }
 

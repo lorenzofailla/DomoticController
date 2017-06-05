@@ -52,15 +52,23 @@
             android:layout_height="64dp"
             app:srcCompat="@drawable/icon_reboot" />
 
+        <ImageButton
+            android:id="@+id/BTN___MAIN___FILEMANAGER"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:srcCompat="@drawable/folder" />
+
     </LinearLayout>
 
-    <fragment
-        android:id="@+id/FGM___MAIN___MAINFRAGMENT"
+    <FrameLayout
+
+        android:id="@+id/VIE___MAIN___SUBVIEW"
         android:layout_below="@+id/LLO___MAIN___BUTTONSTRIP"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    </fragment>
+    </FrameLayout>
+
 
 
 </RelativeLayout>
