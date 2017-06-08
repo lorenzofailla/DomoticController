@@ -57,7 +57,7 @@ public class FileInfo {
 
                 fileRoorDir = rootDirectory;
 
-        String[] supportString = rawFileData.split(" ");
+        String[] supportString = rawFileData.split(" +");
 
         fileName=supportString[8];
         fileSize = 0L;

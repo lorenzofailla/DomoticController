@@ -52,14 +52,32 @@ public class MainActivity extends AppCompatActivity {
 
     private FileViewerFragment fileViewerFragment;
 
+    private FileViewerFragment.FileViewerFragmentListener fileViewerFragmentListener = new FileViewerFragment.FileViewerFragmentListener() {
+        @Override
+        public void onItemSelected(FileInfo fileInfo) {
+
+            fileViewerFragment.currentDirName = "/home/lore-f";
+            sendIM("Home@lorenzofailla.p1.im", "__get_directory_content:::"+fileViewerFragment.currentDirName);
+
+        }
+    };
+
+
     private InstantMessagingListener instantMessagingListener = new InstantMessagingListener() {
 
         @Override
         public void onConnected() {
 
             Log.d(TAG, "connected");
+
             /* modifica il testo del messaggio nel progressDialog */
             generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST));
+            instantMessaging.createChat();
+
+        }
+
+        @Override
+        public void onChatCreated() {
 
             retrieveHostInfo();
 
@@ -181,9 +199,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
-
     */
+
     private void retrieveHostInfo() {
 
         /* invia un instant message con il messaggio di benvenuto */
@@ -236,6 +253,7 @@ public class MainActivity extends AppCompatActivity {
                 */
 
                 fileViewerFragment = new FileViewerFragment();
+                fileViewerFragment.setFileViewerFragmentListener(fileViewerFragmentListener);
 
                 /* invia un instant message con il messaggio di benvenuto */
                 sendIM("Home@lorenzofailla.p1.im", "__get_homedir");
@@ -420,5 +438,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
 
     }
+
+
 
 }

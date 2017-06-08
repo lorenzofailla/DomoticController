@@ -38,7 +38,7 @@ public class FileListAdapter extends ArrayAdapter<FileInfo> {
         TextView fileSizeTXV = (TextView) convertView.findViewById(R.id.TXV___FILELISTROW___FILESIZE);
         ImageView fileTypeIVW = (ImageView)  convertView.findViewById(R.id.IVW___FILELISTROW___FILETYPEICON);
 
-        FileInfo fileInfo = getItem(position);
+        final FileInfo fileInfo = getItem(position);
 
         fileNameTXV.setText(fileInfo.getFileName());
         fileSizeTXV.setText(fileInfo.getFileSizeString());
@@ -53,7 +53,28 @@ public class FileListAdapter extends ArrayAdapter<FileInfo> {
 
         }
 
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(fileListAdapterListener!=null) fileListAdapterListener.onItemSelected(fileInfo);
+
+            }
+        });
+
         return convertView;
+
+    }
+
+    interface FileListAdapterListener{
+        void onItemSelected(FileInfo fileInfo);
+    }
+
+    FileListAdapterListener fileListAdapterListener;
+
+    public void setFileListAdapterListener(FileListAdapterListener listener){
+
+        fileListAdapterListener=listener;
 
     }
 

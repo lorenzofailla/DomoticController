@@ -35,8 +35,30 @@ public class FileViewerFragment extends Fragment {
     TextView currentDirectoryTextView;
     ListView currentDirectoryListView;
 
+    FileListAdapter.FileListAdapterListener fileListAdapterListener = new FileListAdapter.FileListAdapterListener() {
+        @Override
+        public void onItemSelected(FileInfo fileInfo) {
+
+            if(fileViewerFragmentListener!=null) fileViewerFragmentListener.onItemSelected(fileInfo);
+
+        }
+    };
 
     public FileViewerFragment() {
+
+    }
+
+    interface FileViewerFragmentListener{
+
+        public void onItemSelected(FileInfo fileInfo);
+
+    }
+
+    FileViewerFragmentListener fileViewerFragmentListener;
+
+    public void setFileViewerFragmentListener(FileViewerFragmentListener listener){
+
+        fileViewerFragmentListener=listener;
 
     }
 
@@ -58,7 +80,7 @@ public class FileViewerFragment extends Fragment {
 
         updateContent();
 
-            return view;
+        return view;
 
     }
 
@@ -72,6 +94,7 @@ public class FileViewerFragment extends Fragment {
             fileInfoList = refreshFilesList();
 
             FileListAdapter fileListAdapter = new FileListAdapter(getContext(), R.layout.fragment_fileviewer, fileInfoList);
+            fileListAdapter.setFileListAdapterListener(fileListAdapterListener);
             currentDirectoryListView.setAdapter(fileListAdapter);
 
         }
@@ -110,7 +133,7 @@ public class FileViewerFragment extends Fragment {
         String[] tmpFileStringLines = rawDirData.split("\n");
 
         /* procedura di generazione */
-        for (int i=0; i<tmpFileStringLines.length; i++){
+        for (int i=1; i<tmpFileStringLines.length; i++){
 
             tmpFilesInfos.add(new FileInfo(currentDirName,tmpFileStringLines[i]));
 

@@ -28,52 +28,32 @@ import java.io.IOException;
 public class InstantMessaging {
 
     private static final String TAG = "InstantMessaging";
-
-    private String[] paramArrayString = new String[3];;
-
     private AbstractXMPPConnection connection = null;
-    private XMPPConnection xmppConnection = null;
     private ChatManager chatManager = null;
 
-    private class ConnectionTask extends AsyncTask<String, Void, Boolean> {
+    private class ConnectionTask extends AsyncTask<Void, Void, Boolean> {
 
         @Override
-        protected Boolean doInBackground(String... params) {
+        protected Boolean doInBackground(Void... emptyParams) {
 
-            // Create the configuration for this new connection
+            if(!connection.isConnected()) {
+                try {
 
-            XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
-            configBuilder.setUsernameAndPassword(params[1], params[2]);
-            configBuilder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+                    connection.connect().login();
+                    Log.d(TAG, "connected to " + connection.getHost());
 
-            try {
+                } catch (XmppStringprepException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (SmackException e) {
+                    e.printStackTrace();
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                }
 
-                configBuilder.setXmppDomain(params[0]);
-
-            } catch (XmppStringprepException e) {
-
-                e.printStackTrace();
-
-            }
-
-            try {
-
-                connection = new XMPPTCPConnection(configBuilder.build());
-                connection.connect().login();
-
-                Log.d(TAG, "connected to " + connection.getHost());
-
-
-            } catch (XmppStringprepException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (SmackException e) {
-                e.printStackTrace();
-            } catch (XMPPException e) {
-                e.printStackTrace();
             }
 
             return connection.isConnected();
@@ -83,19 +63,9 @@ public class InstantMessaging {
         @Override
         protected void onPostExecute(Boolean isConnected) {
 
-            chatManager = ChatManager.getInstanceFor(connection);
-
-            chatManager.addIncomingListener(new IncomingChatMessageListener() {
-                @Override
-                public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {
-
-                    if(instantMessagingListener!=null){
-                        instantMessagingListener.onMessageReceived(from.asEntityBareJidString(), message.getBody());
-                    }
-                }
-            });
-
-            if (instantMessagingListener!=null) instantMessagingListener.onConnected();
+            if(isConnected){
+                if (instantMessagingListener!=null) instantMessagingListener.onConnected();
+            }
 
         }
 
@@ -103,6 +73,7 @@ public class InstantMessaging {
 
     public interface InstantMessagingListener{
         void onConnected();
+        void onChatCreated();
         void onMessageReceived(String sender, String messageBody);
     }
 
@@ -122,35 +93,70 @@ public class InstantMessaging {
 
     public InstantMessaging(String domainName, String username, String password){
 
-        paramArrayString[0]=domainName;
-        paramArrayString[1]=username;
-        paramArrayString[2]=password;
+        /***
+         * inizializza la classe
+        */
 
-        new ConnectionTask().execute(paramArrayString);
+        /* Creo un nuovo oggetto XMPPTCPConnectionConfiguration.Builder */
+        XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
+        configBuilder.setUsernameAndPassword(username, password);
+        configBuilder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+
+        try {
+
+            configBuilder.setXmppDomain(domainName);
+
+            /* faccio costruire al builder l'oggetto AbstractXMPPConnection */
+            connection = new XMPPTCPConnection(configBuilder.build());
+            connect();
+
+        } catch (XmppStringprepException e) {
+
+            e.printStackTrace();
+
+        }
 
     }
 
     public void connect(){
 
-        new ConnectionTask().execute(paramArrayString);
+        new ConnectionTask().execute();
 
     }
 
     public void disconnect(){
 
-        connection.disconnect();
-
     }
 
     public void sendMessage(String recipient, String messageText) throws XmppStringprepException, SmackException.NotConnectedException, InterruptedException {
 
-        if (connection.isConnected()) {
+        if (chatManager!=null) {
 
             EntityBareJid jid = JidCreate.entityBareFrom(recipient);
             Chat chat = chatManager.chatWith(jid);
             chat.send(messageText);
 
         }
+
+    }
+
+    public void createChat(){
+
+        chatManager = ChatManager.getInstanceFor(connection);
+
+        chatManager.addIncomingListener(new IncomingChatMessageListener() {
+            @Override
+            public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {
+
+                if(instantMessagingListener!=null){
+
+                    instantMessagingListener.onMessageReceived(from.asEntityBareJidString(), message.getBody());
+                }
+
+            }
+        });
+
+        if(instantMessagingListener!=null) instantMessagingListener.onChatCreated();
 
     }
 
