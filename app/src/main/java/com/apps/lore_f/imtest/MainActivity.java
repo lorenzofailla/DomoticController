@@ -38,16 +38,19 @@ public class MainActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
 
-    private ProgressDialog progressDialog;
+    /*private ProgressDialog progressDialog;*/
     private InstantMessaging instantMessaging;
 
     private String remoteHostName;
     private String remoteUpTime;
 
     private ImageButton shutdownButton;
-    private  ImageButton rebootButton;
-    private  ImageButton startFileManagerButton;
+    private ImageButton rebootButton;
+    private ImageButton startFileManagerButton;
 
+    private TextView generalInfoTextView;
+
+    private FileViewerFragment fileViewerFragment;
 
     private InstantMessagingListener instantMessagingListener = new InstantMessagingListener() {
 
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d(TAG, "connected");
             /* modifica il testo del messaggio nel progressDialog */
-            progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST));
+            generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST));
 
             retrieveHostInfo();
 
@@ -89,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
 
                     remoteUpTime = messageBody.substring(23);
                     Log.i(TAG, remoteUpTime);
-                    progressDialog.dismiss();
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -107,7 +109,23 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
 
-                case "%%%_dircty__list____%%%":
+                case "%%%_home_directory__%%%":
+
+                    fileViewerFragment.currentDirName = messageBody.substring(23);
+                    sendIM("Home@lorenzofailla.p1.im", "__get_directory_content:::"+fileViewerFragment.currentDirName);
+                    break;
+
+                case "%%%_dir_content_____%%%":
+                    fileViewerFragment.rawDirData= messageBody.substring(23);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            fileViewerFragment.updateContent();
+
+                        }
+
+                    });
 
                     break;
 
@@ -183,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
         shutdownButton = (ImageButton) findViewById(R.id.BTN___MAIN___SHUTDOWN);
         rebootButton = (ImageButton) findViewById(R.id.BTN___MAIN___REBOOT);
         startFileManagerButton = (ImageButton) findViewById(R.id.BTN___MAIN___FILEMANAGER);
+        generalInfoTextView =(TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
 
         lockControls();
 
@@ -207,13 +226,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                /*
+                // inizializza, prepara e mostra il progress dialog (verrà modificato dal callback instantMessagingListener.onConnected)
+                progressDialog = new ProgressDialog(getApplicationContext(), ProgressDialog.STYLE_HORIZONTAL);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___RETRIEVING_DIRECTORY_DATA));
+
+                progressDialog.show();
+                */
+
+                fileViewerFragment = new FileViewerFragment();
+
+                /* invia un instant message con il messaggio di benvenuto */
+                sendIM("Home@lorenzofailla.p1.im", "__get_homedir");
+
+
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-                FileViewerFragment fileViewerFragment = new FileViewerFragment();
-                fileViewerFragment.currentDirName = "/home/lore-f";
-                fileViewerFragment.rawDirData = getString(R.string.TEST_DIR_RAWDATA);
-                Log.i(TAG, fileViewerFragment.rawDirData);
 
                 fragmentTransaction.add(R.id.VIE___MAIN___SUBVIEW, fileViewerFragment);
 
@@ -227,12 +256,7 @@ public class MainActivity extends AppCompatActivity {
         instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller");
         instantMessaging.setInstantMessagingListener(instantMessagingListener);
 
-        // inizializza, prepara e mostra il progress dialog (verrà modificato dal callback instantMessagingListener.onConnected)
-        progressDialog = new ProgressDialog(this, ProgressDialog.STYLE_HORIZONTAL);
-        progressDialog.setIndeterminate(false);
-        progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER));
-
-        progressDialog.show();
+        generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER));
 
         // esegue il metodo per la connessione
         instantMessaging.connect();
@@ -283,14 +307,14 @@ public class MainActivity extends AppCompatActivity {
     public void onPause(){
         super.onPause();
 
-        instantMessaging.removeInstantMessagingListener();
-        instantMessaging.disconnect();
+        if (instantMessaging!=null) {
+            instantMessaging.removeInstantMessagingListener();
+        }
     }
 
     public void onDestroy(){
 
         super.onDestroy();
-        instantMessaging.disconnect();
 
     }
 

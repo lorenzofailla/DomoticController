@@ -56,17 +56,27 @@ public class FileViewerFragment extends Fragment {
         currentDirectoryTextView = (TextView) view.findViewById(R.id.TXV___FILELIST___FOLDERNAME);
         currentDirectoryListView = (ListView) view.findViewById(R.id.LVW___FILELIST___MAIN);
 
-        currentDirectoryTextView.setText(currentDirName);
-
-        fileInfoList = refreshFilesList();
-
-        FileListAdapter fileListAdapter = new FileListAdapter(getContext(), R.layout.fragment_fileviewer, fileInfoList);
-        currentDirectoryListView.setAdapter(fileListAdapter);
+        updateContent();
 
             return view;
 
     }
 
+
+    public void updateContent(){
+
+        if (rawDirData!=null) {
+
+            currentDirectoryTextView.setText(currentDirName);
+
+            fileInfoList = refreshFilesList();
+
+            FileListAdapter fileListAdapter = new FileListAdapter(getContext(), R.layout.fragment_fileviewer, fileInfoList);
+            currentDirectoryListView.setAdapter(fileListAdapter);
+
+        }
+
+    }
 
     @Override
     public void onAttach(Context context) {

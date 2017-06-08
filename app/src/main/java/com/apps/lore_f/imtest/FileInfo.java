@@ -59,7 +59,6 @@ public class FileInfo {
 
         String[] supportString = rawFileData.split(" ");
 
-
         fileName=supportString[8];
         fileSize = 0L;
 
