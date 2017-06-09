@@ -96,9 +96,17 @@ public class FileViewerFragment extends Fragment {
             FileListAdapter fileListAdapter = new FileListAdapter(getContext(), R.layout.fragment_fileviewer, fileInfoList);
             fileListAdapter.setFileListAdapterListener(fileListAdapterListener);
             currentDirectoryListView.setAdapter(fileListAdapter);
-
+            currentDirectoryListView.setEnabled(true);
+            currentDirectoryListView.setAlpha(1.0f);
         }
 
+    }
+
+    public void hideContent(){
+
+        currentDirectoryTextView.setText(R.string.PROGRESSDIALOG_INFO___RETRIEVING_DIRECTORY_DATA);
+        currentDirectoryListView.setEnabled(false);
+        currentDirectoryListView.setAlpha(0.2f);
     }
 
     @Override

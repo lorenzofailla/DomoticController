@@ -56,10 +56,65 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onItemSelected(FileInfo fileInfo) {
 
-            fileViewerFragment.currentDirName = "/home/lore-f";
-            sendIM("Home@lorenzofailla.p1.im", "__get_directory_content:::"+fileViewerFragment.currentDirName);
+            if(fileInfo.getFileInfoType()== FileInfo.FileInfoType.TYPE_FILE){
+
+                /* attiva la procedura di download del file */
+
+            } else {
+
+                /* è stata selezionata una directory */
+
+                if(fileInfo.getFileName().equals(".")){
+                    /* è stato selezionato '.' */
+                    /* nessuna modifica a currentDirName */
+
+                } else if (fileInfo.getFileName().equals("..") && !fileViewerFragment.currentDirName.equals("/")) {
+                    /* è stato selezionato '..' */
+                    /* modifica currentDirName per salire al livello di directory superiore */
+
+                    String[] directoryArray = fileViewerFragment.currentDirName.split("/");
+
+                    fileViewerFragment.currentDirName = "/";
+                    for (int i = 0; i < directoryArray.length-1; i++) {
+
+                        if (fileViewerFragment.currentDirName.equals("/")) {
+
+                            fileViewerFragment.currentDirName += directoryArray[i];
+
+                        } else {
+
+                            fileViewerFragment.currentDirName += "/" + directoryArray[i];
+                        }
+
+                    }
+
+                } else {
+
+                    /* è stato selezionata una directory */
+                    /* modifica currentDirName per scendere al livello di directory selezionato */
+                    if(fileViewerFragment.currentDirName.equals("/")) {
+                        fileViewerFragment.currentDirName += fileInfo.getFileName();
+                    } else {
+                        fileViewerFragment.currentDirName += "/"+fileInfo.getFileName();
+                    }
+
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        fileViewerFragment.hideContent();
+
+                    }
+                });
+
+                sendIM("Home@lorenzofailla.p1.im", "__get_directory_content:::"+fileViewerFragment.currentDirName);
+
+            }
 
         }
+
     };
 
 
@@ -129,12 +184,14 @@ public class MainActivity extends AppCompatActivity {
 
                 case "%%%_home_directory__%%%":
 
-                    fileViewerFragment.currentDirName = messageBody.substring(23);
+                    fileViewerFragment.currentDirName = messageBody.substring(23).replace("\n","");
                     sendIM("Home@lorenzofailla.p1.im", "__get_directory_content:::"+fileViewerFragment.currentDirName);
                     break;
 
                 case "%%%_dir_content_____%%%":
+
                     fileViewerFragment.rawDirData= messageBody.substring(23);
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -142,8 +199,8 @@ public class MainActivity extends AppCompatActivity {
                             fileViewerFragment.updateContent();
 
                         }
-
                     });
+
 
                     break;
 
@@ -243,41 +300,26 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                /*
-                // inizializza, prepara e mostra il progress dialog (verrà modificato dal callback instantMessagingListener.onConnected)
-                progressDialog = new ProgressDialog(getApplicationContext(), ProgressDialog.STYLE_HORIZONTAL);
-                progressDialog.setIndeterminate(true);
-                progressDialog.setMessage(getString(R.string.PROGRESSDIALOG_INFO___RETRIEVING_DIRECTORY_DATA));
-
-                progressDialog.show();
-                */
-
                 fileViewerFragment = new FileViewerFragment();
                 fileViewerFragment.setFileViewerFragmentListener(fileViewerFragmentListener);
 
-                /* invia un instant message con il messaggio di benvenuto */
-                sendIM("Home@lorenzofailla.p1.im", "__get_homedir");
 
 
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-                fragmentTransaction.add(R.id.VIE___MAIN___SUBVIEW, fileViewerFragment);
+                fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, fileViewerFragment);
 
                 fragmentTransaction.commit();
 
+                /* invia un instant message con il messaggio di benvenuto */
+                sendIM("Home@lorenzofailla.p1.im", "__get_homedir");
             }
 
         });
 
         // inizializza una nuova istanza di InstantMessaging
         instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller");
-        instantMessaging.setInstantMessagingListener(instantMessagingListener);
-
         generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER));
-
-        // esegue il metodo per la connessione
-        instantMessaging.connect();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -319,6 +361,14 @@ public class MainActivity extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
+    }
+
+    @Override
+    public void onResume() {
+
+        super.onResume();
+        instantMessaging.setInstantMessagingListener(instantMessagingListener);
+
     }
 
 

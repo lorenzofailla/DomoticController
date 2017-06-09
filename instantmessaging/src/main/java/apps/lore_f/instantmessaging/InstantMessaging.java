@@ -136,6 +136,7 @@ public class InstantMessaging {
             Chat chat = chatManager.chatWith(jid);
             chat.send(messageText);
 
+            Log.i(TAG, "Message <"+messageText+"> sent to <"+recipient +">");
         }
 
     }
