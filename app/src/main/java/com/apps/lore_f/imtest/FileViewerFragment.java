@@ -109,6 +109,12 @@ public class FileViewerFragment extends Fragment {
         currentDirectoryListView.setAlpha(0.2f);
     }
 
+    public void updateFileTransferProgress(double progress, long bytesTransferred){
+
+        currentDirectoryTextView.setText(String.format("Progress: %d%%, Bytes: %d", progress, bytesTransferred));
+
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

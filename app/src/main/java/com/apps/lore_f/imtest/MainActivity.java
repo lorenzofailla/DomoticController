@@ -1,5 +1,6 @@
 package com.apps.lore_f.imtest;
 
+import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -21,8 +22,10 @@ import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jxmpp.stringprep.XmppStringprepException;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
 
     private FileViewerFragment fileViewerFragment;
 
+    private String pendingDownloadFileName;
+
     private FileViewerFragment.FileViewerFragmentListener fileViewerFragmentListener = new FileViewerFragment.FileViewerFragmentListener() {
         @Override
         public void onItemSelected(FileInfo fileInfo) {
@@ -59,10 +64,12 @@ public class MainActivity extends AppCompatActivity {
             if(fileInfo.getFileInfoType()== FileInfo.FileInfoType.TYPE_FILE){
 
                 /* attiva la procedura di download del file */
+                pendingDownloadFileName=fileInfo.getFileName();
+                sendIM("Home@lorenzofailla.p1.im", "__get_file:::"+fileInfo.getFileRoorDir()+"/"+fileInfo.getFileName());
 
             } else {
 
-                /* è stata selezionata una directory */
+                /* è stata selezionata un'entità diversa da un file (directory, '.' o '..') */
 
                 if(fileInfo.getFileName().equals(".")){
                     /* è stato selezionato '.' */
@@ -70,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
                 } else if (fileInfo.getFileName().equals("..") && !fileViewerFragment.currentDirName.equals("/")) {
                     /* è stato selezionato '..' */
+
                     /* modifica currentDirName per salire al livello di directory superiore */
 
                     String[] directoryArray = fileViewerFragment.currentDirName.split("/");
@@ -134,15 +142,23 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onChatCreated() {
 
-            retrieveHostInfo();
+            Log.d(TAG, "chat created");
+            instantMessaging.createFileTransferManager();
 
+        }
+
+        @Override
+        public void onFileTransferManagerCreated() {
+            Log.d(TAG, "file transfer manager created");
+            retrieveHostInfo();
         }
 
         @Override
         public void onMessageReceived(String sender, String messageBody) {
 
+            Log.i(TAG, messageBody);
             String command = messageBody.substring(0, 23);
-            Log.i(TAG, command);
+
 
             switch (command) {
 
@@ -205,6 +221,36 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
             }
+
+        }
+
+        @Override
+        public void onFileTransferRequest(FileTransferRequest request) {
+
+            /* inizializza il file su cui verrà effettuato il download della risorsa remota */
+            File downloadDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Raspberry-pi remote");
+            if (!downloadDirectory.exists()){
+                downloadDirectory.mkdir();
+            }
+            File downloadFileResource = new File(downloadDirectory.getPath() + File.separator + pendingDownloadFileName);
+
+            fileViewerFragment.hideContent();
+            instantMessaging.acceptFileTransfer(downloadFileResource);
+
+        }
+
+        @Override
+        public void onFileTranferUpdate(double progress, long bytesWritten) {
+            fileViewerFragment.updateFileTransferProgress(progress, bytesWritten);
+        }
+
+        @Override
+        public void onFileTransferCompleted() {
+            fileViewerFragment.updateContent();
+        }
+
+        @Override
+        public void onFileTransferCompletedWithError() {
 
         }
 
@@ -318,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // inizializza una nuova istanza di InstantMessaging
-        instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller");
+        instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller", "authorized controller");
         generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER));
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -488,7 +534,5 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
 
     }
-
-
 
 }
