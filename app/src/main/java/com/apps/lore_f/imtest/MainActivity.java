@@ -234,19 +234,48 @@ public class MainActivity extends AppCompatActivity {
             }
             File downloadFileResource = new File(downloadDirectory.getPath() + File.separator + pendingDownloadFileName);
 
-            fileViewerFragment.hideContent();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    fileViewerFragment.hideContent();
+
+                }
+            });
+
             instantMessaging.acceptFileTransfer(downloadFileResource);
 
         }
 
         @Override
         public void onFileTranferUpdate(double progress, long bytesWritten) {
-            fileViewerFragment.updateFileTransferProgress(progress, bytesWritten);
+
+            final double progressToShow = progress;
+            final long bytesWrittenToShow = bytesWritten;
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    fileViewerFragment.updateFileTransferProgress(progressToShow, bytesWrittenToShow);
+
+                }
+            });
+
         }
 
         @Override
         public void onFileTransferCompleted() {
-            fileViewerFragment.updateContent();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    fileViewerFragment.updateContent();
+
+                }
+            });
+
         }
 
         @Override

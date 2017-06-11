@@ -115,6 +115,7 @@ public class InstantMessaging {
             } else {
                 /* trasferimento ancora in corso */
                 if (instantMessagingListener!=null) instantMessagingListener.onFileTranferUpdate(incomingFileTransfer.getProgress(), incomingFileTransfer.getAmountWritten());
+                handler.postAtTime(this, 250);
             }
 
         }
@@ -269,6 +270,7 @@ public class InstantMessaging {
 
         incomingFileTransfer = pendingFileTransferRequest.accept();
         try {
+            handler.postAtTime(monitorIncomingFileTransfer,0);
             incomingFileTransfer.recieveFile(file);
 
         } catch (SmackException e) {
