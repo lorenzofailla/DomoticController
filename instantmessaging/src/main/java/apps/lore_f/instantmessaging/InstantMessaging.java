@@ -88,7 +88,8 @@ public class InstantMessaging {
         @Override
         public void run() {
 
-            if(incomingFileTransfer.isDone()) {
+            FileTransfer.Status status = incomingFileTransfer.getStatus();
+            if(status.equals(FileTransfer.Status.complete)) {
                 /* trasferimento in corso */
                 /* rimuove il task dall'handler */
                 handler.removeCallbacks(this);
@@ -100,8 +101,9 @@ public class InstantMessaging {
                 incomingFileTransfer = null;
                 pendingFileTransferRequest = null;
 
-            } else if(incomingFileTransfer.getStatus().equals(FileTransfer.Status.error)){
+            } else if(status.equals(FileTransfer.Status.error)){
                 /* trasferimento concluso come errore */
+                FileTransfer.Error error=incomingFileTransfer.getError();
 
                 /* rimuove il task dall'handler */
                 handler.removeCallbacks(this);
@@ -270,8 +272,10 @@ public class InstantMessaging {
 
         incomingFileTransfer = pendingFileTransferRequest.accept();
         try {
-            handler.postAtTime(monitorIncomingFileTransfer,0);
+
             incomingFileTransfer.recieveFile(file);
+            handler.postAtTime(monitorIncomingFileTransfer,0);
+
 
         } catch (SmackException e) {
             e.printStackTrace();

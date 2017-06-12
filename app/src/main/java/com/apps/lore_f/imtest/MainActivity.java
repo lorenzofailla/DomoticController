@@ -1,11 +1,14 @@
 package com.apps.lore_f.imtest;
 
+import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -215,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
                             fileViewerFragment.updateContent();
 
                         }
+
                     });
 
 
@@ -266,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onFileTransferCompleted() {
+
 
             runOnUiThread(new Runnable() {
                 @Override

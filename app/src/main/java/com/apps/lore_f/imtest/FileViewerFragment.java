@@ -111,8 +111,8 @@ public class FileViewerFragment extends Fragment {
 
     public void updateFileTransferProgress(double progress, long bytesTransferred){
 
-        currentDirectoryTextView.setText(String.format("Progress: %f%%, Bytes: %d", progress, bytesTransferred));
-
+        //currentDirectoryTextView.setText(String.format("Progress: %f%%, Bytes: %d", progress, bytesTransferred));
+        currentDirectoryTextView.setText("dio cane");
     }
 
     @Override
