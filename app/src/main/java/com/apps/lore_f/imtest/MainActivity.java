@@ -26,6 +26,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
+import org.jivesoftware.smackx.si.packet.StreamInitiation;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.File;
@@ -236,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
             if (!downloadDirectory.exists()){
                 downloadDirectory.mkdir();
             }
+
             File downloadFileResource = new File(downloadDirectory.getPath() + File.separator + pendingDownloadFileName);
 
             runOnUiThread(new Runnable() {

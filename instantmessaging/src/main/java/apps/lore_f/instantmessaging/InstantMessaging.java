@@ -21,12 +21,15 @@ import org.jivesoftware.smackx.filetransfer.FileTransferListener;
 import org.jivesoftware.smackx.filetransfer.FileTransferManager;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
+import org.jivesoftware.smackx.filetransfer.StreamNegotiator;
+import org.jivesoftware.smackx.si.packet.StreamInitiation;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.TimerTask;
 
 /**
@@ -41,6 +44,7 @@ public class InstantMessaging {
 
     private FileTransferRequest pendingFileTransferRequest;
     private IncomingFileTransfer incomingFileTransfer;
+    private File fileToDownload;
 
     private class ConnectionTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -88,37 +92,6 @@ public class InstantMessaging {
         @Override
         public void run() {
 
-            FileTransfer.Status status = incomingFileTransfer.getStatus();
-            if(status.equals(FileTransfer.Status.complete)) {
-                /* trasferimento in corso */
-                /* rimuove il task dall'handler */
-                handler.removeCallbacks(this);
-
-                /* richiama il metodo onFileTransderCompleted() sui listener */
-                if (instantMessagingListener!=null) instantMessagingListener.onFileTransferCompleted();
-
-                /* rilascia le risorse coinvolte */
-                incomingFileTransfer = null;
-                pendingFileTransferRequest = null;
-
-            } else if(status.equals(FileTransfer.Status.error)){
-                /* trasferimento concluso come errore */
-                FileTransfer.Error error=incomingFileTransfer.getError();
-
-                /* rimuove il task dall'handler */
-                handler.removeCallbacks(this);
-
-                /* richiama il metodo onFileTransderCompletedWithError() sui listener */
-                if (instantMessagingListener!=null) instantMessagingListener.onFileTransferCompletedWithError();
-                /* rilascia le risorse coinvolte */
-                incomingFileTransfer = null;
-                pendingFileTransferRequest = null;
-
-            } else {
-                /* trasferimento ancora in corso */
-                if (instantMessagingListener!=null) instantMessagingListener.onFileTranferUpdate(incomingFileTransfer.getProgress(), incomingFileTransfer.getAmountWritten());
-                handler.postAtTime(this, 250);
-            }
 
         }
 
@@ -270,23 +243,65 @@ public class InstantMessaging {
 
     public void acceptFileTransfer(File file){
 
+        fileToDownload = file;
+        InputStream inputStream;
+
         incomingFileTransfer = pendingFileTransferRequest.accept();
-        try {
+        final StreamInitiation streamInitiation = new StreamInitiation();
 
-            incomingFileTransfer.recieveFile(file);
-            handler.postAtTime(monitorIncomingFileTransfer,0);
+        new Thread() {
+
+            public void run() {
+
+                try {
+
+                    incomingFileTransfer.recieveFile(fileToDownload);
+                    streamInitiation.setFile(new StreamInitiation.File(
+                            incomingFileTransfer.getFileName(),
+                            incomingFileTransfer.getFileSize()
+                    ));
+
+                    while(!incomingFileTransfer.isDone()){
+                        if(instantMessagingListener!=null) instantMessagingListener.onFileTranferUpdate(incomingFileTransfer.getProgress(), incomingFileTransfer.getAmountWritten());
+                        String logText= incomingFileTransfer.getProgress()+"; "+
+                                incomingFileTransfer.getAmountWritten()+"; "+
+                                incomingFileTransfer.getStatus().toString()+"; "+
+                                incomingFileTransfer.getFileName()+"; "+
+                                incomingFileTransfer.getFileSize();
+
+                        if (incomingFileTransfer.getError()!=null) logText +="Error: "+incomingFileTransfer.getError().toString() +"; ";
+                        if (incomingFileTransfer.getException()!=null) logText +="Error: "+incomingFileTransfer.getException().toString() +"; ";
+
+                        Log.d(TAG,logText);
+                        sleep(100);
+                    }
+
+                    if(instantMessagingListener!=null) instantMessagingListener.onFileTransferCompleted();
 
 
-        } catch (SmackException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                } catch (SmackException e) {
+
+                    e.printStackTrace();
+
+                } catch (InterruptedException e) {
+
+                    e.printStackTrace();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+
+        }.start();
 
     }
 
     public void cancelFileTransfer(){
+
         incomingFileTransfer.cancel();
+
     }
 
 }
