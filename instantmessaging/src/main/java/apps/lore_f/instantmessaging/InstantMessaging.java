@@ -1,6 +1,7 @@
 package apps.lore_f.instantmessaging;
 
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 
@@ -19,6 +20,7 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.filetransfer.FileTransfer;
 import org.jivesoftware.smackx.filetransfer.FileTransferListener;
 import org.jivesoftware.smackx.filetransfer.FileTransferManager;
+import org.jivesoftware.smackx.filetransfer.FileTransferNegotiator;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
 import org.jivesoftware.smackx.filetransfer.StreamNegotiator;
@@ -196,6 +198,7 @@ public class InstantMessaging {
     public void createFileTransferManager(){
 
         FileTransferManager fileTransferManager = FileTransferManager.getInstanceFor(connection);
+
         fileTransferManager.addFileTransferListener(new FileTransferListener() {
             @Override
             public void fileTransferRequest(FileTransferRequest request) {
@@ -243,11 +246,8 @@ public class InstantMessaging {
 
     public void acceptFileTransfer(File file){
 
-        fileToDownload = file;
-        InputStream inputStream;
-
+        fileToDownload = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + File.separator + "dio-cane.png");
         incomingFileTransfer = pendingFileTransferRequest.accept();
-        final StreamInitiation streamInitiation = new StreamInitiation();
 
         new Thread() {
 
@@ -256,10 +256,6 @@ public class InstantMessaging {
                 try {
 
                     incomingFileTransfer.recieveFile(fileToDownload);
-                    streamInitiation.setFile(new StreamInitiation.File(
-                            incomingFileTransfer.getFileName(),
-                            incomingFileTransfer.getFileSize()
-                    ));
 
                     while(!incomingFileTransfer.isDone()){
                         if(instantMessagingListener!=null) instantMessagingListener.onFileTranferUpdate(incomingFileTransfer.getProgress(), incomingFileTransfer.getAmountWritten());

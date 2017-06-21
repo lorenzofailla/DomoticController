@@ -400,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // inizializza una nuova istanza di InstantMessaging
-        instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller", "authorized controller");
+        instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller", "authorized-controller");
         generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER));
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
