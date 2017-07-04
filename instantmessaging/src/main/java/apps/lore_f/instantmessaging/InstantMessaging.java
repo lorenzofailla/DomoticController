@@ -5,9 +5,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 
-
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -17,22 +17,19 @@ import org.jivesoftware.smack.chat2.IncomingChatMessageListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
-import org.jivesoftware.smackx.filetransfer.FileTransfer;
+
 import org.jivesoftware.smackx.filetransfer.FileTransferListener;
 import org.jivesoftware.smackx.filetransfer.FileTransferManager;
-import org.jivesoftware.smackx.filetransfer.FileTransferNegotiator;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
-import org.jivesoftware.smackx.filetransfer.StreamNegotiator;
-import org.jivesoftware.smackx.si.packet.StreamInitiation;
+
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.TimerTask;
+
 
 /**
  * Created by 105053228 on 23/mar/2017.
@@ -99,6 +96,43 @@ public class InstantMessaging {
 
     };
 
+    private ConnectionListener connectionListener = new ConnectionListener() {
+        @Override
+        public void connected(XMPPConnection connection) {
+
+        }
+
+        @Override
+        public void authenticated(XMPPConnection connection, boolean resumed) {
+
+        }
+
+        @Override
+        public void connectionClosed() {
+
+        }
+
+        @Override
+        public void connectionClosedOnError(Exception e) {
+
+        }
+
+        @Override
+        public void reconnectionSuccessful() {
+
+        }
+
+        @Override
+        public void reconnectingIn(int seconds) {
+
+        }
+
+        @Override
+        public void reconnectionFailed(Exception e) {
+
+        }
+    };
+
     public interface InstantMessagingListener{
         void onConnected();
         void onChatCreated();
@@ -133,8 +167,9 @@ public class InstantMessaging {
 
         /* Creo un nuovo oggetto XMPPTCPConnectionConfiguration.Builder */
         XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
-        configBuilder.setUsernameAndPassword(username, password);
-        configBuilder.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+        configBuilder.setUsernameAndPassword(username, password)
+        .setSecurityMode(ConnectionConfiguration.SecurityMode.ifpossible)
+        .setKeystoreType(null);
 
         try {
             configBuilder.setResource(resource);
@@ -142,6 +177,7 @@ public class InstantMessaging {
 
             /* faccio costruire al builder l'oggetto AbstractXMPPConnection */
             connection = new XMPPTCPConnection(configBuilder.build());
+
             connect();
 
         } catch (XmppStringprepException e) {
@@ -171,6 +207,7 @@ public class InstantMessaging {
             chat.send(messageText);
 
             Log.i(TAG, "Message <"+messageText+"> sent to <"+recipient +">");
+
         }
 
     }
@@ -207,6 +244,8 @@ public class InstantMessaging {
 
                     /* non ci sono trasferimenti in corso */
                     pendingFileTransferRequest=request;
+
+                    /* invia la notifica al listener */
                     instantMessagingListener.onFileTransferRequest(pendingFileTransferRequest);
 
 
@@ -246,7 +285,7 @@ public class InstantMessaging {
 
     public void acceptFileTransfer(File file){
 
-        fileToDownload = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + File.separator + "dio-cane.png");
+        fileToDownload = file;
         incomingFileTransfer = pendingFileTransferRequest.accept();
 
         new Thread() {
@@ -256,10 +295,11 @@ public class InstantMessaging {
                 try {
 
                     incomingFileTransfer.recieveFile(fileToDownload);
+                    String logText;
 
                     while(!incomingFileTransfer.isDone()){
                         if(instantMessagingListener!=null) instantMessagingListener.onFileTranferUpdate(incomingFileTransfer.getProgress(), incomingFileTransfer.getAmountWritten());
-                        String logText= incomingFileTransfer.getProgress()+"; "+
+                        logText= incomingFileTransfer.getProgress()+"; "+
                                 incomingFileTransfer.getAmountWritten()+"; "+
                                 incomingFileTransfer.getStatus().toString()+"; "+
                                 incomingFileTransfer.getFileName()+"; "+
@@ -270,10 +310,19 @@ public class InstantMessaging {
 
                         Log.d(TAG,logText);
                         sleep(100);
+
                     }
+
+                    logText="";
+                    if (incomingFileTransfer.getError()!=null) logText +="Error: "+incomingFileTransfer.getError().toString() +"; ";
+                    if (incomingFileTransfer.getException()!=null) logText +="Error: "+incomingFileTransfer.getException().toString() +"; ";
+
+                    Log.d(TAG,logText);
 
                     if(instantMessagingListener!=null) instantMessagingListener.onFileTransferCompleted();
 
+                    pendingFileTransferRequest=null;
+                    incomingFileTransfer=null;
 
                 } catch (SmackException e) {
 
@@ -284,9 +333,10 @@ public class InstantMessaging {
                     e.printStackTrace();
 
                 } catch (IOException e) {
-                    e.printStackTrace();
-                }
 
+                    e.printStackTrace();
+
+                }
 
             }
 

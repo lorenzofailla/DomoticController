@@ -38,6 +38,7 @@ import apps.lore_f.instantmessaging.InstantMessaging.InstantMessagingListener;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String HOME_ADDRESS="lorenzofailla-home@alpha-labs.net";
     private static final String TAG = "MainActivity";
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
                 /* attiva la procedura di download del file */
                 pendingDownloadFileName=fileInfo.getFileName();
-                sendIM("Home@lorenzofailla.p1.im", "__get_file:::"+fileInfo.getFileRoorDir()+"/"+fileInfo.getFileName());
+                sendIM(HOME_ADDRESS, "__get_file:::"+fileInfo.getFileRoorDir()+"/"+fileInfo.getFileName());
 
             } else {
 
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-                sendIM("Home@lorenzofailla.p1.im", "__get_directory_content:::"+fileViewerFragment.currentDirName);
+                sendIM(HOME_ADDRESS, "__get_directory_content:::"+fileViewerFragment.currentDirName);
 
             }
 
@@ -205,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                 case "%%%_home_directory__%%%":
 
                     fileViewerFragment.currentDirName = messageBody.substring(23).replace("\n","");
-                    sendIM("Home@lorenzofailla.p1.im", "__get_directory_content:::"+fileViewerFragment.currentDirName);
+                    sendIM(HOME_ADDRESS, "__get_directory_content:::"+fileViewerFragment.currentDirName);
                     break;
 
                 case "%%%_dir_content_____%%%":
@@ -343,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
     private void retrieveHostInfo() {
 
         /* invia un instant message con il messaggio di benvenuto */
-        sendIM("Home@lorenzofailla.p1.im", "__requestWelcomeMessage");
+        sendIM(HOME_ADDRESS, "__requestWelcomeMessage");
 
     }
 
@@ -394,13 +395,13 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.commit();
 
                 /* invia un instant message con il messaggio di benvenuto */
-                sendIM("Home@lorenzofailla.p1.im", "__get_homedir");
+                sendIM(HOME_ADDRESS, "__get_homedir");
             }
 
         });
 
         // inizializza una nuova istanza di InstantMessaging
-        instantMessaging = new InstantMessaging("lorenzofailla.p1.im", "controller", "fornaci12Controller", "authorized-controller");
+        instantMessaging = new InstantMessaging("alpha-labs.net", "lorenzofailla-controller", "fornaci12Controller", "authorized-controller");
         generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER));
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -521,15 +522,17 @@ public class MainActivity extends AppCompatActivity {
                 // User clicked OK button
 
                 /* invia un instant message con il comando di reboot */
-                sendIM("Home@lorenzofailla.p1.im", "__reboot");
+                sendIM(HOME_ADDRESS, "__reboot");
                 recreate();
 
             }
 
         });
+
         builder.setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
+
             }
         });
 
@@ -551,7 +554,7 @@ public class MainActivity extends AppCompatActivity {
                 // User clicked OK button
 
                 /* invia un instant message con il comando di reboot */
-                sendIM("Home@lorenzofailla.p1.im", "__shutdown");
+                sendIM(HOME_ADDRESS, "__shutdown");
                 finish();
 
             }
