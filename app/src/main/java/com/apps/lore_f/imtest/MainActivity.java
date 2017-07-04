@@ -139,7 +139,22 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "connected");
 
             /* modifica il testo del messaggio nel progressDialog */
-            generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST));
+            runOnUiThread(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST));
+                        }
+                    }
+            );
+            instantMessaging.login();
+
+        }
+
+        @Override
+        public void onLogIn() {
+
+            Log.d(TAG, "logged in");
             instantMessaging.createChat();
 
         }

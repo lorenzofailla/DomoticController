@@ -20,6 +20,7 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
 import org.jivesoftware.smackx.filetransfer.FileTransferListener;
 import org.jivesoftware.smackx.filetransfer.FileTransferManager;
+import org.jivesoftware.smackx.filetransfer.FileTransferNegotiator;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
 
@@ -45,65 +46,18 @@ public class InstantMessaging {
     private IncomingFileTransfer incomingFileTransfer;
     private File fileToDownload;
 
-    private class ConnectionTask extends AsyncTask<Void, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Void... emptyParams) {
-
-            if(!connection.isConnected()) {
-                try {
-
-                    connection.connect().login();
-                    Log.d(TAG, "connected to " + connection.getHost());
-
-                } catch (XmppStringprepException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (SmackException e) {
-                    e.printStackTrace();
-                } catch (XMPPException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            return connection.isConnected();
-
-        }
-
-        @Override
-        protected void onPostExecute(Boolean isConnected) {
-
-            if(isConnected){
-                if (instantMessagingListener!=null) instantMessagingListener.onConnected();
-            }
-
-        }
-
-    }
-
-    private Handler handler = new Handler();
-
-    private Runnable monitorIncomingFileTransfer = new Runnable() {
-        @Override
-        public void run() {
-
-
-        }
-
-    };
-
     private ConnectionListener connectionListener = new ConnectionListener() {
         @Override
         public void connected(XMPPConnection connection) {
+
+            if (instantMessagingListener!=null) instantMessagingListener.onConnected();
 
         }
 
         @Override
         public void authenticated(XMPPConnection connection, boolean resumed) {
+
+            if (instantMessagingListener!=null) instantMessagingListener.onLogIn();
 
         }
 
@@ -135,6 +89,7 @@ public class InstantMessaging {
 
     public interface InstantMessagingListener{
         void onConnected();
+        void onLogIn();
         void onChatCreated();
         void onFileTransferManagerCreated();
         void onMessageReceived(String sender, String messageBody);
@@ -145,7 +100,7 @@ public class InstantMessaging {
 
     }
 
-    InstantMessagingListener instantMessagingListener;
+    private InstantMessagingListener instantMessagingListener;
 
     public void setInstantMessagingListener(InstantMessagingListener listener){
 
@@ -159,6 +114,21 @@ public class InstantMessaging {
 
     }
 
+    public void login(){
+
+        try {
+            connection.login();
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        } catch (SmackException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
     public InstantMessaging(String domainName, String username, String password, String resource){
 
         /***
@@ -177,7 +147,7 @@ public class InstantMessaging {
 
             /* faccio costruire al builder l'oggetto AbstractXMPPConnection */
             connection = new XMPPTCPConnection(configBuilder.build());
-
+            connection.addConnectionListener(connectionListener);
             connect();
 
         } catch (XmppStringprepException e) {
@@ -190,11 +160,38 @@ public class InstantMessaging {
 
     public void connect(){
 
-        new ConnectionTask().execute();
+        if(!connection.isConnected()) {
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+
+                        connection.connect();
+                        Log.d(TAG, "connected to " + connection.getHost());
+
+                    } catch (XmppStringprepException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (SmackException e) {
+                        e.printStackTrace();
+                    } catch (XMPPException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }).start();
+
+        }
 
     }
 
     public void disconnect(){
+
+        connection.disconnect();
 
     }
 
@@ -235,7 +232,9 @@ public class InstantMessaging {
     public void createFileTransferManager(){
 
         FileTransferManager fileTransferManager = FileTransferManager.getInstanceFor(connection);
-
+        
+        //FileTransferNegotiator.IBB_ONLY=true; // TODO: 04/07/2017 deve essere un parametro impostabile
+        
         fileTransferManager.addFileTransferListener(new FileTransferListener() {
             @Override
             public void fileTransferRequest(FileTransferRequest request) {
