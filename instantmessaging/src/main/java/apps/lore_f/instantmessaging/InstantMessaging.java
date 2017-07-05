@@ -51,12 +51,12 @@ public class InstantMessaging {
         public void connected(XMPPConnection connection) {
 
             if (instantMessagingListener!=null) instantMessagingListener.onConnected();
-
+            Log.d(TAG, "connected");
         }
 
         @Override
         public void authenticated(XMPPConnection connection, boolean resumed) {
-
+            Log.d(TAG, "authenticated");
             if (instantMessagingListener!=null) instantMessagingListener.onLogIn();
 
         }
@@ -64,31 +64,34 @@ public class InstantMessaging {
         @Override
         public void connectionClosed() {
 
+            if (instantMessagingListener!=null) instantMessagingListener.onDisconnected();
+            Log.d(TAG, "connectionClosed");
         }
 
         @Override
         public void connectionClosedOnError(Exception e) {
-
+            Log.d(TAG, "connectionClosedOnError - " + e.getMessage());
         }
 
         @Override
         public void reconnectionSuccessful() {
-
+            Log.d(TAG, "reconnectionSuccessful");
         }
 
         @Override
         public void reconnectingIn(int seconds) {
-
+            Log.d(TAG, "reconnectingIn - " + seconds);
         }
 
         @Override
         public void reconnectionFailed(Exception e) {
-
+            Log.d(TAG, "reconnectionFailed - " + e.getMessage());
         }
     };
 
     public interface InstantMessagingListener{
         void onConnected();
+        void onDisconnected();
         void onLogIn();
         void onChatCreated();
         void onFileTransferManagerCreated();
@@ -132,7 +135,7 @@ public class InstantMessaging {
     public InstantMessaging(String domainName, String username, String password, String resource){
 
         /***
-         * inizializza la classe
+         * costruttore
         */
 
         /* Creo un nuovo oggetto XMPPTCPConnectionConfiguration.Builder */
@@ -148,7 +151,6 @@ public class InstantMessaging {
             /* faccio costruire al builder l'oggetto AbstractXMPPConnection */
             connection = new XMPPTCPConnection(configBuilder.build());
             connection.addConnectionListener(connectionListener);
-            connect();
 
         } catch (XmppStringprepException e) {
 
@@ -195,6 +197,12 @@ public class InstantMessaging {
 
     }
 
+    public boolean isConnected(){
+
+        return connection.isConnected();
+
+    }
+
     public void sendMessage(String recipient, String messageText) throws XmppStringprepException, SmackException.NotConnectedException, InterruptedException {
 
         if (chatManager!=null) {
@@ -233,7 +241,7 @@ public class InstantMessaging {
 
         FileTransferManager fileTransferManager = FileTransferManager.getInstanceFor(connection);
         
-        //FileTransferNegotiator.IBB_ONLY=true; // TODO: 04/07/2017 deve essere un parametro impostabile
+        FileTransferNegotiator.IBB_ONLY=true; // TODO: 04/07/2017 deve essere un parametro impostabile
         
         fileTransferManager.addFileTransferListener(new FileTransferListener() {
             @Override

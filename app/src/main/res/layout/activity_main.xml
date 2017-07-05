@@ -41,6 +41,12 @@
         android:layout_alignParentLeft="true">
 
         <ImageButton
+            android:id="@+id/BTN___MAIN___RECONNECT"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:srcCompat="@drawable/icon_connect" />
+
+        <ImageButton
             android:id="@+id/BTN___MAIN___SHUTDOWN"
             android:layout_width="64dp"
             android:layout_height="64dp"

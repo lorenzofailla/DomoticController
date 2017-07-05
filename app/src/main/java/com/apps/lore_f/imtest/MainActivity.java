@@ -1,22 +1,17 @@
 package com.apps.lore_f.imtest;
 
-import android.content.pm.PackageManager;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
+import android.os.Handler;
 import android.support.v4.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
@@ -26,12 +21,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
-import org.jivesoftware.smackx.si.packet.StreamInitiation;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import apps.lore_f.instantmessaging.InstantMessaging;
 import apps.lore_f.instantmessaging.InstantMessaging.InstantMessagingListener;
@@ -55,12 +47,40 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton shutdownButton;
     private ImageButton rebootButton;
     private ImageButton startFileManagerButton;
+    private ImageButton connectButton;
 
     private TextView generalInfoTextView;
 
     private FileViewerFragment fileViewerFragment;
 
     private String pendingDownloadFileName;
+
+    private boolean connectionInProgressFlag=false;
+    private boolean disconnectIfConnected=false;
+
+    private Handler handler = new Handler();
+
+    private Runnable hostReplyTimeout = new Runnable() {
+        @Override
+        public void run() {
+
+            /* messaggio utente */
+            AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext())
+                    .setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    })
+                    .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    }).create();
+
+        }
+    };
 
     private FileViewerFragment.FileViewerFragmentListener fileViewerFragmentListener = new FileViewerFragment.FileViewerFragmentListener() {
         @Override
@@ -130,6 +150,31 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
+    private void updateGeneralInfoTextView (final String message){
+
+        runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        generalInfoTextView.setText(message);
+                    }
+                }
+        );
+
+    }
+
+    private void updateGeneralInfoTextView (final int messageRId){
+
+        runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        generalInfoTextView.setText(messageRId);
+                    }
+                }
+        );
+
+    }
 
     private InstantMessagingListener instantMessagingListener = new InstantMessagingListener() {
 
@@ -138,16 +183,20 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d(TAG, "connected");
 
+            /* rilascia il flag di interblocco */
+            connectionInProgressFlag=false;
+
             /* modifica il testo del messaggio nel progressDialog */
-            runOnUiThread(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST));
-                        }
-                    }
-            );
+            updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___LOGGING_IN_TO_XMPP_SERVER);
             instantMessaging.login();
+
+        }
+
+        @Override
+        public void onDisconnected() {
+
+            lockControls();
+            manageConnection();
 
         }
 
@@ -155,6 +204,7 @@ public class MainActivity extends AppCompatActivity {
         public void onLogIn() {
 
             Log.d(TAG, "logged in");
+            updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___CREATING_CHAT_SESSION);
             instantMessaging.createChat();
 
         }
@@ -163,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
         public void onChatCreated() {
 
             Log.d(TAG, "chat created");
+            updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___HANDSHAKING);
             instantMessaging.createFileTransferManager();
 
         }
@@ -373,6 +424,8 @@ public class MainActivity extends AppCompatActivity {
         shutdownButton = (ImageButton) findViewById(R.id.BTN___MAIN___SHUTDOWN);
         rebootButton = (ImageButton) findViewById(R.id.BTN___MAIN___REBOOT);
         startFileManagerButton = (ImageButton) findViewById(R.id.BTN___MAIN___FILEMANAGER);
+        connectButton = (ImageButton) findViewById(R.id.BTN___MAIN___RECONNECT);
+
         generalInfoTextView =(TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
 
         lockControls();
@@ -402,22 +455,37 @@ public class MainActivity extends AppCompatActivity {
                 fileViewerFragment.setFileViewerFragmentListener(fileViewerFragmentListener);
 
 
-
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, fileViewerFragment);
 
                 fragmentTransaction.commit();
 
-                /* invia un instant message con il messaggio di benvenuto */
+                /* aggiorna la text view */
+                updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___RETRIEVING_DIRECTORY_DATA);
+
+                /* invia un instant message con la richiesta della directorry iniziale */
                 sendIM(HOME_ADDRESS, "__get_homedir");
+
+            }
+
+        });
+
+        connectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                /* imposta il flag di interblocco */
+                disconnectIfConnected=true;
+
+                manageConnection();
+
             }
 
         });
 
         // inizializza una nuova istanza di InstantMessaging
         instantMessaging = new InstantMessaging("alpha-labs.net", "lorenzofailla-controller", "fornaci12Controller", "authorized-controller");
-        generalInfoTextView.setText(getString(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER));
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -425,6 +493,34 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void manageConnection(){
+
+        if (instantMessaging!=null){
+
+            if (!instantMessaging.isConnected()){
+
+                if (!connectionInProgressFlag){
+                    connectionInProgressFlag=true;
+
+                    updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_XMPP_SERVER);
+                    instantMessaging.connect();
+                }
+
+            } else {
+
+                if (disconnectIfConnected) {
+
+                    disconnectIfConnected=false;
+
+                    updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___DISCONNECTING_FROM_XMPP_SERVER);
+                    instantMessaging.disconnect();
+
+                }
+
+            }
+
+        }
+    }
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -465,6 +561,9 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
 
         super.onResume();
+        /* verifica lo stato di connessione */
+        manageConnection();
+
         instantMessaging.setInstantMessagingListener(instantMessagingListener);
 
     }

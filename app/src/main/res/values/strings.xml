@@ -2,15 +2,18 @@
 
     <string name="app_name">Rasberry-Pi Remote Control</string>
 
-    <string name="PROGRESSDIALOG_INFO___CONNECTING_TO_IM_SUPPORT_SERVER">Connecting to IM support server...</string>
-    <string name="PROGRESSDIALOG_INFO___CONTACTING_REMOTE_HOST">Connected to IM support server. Contacting remote host...</string>
-    <string name="PROGRESSDIALOG_INFO___RETRIEVING_UPTIME">Retrieving remote host uptime...</string>
+    <string name="PROGRESSDIALOG_INFO___CONNECTING_TO_XMPP_SERVER">Connecting to IM support server...</string>
+    <string name="PROGRESSDIALOG_INFO___LOGGING_IN_TO_XMPP_SERVER">Connected to IM support server. Logging in...</string>
+    <string name="PROGRESSDIALOG_INFO___CREATING_CHAT_SESSION">Logged in. Creating chat session...</string>
+    <string name="PROGRESSDIALOG_INFO___HANDSHAKING">Handshaking remote host...</string>
     <string name="PROGRESSDIALOG_INFO___RETRIEVING_DIRECTORY_DATA">Retrieving remote host directory data...</string>
-
+    <string name="PROGRESSDIALOG_INFO___DISCONNECTING_FROM_XMPP_SERVER">Disconnecting from IM support server...</string>
 
     <string name="ALERTDIALOG_YES">Yes</string>
     <string name="ALERTDIALOG_NO">No</string>
     <string name="ALERTDIALOG_MESSAGE_REBOOT">This will reboot the remote host.</string>
     <string name="ALERTDIALOG_MESSAGE_SHUTDOWN">This will shutdown the remote host.</string>
+
+    <string name="ALERTDIALOG_MESSAGE_REPLY_TIMEOUT">The remote host did not reply. Do you want to keep waiting ?</string>
 
 </resources>
