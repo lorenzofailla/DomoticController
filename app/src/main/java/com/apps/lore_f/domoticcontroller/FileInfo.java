@@ -1,4 +1,4 @@
-package com.apps.lore_f.imtest;
+package com.apps.lore_f.domoticcontroller;
 
 /**
  * Created by lore_f on 04/06/2017.

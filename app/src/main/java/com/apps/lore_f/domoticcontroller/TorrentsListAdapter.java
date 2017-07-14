@@ -1,4 +1,4 @@
-package com.apps.lore_f.imtest;
+package com.apps.lore_f.domoticcontroller;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
@@ -8,8 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 

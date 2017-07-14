@@ -1,4 +1,4 @@
-package com.apps.lore_f.imtest;
+package com.apps.lore_f.domoticcontroller;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;

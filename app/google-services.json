@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "410796746391",
+    "firebase_url": "https://domotic-28a5e.firebaseio.com",
+    "project_id": "domotic-28a5e",
+    "storage_bucket": "domotic-28a5e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410796746391:android:2f880a282480dcef",
+        "android_client_info": {
+          "package_name": "com.apps.lore_f.domoticcontroller"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "410796746391-8ta02ttr50t4imae4fo97hqq1bmbms6j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apps.lore_f.domoticcontroller",
+            "certificate_hash": "758da6dfafcbc0b8c20639fae7f3bc2ef5686b19"
+          }
+        },
+        {
+          "client_id": "410796746391-mku70if55as3nkh82ttcv3t4r4s4uefm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCauF0ZNFnKmzFZzVMRkr8sJu1pEbJc0hA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "410796746391-mku70if55as3nkh82ttcv3t4r4s4uefm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,4 @@
-package com.apps.lore_f.imtest;
+package com.apps.lore_f.domoticcontroller;
 
 import org.junit.Test;
 

@@ -2,12 +2,12 @@
 
     <string name="app_name">Rasberry-Pi Remote Control</string>
 
-    <string name="PROGRESSDIALOG_INFO___CONNECTING_TO_XMPP_SERVER">Connecting to IM support server...</string>
-    <string name="PROGRESSDIALOG_INFO___LOGGING_IN_TO_XMPP_SERVER">Connected to IM support server. Logging in...</string>
-    <string name="PROGRESSDIALOG_INFO___CREATING_CHAT_SESSION">Logged in. Creating chat session...</string>
-    <string name="PROGRESSDIALOG_INFO___HANDSHAKING">Handshaking remote host...</string>
-    <string name="PROGRESSDIALOG_INFO___RETRIEVING_DIRECTORY_DATA">Retrieving remote host directory data...</string>
-    <string name="PROGRESSDIALOG_INFO___DISCONNECTING_FROM_XMPP_SERVER">Disconnecting from IM support server...</string>
+    <string name="PROGRESSSTATUS_INFO___CONNECTING_TO_XMPP_SERVER">Connecting to IM support server...</string>
+    <string name="PROGRESSSTATUS_INFO___LOGGING_IN_TO_XMPP_SERVER">Connected to IM support server. Logging in...</string>
+    <string name="PROGRESSSTATUS">Logged in. Creating chat session...</string>
+    <string name="PROGRESSSTATUS_INFO___HANDSHAKING">Handshaking remote host...</string>
+    <string name="PROGRESSSTATUS_INFO___RETRIEVING_DIRECTORY_DATA">Retrieving remote host directory data...</string>
+    <string name="PROGRESSSTATUS_INFO___DISCONNECTING_FROM_XMPP_SERVER">Disconnecting from IM support server...</string>
 
     <string name="ALERTDIALOG_YES">Yes</string>
     <string name="ALERTDIALOG_NO">No</string>
@@ -16,4 +16,5 @@
 
     <string name="ALERTDIALOG_MESSAGE_REPLY_TIMEOUT">The remote host did not reply. Do you want to keep waiting ?</string>
 
+    <string name="PROGRESSDIALOG_GOOGLESIGNIN___LOADING">Loading...</string>
 </resources>

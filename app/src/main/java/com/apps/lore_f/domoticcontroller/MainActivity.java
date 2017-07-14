@@ -1,5 +1,6 @@
-package com.apps.lore_f.imtest;
+package com.apps.lore_f.domoticcontroller;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
@@ -18,6 +19,8 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
@@ -37,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+
+    // Firebase Auth
+    FirebaseAuth firebaseAuth;
+    FirebaseUser firebaseUser;
 
     /*private ProgressDialog progressDialog;*/
     private InstantMessaging instantMessaging;
@@ -187,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
             connectionInProgressFlag=false;
 
             /* modifica il testo del messaggio nel progressDialog */
-            updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___LOGGING_IN_TO_XMPP_SERVER);
+            updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___LOGGING_IN_TO_XMPP_SERVER);
             instantMessaging.login();
 
         }
@@ -204,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
         public void onLogIn() {
 
             Log.d(TAG, "logged in");
-            updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___CREATING_CHAT_SESSION);
+            updateGeneralInfoTextView(R.string.PROGRESSSTATUS);
             instantMessaging.createChat();
 
         }
@@ -213,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
         public void onChatCreated() {
 
             Log.d(TAG, "chat created");
-            updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___HANDSHAKING);
+            updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___HANDSHAKING);
             instantMessaging.createFileTransferManager();
 
         }
@@ -420,6 +427,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /* controlla l'auth Firebase */
+        // inizializza il FirebaseAuth
+        firebaseAuth = FirebaseAuth.getInstance();
+        // ottiene l'user corrente
+        firebaseUser = firebaseAuth.getCurrentUser();
+
+        if (firebaseUser == null) {
+            // autenticazione non effettuata
+
+            // lancia la SignInActivity e termina l'attività corrente
+            startActivity(new Intent(this, GoogleSignInActivity.class));
+            finish();
+            return;
+
+        }
+
         /* inizializza l'handler ai controlli */
         shutdownButton = (ImageButton) findViewById(R.id.BTN___MAIN___SHUTDOWN);
         rebootButton = (ImageButton) findViewById(R.id.BTN___MAIN___REBOOT);
@@ -454,7 +477,6 @@ public class MainActivity extends AppCompatActivity {
                 fileViewerFragment = new FileViewerFragment();
                 fileViewerFragment.setFileViewerFragmentListener(fileViewerFragmentListener);
 
-
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, fileViewerFragment);
@@ -462,7 +484,7 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.commit();
 
                 /* aggiorna la text view */
-                updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___RETRIEVING_DIRECTORY_DATA);
+                updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___RETRIEVING_DIRECTORY_DATA);
 
                 /* invia un instant message con la richiesta della directorry iniziale */
                 sendIM(HOME_ADDRESS, "__get_homedir");
@@ -485,7 +507,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // inizializza una nuova istanza di InstantMessaging
-        instantMessaging = new InstantMessaging("alpha-labs.net", "lorenzofailla-controller", "fornaci12Controller", "authorized-controller");
+        instantMessaging = new InstantMessaging("alpha-labs.net", "lorenzofailla-domotica.controller", "fornaci12Controller", "authorized-domotica.controller");
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -502,7 +524,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!connectionInProgressFlag){
                     connectionInProgressFlag=true;
 
-                    updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___CONNECTING_TO_XMPP_SERVER);
+                    updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___CONNECTING_TO_XMPP_SERVER);
                     instantMessaging.connect();
                 }
 
@@ -512,7 +534,7 @@ public class MainActivity extends AppCompatActivity {
 
                     disconnectIfConnected=false;
 
-                    updateGeneralInfoTextView(R.string.PROGRESSDIALOG_INFO___DISCONNECTING_FROM_XMPP_SERVER);
+                    updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___DISCONNECTING_FROM_XMPP_SERVER);
                     instantMessaging.disconnect();
 
                 }
