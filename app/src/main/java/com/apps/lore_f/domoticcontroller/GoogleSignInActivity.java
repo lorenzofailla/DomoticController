@@ -26,6 +26,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class GoogleSignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
@@ -124,6 +125,8 @@ public class GoogleSignInActivity extends AppCompatActivity implements GoogleApi
                             Toast.makeText(GoogleSignInActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
 
                         } else {
+
+                            FirebaseMessaging.getInstance().subscribeToTopic("lorenzofailla-home");
 
                             // l'autenticazione è riuscita
                             startActivity(new Intent(GoogleSignInActivity.this, MainActivity.class));

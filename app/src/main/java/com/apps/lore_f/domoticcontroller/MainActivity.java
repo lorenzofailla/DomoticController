@@ -3,6 +3,7 @@ package com.apps.lore_f.domoticcontroller;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.content.DialogInterface;
 import android.net.Uri;
@@ -11,6 +12,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -18,6 +22,8 @@ import android.widget.TextView;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,7 +37,7 @@ import java.io.File;
 import apps.lore_f.instantmessaging.InstantMessaging;
 import apps.lore_f.instantmessaging.InstantMessaging.InstantMessagingListener;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private static final String HOME_ADDRESS="lorenzofailla-home@alpha-labs.net";
     private static final String TAG = "MainActivity";
@@ -39,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    private GoogleApiClient client;
+    private GoogleApiClient googleApiClient;
 
     // Firebase Auth
     FirebaseAuth firebaseAuth;
@@ -427,6 +433,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API)
+                .addApi(AppIndex.API)
+                .build();
+
         /* controlla l'auth Firebase */
         // inizializza il FirebaseAuth
         firebaseAuth = FirebaseAuth.getInstance();
@@ -507,11 +519,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // inizializza una nuova istanza di InstantMessaging
-        instantMessaging = new InstantMessaging("alpha-labs.net", "lorenzofailla-domotica.controller", "fornaci12Controller", "authorized-domotica.controller");
+        instantMessaging = new InstantMessaging("alpha-labs.net", "lorenzofailla-controller", "fornaci12Controller", "authorized-controller");
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mainactivity_menu, menu);
+
+        return true;
 
     }
 
@@ -565,8 +582,8 @@ public class MainActivity extends AppCompatActivity {
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+        googleApiClient.connect();
+        AppIndex.AppIndexApi.start(googleApiClient, getIndexApiAction());
     }
 
     @Override
@@ -575,8 +592,8 @@ public class MainActivity extends AppCompatActivity {
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
+        AppIndex.AppIndexApi.end(googleApiClient, getIndexApiAction());
+        googleApiClient.disconnect();
     }
 
     @Override
@@ -710,4 +727,29 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.sign_out_menuEntry:
+
+                // è stato selezionata l'opzione di sign out dal menu
+                firebaseAuth.signOut();
+                Auth.GoogleSignInApi.signOut(googleApiClient);
+
+                startActivity(new Intent(this, GoogleSignInActivity.class));
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
 }

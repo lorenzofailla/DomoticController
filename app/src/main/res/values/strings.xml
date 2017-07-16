@@ -17,4 +17,8 @@
     <string name="ALERTDIALOG_MESSAGE_REPLY_TIMEOUT">The remote host did not reply. Do you want to keep waiting ?</string>
 
     <string name="PROGRESSDIALOG_GOOGLESIGNIN___LOADING">Loading...</string>
+
+    <string name="MNU_MAIN_SIGNOUT">Sign out from Google</string>
+    <string name="MNU_MAIN_REVOKE">Revoke Google access</string>
+
 </resources>
