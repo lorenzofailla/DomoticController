@@ -9,6 +9,8 @@
     <string name="PROGRESSSTATUS_INFO___RETRIEVING_DIRECTORY_DATA">Retrieving remote host directory data...</string>
     <string name="PROGRESSSTATUS_INFO___DISCONNECTING_FROM_XMPP_SERVER">Disconnecting from IM support server...</string>
     <string name="PROGRESSSTATUS_INFO___RETRIEVING_TORRENT_DATA">Retrieving remote host torrent data...</string>
+    <string name="PROGRESSSTATUS_INFO___NO_ACTIVE_TORRENT">No active torrent.</string>
+    <string name="PROGRESSSTATUS_INFO___ACTIVE_TORRENTS">active torrents.</string>
 
 
     <string name="ALERTDIALOG_YES">Yes</string>

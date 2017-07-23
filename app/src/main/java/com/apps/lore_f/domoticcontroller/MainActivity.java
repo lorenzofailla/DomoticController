@@ -282,9 +282,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 case "%%%_torrent_list____%%%":
 
                     torrentViewerFragment.nOfTorrents = messageBody.substring(23).split("\n").length-2;
-                    updateGeneralInfoTextView(torrentViewerFragment.nOfTorrents + "torrents.");
 
-                    torrentViewerFragment.rawTorrentData = messageBody.substring(23);
+                    if(torrentViewerFragment.nOfTorrents>0) {
+
+                        updateGeneralInfoTextView(torrentViewerFragment.nOfTorrents + getString(R.string.PROGRESSSTATUS_INFO___ACTIVE_TORRENTS));
+                        torrentViewerFragment.rawTorrentDataLines = messageBody.substring(23).split("\n");
+                        torrentViewerFragment.updateContent();
+
+                    } else {
+
+                        updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___NO_ACTIVE_TORRENT);
+                        torrentViewerFragment.rawTorrentDataLines = null;
+                        torrentViewerFragment.hideContent();
+
+                    }
+
                     break;
 
 
