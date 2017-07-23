@@ -61,10 +61,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private ImageButton rebootButton;
     private ImageButton startFileManagerButton;
     private ImageButton connectButton;
+    private ImageButton startTorrentManagerButton;
 
     private TextView generalInfoTextView;
 
     private FileViewerFragment fileViewerFragment;
+    private TorrentViewerFragment torrentViewerFragment;
 
     private String pendingDownloadFileName;
 
@@ -279,6 +281,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                 case "%%%_torrent_list____%%%":
 
+                    torrentViewerFragment.nOfTorrents = messageBody.substring(23).split("\n").length-2;
+                    updateGeneralInfoTextView(torrentViewerFragment.nOfTorrents + "torrents.");
+
+                    torrentViewerFragment.rawTorrentData = messageBody.substring(23);
                     break;
 
 
@@ -460,6 +466,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         rebootButton = (ImageButton) findViewById(R.id.BTN___MAIN___REBOOT);
         startFileManagerButton = (ImageButton) findViewById(R.id.BTN___MAIN___FILEMANAGER);
         connectButton = (ImageButton) findViewById(R.id.BTN___MAIN___RECONNECT);
+        startTorrentManagerButton = (ImageButton) findViewById(R.id.BTN___MAIN___TORRENTMANAGER);
 
         generalInfoTextView =(TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
 
@@ -516,6 +523,29 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             }
 
+        });
+
+        startTorrentManagerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                torrentViewerFragment = new TorrentViewerFragment();
+                // TODO: imposta il listener
+
+
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, torrentViewerFragment);
+
+                fragmentTransaction.commit();
+
+                /* aggiorna la text view */
+                updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___RETRIEVING_TORRENT_DATA);
+
+                /* invia un instant message con la richiesta della directorry iniziale */
+                sendIM(HOME_ADDRESS, "___listTorrents");
+
+            }
         });
 
         // inizializza una nuova istanza di InstantMessaging

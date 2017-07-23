@@ -64,6 +64,12 @@
             android:layout_height="64dp"
             app:srcCompat="@drawable/folder" />
 
+        <ImageButton
+            android:id="@+id/BTN___MAIN___TORRENTMANAGER"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:srcCompat="@drawable/torrent" />
+
     </LinearLayout>
 
     <FrameLayout

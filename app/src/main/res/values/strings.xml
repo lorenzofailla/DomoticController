@@ -8,6 +8,8 @@
     <string name="PROGRESSSTATUS_INFO___HANDSHAKING">Handshaking remote host...</string>
     <string name="PROGRESSSTATUS_INFO___RETRIEVING_DIRECTORY_DATA">Retrieving remote host directory data...</string>
     <string name="PROGRESSSTATUS_INFO___DISCONNECTING_FROM_XMPP_SERVER">Disconnecting from IM support server...</string>
+    <string name="PROGRESSSTATUS_INFO___RETRIEVING_TORRENT_DATA">Retrieving remote host torrent data...</string>
+
 
     <string name="ALERTDIALOG_YES">Yes</string>
     <string name="ALERTDIALOG_NO">No</string>
@@ -20,5 +22,8 @@
 
     <string name="MNU_MAIN_SIGNOUT">Sign out from Google</string>
     <string name="MNU_MAIN_REVOKE">Revoke Google access</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
