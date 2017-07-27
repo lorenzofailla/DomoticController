@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private ImageButton startFileManagerButton;
     private ImageButton connectButton;
     private ImageButton startTorrentManagerButton;
+    private ImageButton refreshSSHLinksButton;
 
     private TextView generalInfoTextView;
 
@@ -479,6 +480,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         startFileManagerButton = (ImageButton) findViewById(R.id.BTN___MAIN___FILEMANAGER);
         connectButton = (ImageButton) findViewById(R.id.BTN___MAIN___RECONNECT);
         startTorrentManagerButton = (ImageButton) findViewById(R.id.BTN___MAIN___TORRENTMANAGER);
+        refreshSSHLinksButton = (ImageButton) findViewById(R.id.BTN___MAIN___SSH_LINK_REFRESH);
 
         generalInfoTextView =(TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
 
@@ -556,6 +558,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                 /* invia un instant message con la richiesta della directorry iniziale */
                 sendIM(HOME_ADDRESS, "___listTorrents");
+
+            }
+        });
+
+        refreshSSHLinksButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                sendIM(HOME_ADDRESS, "__execute_command:::sudo /etc/init.d/manage-tmate-session.sh start");
 
             }
         });
@@ -696,6 +707,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         shutdownButton.setEnabled(true);
         rebootButton.setEnabled(true);
         startFileManagerButton.setEnabled(true);
+        startTorrentManagerButton.setEnabled(true);
+        refreshSSHLinksButton.setEnabled(true);
+
     }
 
     private void lockControls(){
@@ -704,6 +718,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         shutdownButton.setEnabled(false);
         rebootButton.setEnabled(false);
         startFileManagerButton.setEnabled(false);
+        startTorrentManagerButton.setEnabled(false);
+        refreshSSHLinksButton.setEnabled(false);
 
     }
 
@@ -794,4 +810,5 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
 }

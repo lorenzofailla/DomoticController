@@ -42,33 +42,41 @@
 
         <ImageButton
             android:id="@+id/BTN___MAIN___RECONNECT"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             app:srcCompat="@drawable/icon_connect" />
 
         <ImageButton
             android:id="@+id/BTN___MAIN___SHUTDOWN"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             app:srcCompat="@drawable/icon_shutdown" />
 
         <ImageButton
             android:id="@+id/BTN___MAIN___REBOOT"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             app:srcCompat="@drawable/icon_reboot" />
 
         <ImageButton
             android:id="@+id/BTN___MAIN___FILEMANAGER"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             app:srcCompat="@drawable/folder" />
 
         <ImageButton
             android:id="@+id/BTN___MAIN___TORRENTMANAGER"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             app:srcCompat="@drawable/torrent" />
+
+        <ImageButton
+            android:id="@+id/BTN___MAIN___SSH_LINK_REFRESH"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:srcCompat="@drawable/ssh" />
+
+
 
     </LinearLayout>
 
