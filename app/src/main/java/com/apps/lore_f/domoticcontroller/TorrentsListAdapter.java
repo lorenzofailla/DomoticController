@@ -29,11 +29,13 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
 
         TextView torrentNameTXV=(TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTNAME);
         TextView torrentStatusTXV = (TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTSTATUS);
+        TextView torrentHaveTXV = (TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTHAVE);
 
         TorrentInfo torrentInfo = getItem(position);
 
         torrentNameTXV.setText(torrentInfo.getName());
         torrentStatusTXV.setText(torrentInfo.getStatus());
+        torrentHaveTXV.setText(torrentInfo.getDone() + " - " + torrentInfo.getHave());
 
         return convertView;
 

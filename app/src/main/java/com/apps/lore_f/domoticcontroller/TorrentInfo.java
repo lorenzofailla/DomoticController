@@ -7,11 +7,11 @@ package com.apps.lore_f.domoticcontroller;
 public class TorrentInfo {
 
     public String getID() {
-        return ID;
+        return IDString;
     }
 
     public void setID(String ID) {
-        this.ID = ID;
+        this.IDString = ID;
     }
 
     public String getName() {
@@ -23,11 +23,11 @@ public class TorrentInfo {
     }
 
     public String getStatus() {
-        return status;
+        return statusString;
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        this.statusString = status;
     }
 
     public String getEta() {
@@ -56,20 +56,30 @@ public class TorrentInfo {
 
     public TorrentInfo(String rawServerResponseLine){
 
-        ID=rawServerResponseLine.substring(0,6);
+        IDString=rawServerResponseLine.substring(0,6);
+        ID=Integer.parseInt(IDString);
+
         name=rawServerResponseLine.substring(70,rawServerResponseLine.length()-1);
-        status=rawServerResponseLine.substring(57,69);
-        eta=  rawServerResponseLine.substring(24,33);
-        done=rawServerResponseLine.substring(7,10);
-        have=rawServerResponseLine.substring(11,21);
+        statusString=rawServerResponseLine.substring(57,70);
+        eta=  rawServerResponseLine.substring(24,34);
+        done=rawServerResponseLine.substring(7,11);
+        have=rawServerResponseLine.substring(11,22);
+
     }
 
-    private String ID;
+    private String IDString;
+    private int ID;
     private String name;
-    private String status;
+    private String statusString;
+    private TorrentStatus status;
     private String eta;
     private String done;
     private String have;
 
+    public static enum TorrentStatus{
+
+        STOPPED,STARTED;
+
+    }
 
 }

@@ -282,13 +282,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                 case "%%%_torrent_list____%%%":
 
+                    Log.i(TAG,messageBody.substring(23));
+
                     torrentViewerFragment.nOfTorrents = messageBody.substring(23).split("\n").length-2;
 
                     if(torrentViewerFragment.nOfTorrents>0) {
 
-                        updateGeneralInfoTextView(torrentViewerFragment.nOfTorrents + getString(R.string.PROGRESSSTATUS_INFO___ACTIVE_TORRENTS));
+                        updateGeneralInfoTextView(torrentViewerFragment.nOfTorrents + " " +getString(R.string.PROGRESSSTATUS_INFO___ACTIVE_TORRENTS));
                         torrentViewerFragment.rawTorrentDataLines = messageBody.substring(23).split("\n");
-                        torrentViewerFragment.updateContent();
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                torrentViewerFragment.updateContent();
+                            }
+                        });
+
 
                     } else {
 
@@ -546,7 +555,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 torrentViewerFragment = new TorrentViewerFragment();
                 // TODO: imposta il listener
 
-
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, torrentViewerFragment);
@@ -557,9 +565,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___RETRIEVING_TORRENT_DATA);
 
                 /* invia un instant message con la richiesta della directorry iniziale */
-                sendIM(HOME_ADDRESS, "___listTorrents");
+                sendIM(HOME_ADDRESS, "__listTorrents");
 
             }
+
         });
 
         refreshSSHLinksButton.setOnClickListener(new View.OnClickListener() {

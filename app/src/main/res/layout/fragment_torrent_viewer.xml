@@ -4,10 +4,11 @@
     android:layout_height="match_parent"
     tools:context="com.apps.lore_f.domoticcontroller.TorrentViewerFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ListView
+        android:id="@+id/LVW___TORRENTSLIST___MAIN"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_alignParentLeft="true"
+       />
 
 </FrameLayout>

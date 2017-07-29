@@ -76,8 +76,6 @@
             android:layout_height="50dp"
             app:srcCompat="@drawable/ssh" />
 
-
-
     </LinearLayout>
 
     <FrameLayout
