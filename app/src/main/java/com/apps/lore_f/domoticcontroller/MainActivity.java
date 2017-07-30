@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -96,6 +97,51 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     }).create();
 
         }
+    };
+
+    private TorrentsListAdapter.TorrentsListAdapterListener torrentsListAdapterListener = new TorrentsListAdapter.TorrentsListAdapterListener() {
+        @Override
+        public void onStartRequest(int torrentID) {
+
+            //Toast.makeText(MainActivity.this, "Ricevuta richiesta di start per ID:"+ torrentID, Toast.LENGTH_SHORT).show();
+
+            /* invia il commando all'host remoto via IM */
+            sendIM(HOME_ADDRESS, "__execute_command:::transmission-remote -n 'transmission:transmission' -s -t "+torrentID);
+
+            /* invia un instant message con la richiesta della lista dei torrents */
+            sendIM(HOME_ADDRESS, "__listTorrents");
+
+        }
+
+        @Override
+        public void onStopRequest(int torrentID) {
+
+            //Toast.makeText(MainActivity.this, "Ricevuta richiesta di stop per ID:"+ torrentID, Toast.LENGTH_SHORT).show();
+
+            /* invia il commando all'host remoto via IM */
+            sendIM(HOME_ADDRESS, "__execute_command:::transmission-remote -n 'transmission:transmission' -S -t "+torrentID);
+
+            /* invia un instant message con la richiesta della lista dei torrents */
+            sendIM(HOME_ADDRESS, "__listTorrents");
+
+        }
+
+        @Override
+        public void onRemoveRequest(final int torrentID) {
+
+            new AlertDialog.Builder(getApplicationContext())
+                    .setMessage(R.string.ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL)
+                    .setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(MainActivity.this, "Ricevuta richiesta di rimozione per ID:"+ torrentID, Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton(R.string.ALERTDIALOG_NO,null)
+                    .setTitle(R.string.ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL).create().show();
+
+        }
+
     };
 
     private FileViewerFragment.FileViewerFragmentListener fileViewerFragmentListener = new FileViewerFragment.FileViewerFragmentListener() {
@@ -333,6 +379,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                     break;
 
+                case "%%%_command_reply___%%%":
+                    Log.i(TAG,messageBody.substring(23));
+                    break;
+
+
             }
 
         }
@@ -553,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onClick(View v) {
 
                 torrentViewerFragment = new TorrentViewerFragment();
-                // TODO: imposta il listener
+                torrentViewerFragment.localTorrentsListAdapterListener = torrentsListAdapterListener;
 
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -564,7 +615,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 /* aggiorna la text view */
                 updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___RETRIEVING_TORRENT_DATA);
 
-                /* invia un instant message con la richiesta della directorry iniziale */
+                /* invia un instant message con la richiesta della lista dei torrents */
                 sendIM(HOME_ADDRESS, "__listTorrents");
 
             }
@@ -575,7 +626,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onClick(View view) {
 
-                sendIM(HOME_ADDRESS, "__execute_command:::sudo /etc/init.d/manage-tmate-session.sh start");
+                sendIM(HOME_ADDRESS, "__execute_command:::sudo /etc/init.d/manage-tmate-session.sh start_immediately");
 
             }
         });

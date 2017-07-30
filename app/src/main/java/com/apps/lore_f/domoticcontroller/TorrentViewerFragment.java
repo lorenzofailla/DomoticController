@@ -14,10 +14,15 @@ import java.util.List;
 
 public class TorrentViewerFragment extends Fragment {
 
-    String[] rawTorrentDataLines;
-    int nOfTorrents;
+    public String[] rawTorrentDataLines;
+    public int nOfTorrents;
+    public TorrentsListAdapter torrentsListAdapter;
+    public TorrentsListAdapter.TorrentsListAdapterListener localTorrentsListAdapterListener;
+
     private List<TorrentInfo> torrents = new ArrayList<>();
-    ListView torrentsListView;
+    private ListView torrentsListView;
+
+
 
     public TorrentViewerFragment() {
         // Required empty public constructor
@@ -59,7 +64,8 @@ public class TorrentViewerFragment extends Fragment {
 
         torrents = getTorrentsList(rawTorrentDataLines);
 
-        TorrentsListAdapter torrentsListAdapter = new TorrentsListAdapter(getContext(), R.layout.torrents_list_row, torrents);
+        torrentsListAdapter = new TorrentsListAdapter(getContext(), R.layout.torrents_list_row, torrents);
+        if (localTorrentsListAdapterListener!=null) torrentsListAdapter.setTorrentsListAdapterListener(localTorrentsListAdapterListener);
 
         torrentsListView.setAdapter(torrentsListAdapter);
         torrentsListView.setVisibility(View.VISIBLE);

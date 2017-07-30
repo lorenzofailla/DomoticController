@@ -6,12 +6,20 @@ package com.apps.lore_f.domoticcontroller;
 
 public class TorrentInfo {
 
-    public String getID() {
+    private String IDString;
+    public String getIDString() {
         return IDString;
     }
-
-    public void setID(String ID) {
+    public void setIDString(String ID) {
         this.IDString = ID;
+    }
+
+    private String statusString;
+    public String getStatusString() {
+        return statusString;
+    }
+    public void setStatusString(String statusString) {
+        this.statusString = statusString;
     }
 
     public String getName() {
@@ -22,12 +30,12 @@ public class TorrentInfo {
         this.name = name;
     }
 
-    public String getStatus() {
-        return statusString;
+    public TorrentStatus getStatus() {
+        return status;
     }
 
-    public void setStatus(String status) {
-        this.statusString = status;
+    public void setStatus(TorrentStatus status) {
+        this.status= status;
     }
 
     public String getEta() {
@@ -56,8 +64,8 @@ public class TorrentInfo {
 
     public TorrentInfo(String rawServerResponseLine){
 
-        IDString=rawServerResponseLine.substring(0,6);
-        ID=Integer.parseInt(IDString);
+        IDString=rawServerResponseLine.substring(0,4);
+        ID=Integer.parseInt(IDString.replace(" ",""));
 
         name=rawServerResponseLine.substring(70,rawServerResponseLine.length()-1);
         statusString=rawServerResponseLine.substring(57,70);
@@ -65,12 +73,29 @@ public class TorrentInfo {
         done=rawServerResponseLine.substring(7,11);
         have=rawServerResponseLine.substring(11,22);
 
+        if (statusString.replace(" ", "").equals("Stopped")){
+
+            status = TorrentStatus.STOPPED;
+
+        } else {
+
+            status = TorrentStatus.NOT_STOPPED;
+        }
+
     }
 
-    private String IDString;
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+
+    public int getID() {
+        return ID;
+    }
+
+
     private int ID;
     private String name;
-    private String statusString;
+
     private TorrentStatus status;
     private String eta;
     private String done;
@@ -78,7 +103,7 @@ public class TorrentInfo {
 
     public static enum TorrentStatus{
 
-        STOPPED,STARTED;
+        STOPPED,NOT_STOPPED;
 
     }
 

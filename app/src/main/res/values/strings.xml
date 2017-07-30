@@ -17,8 +17,9 @@
     <string name="ALERTDIALOG_NO">No</string>
     <string name="ALERTDIALOG_MESSAGE_REBOOT">This will reboot the remote host.</string>
     <string name="ALERTDIALOG_MESSAGE_SHUTDOWN">This will shutdown the remote host.</string>
-
     <string name="ALERTDIALOG_MESSAGE_REPLY_TIMEOUT">The remote host did not reply. Do you want to keep waiting ?</string>
+    <string name="ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL">Torrent removal</string>
+    <string name="ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL">Do you really want to remove the selected torrent ?</string>
 
     <string name="PROGRESSDIALOG_GOOGLESIGNIN___LOADING">Loading...</string>
 
