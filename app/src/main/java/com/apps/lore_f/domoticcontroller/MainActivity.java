@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             //Toast.makeText(MainActivity.this, "Ricevuta richiesta di start per ID:"+ torrentID, Toast.LENGTH_SHORT).show();
 
             /* invia il commando all'host remoto via IM */
-            sendIM(HOME_ADDRESS, "__execute_command:::transmission-remote -n 'transmission:transmission' -s -t "+torrentID);
+            sendIM(HOME_ADDRESS, "__execute_command:::transmission-remote -n 'transmission:transmission' -t "+torrentID+" -s");
 
             /* invia un instant message con la richiesta della lista dei torrents */
             sendIM(HOME_ADDRESS, "__listTorrents");
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             //Toast.makeText(MainActivity.this, "Ricevuta richiesta di stop per ID:"+ torrentID, Toast.LENGTH_SHORT).show();
 
             /* invia il commando all'host remoto via IM */
-            sendIM(HOME_ADDRESS, "__execute_command:::transmission-remote -n 'transmission:transmission' -S -t "+torrentID);
+            sendIM(HOME_ADDRESS, "__execute_command:::transmission-remote -n 'transmission:transmission' -t "+torrentID + " -S");
 
             /* invia un instant message con la richiesta della lista dei torrents */
             sendIM(HOME_ADDRESS, "__listTorrents");
