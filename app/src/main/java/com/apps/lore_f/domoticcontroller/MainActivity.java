@@ -129,21 +129,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         @Override
         public void onRemoveRequest(final int torrentID) {
 
-            new AlertDialog.Builder(getApplicationContext())
-                    .setMessage(R.string.ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL)
-                    .setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Toast.makeText(MainActivity.this, "Ricevuta richiesta di rimozione per ID:"+ torrentID, Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .setTitle(R.string.ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL).create().show();
+            removeTorrent(torrentID);
 
         }
 
@@ -388,6 +374,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     Log.i(TAG,messageBody.substring(23));
                     break;
 
+                case "%%%_torrent_started_%%%":
+                case "%%%_torrent_stopped_%%%":
+                case "%%%_torrent_removed_%%%":
+                case "%%%_torrent_added___%%%":
+                    startTorrentManagerButton.callOnClick();
+
+                    break;
+
+
 
             }
 
@@ -465,44 +460,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void updateRemoteUpTime() {
 
-        TextView remoteUpTimeTextView = (TextView) findViewById(R.id.TXV___MAIN___HOSTUPTIME);
-        remoteUpTimeTextView.setText(remoteUpTime);
+        updateGeneralInfoTextView(remoteUpTime);
 
         releaseControls();
 
     }
-
-    /*
-    private void refreshTorrentInfo() {
-
-        TextView torrentInfoTXV = (TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
-        progressDialog.dismiss();
-
-        String[] responseLines = torrentInfo.split("\n");
-        nOfTorrents = responseLines.length-2;
-
-        ListView torrenstListLVW = (ListView) findViewById(R.id.LVW___MAIN___TORRENTSLIST);
-
-        if (nOfTorrents>0){
-
-            // mostra la lista dei torrent
-            torrentInfoTXV .setText("Torrents: " + nOfTorrents);
-            torrentsList = refreshTorrentsList(responseLines);
-            TorrentsListAdapter torrentsListAdapter = new TorrentsListAdapter(this, R.layout.torrents_list_row, torrentsList);
-            torrenstListLVW.setAdapter(torrentsListAdapter);
-
-            torrenstListLVW.setVisibility(View.VISIBLE);
-
-        } else {
-
-            // nasconde la lista dei torrent
-            torrentInfoTXV .setText("No active Torrent.");
-            torrenstListLVW.setVisibility(View.GONE);
-
-        }
-
-    }
-    */
 
     private void retrieveHostInfo() {
 
@@ -873,6 +835,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    private void removeTorrent(final int id){
+
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL)
+                .setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        sendIM(HOME_ADDRESS, "__remove_torrent:::"+id);
+                    }
+                })
+                .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setTitle(R.string.ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL)
+                .create()
+                .show();
 
     }
 
