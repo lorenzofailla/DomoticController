@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -22,11 +23,24 @@ public class TorrentViewerFragment extends Fragment {
     private List<TorrentInfo> torrents = new ArrayList<>();
     private ListView torrentsListView;
 
-
-
     public TorrentViewerFragment() {
         // Required empty public constructor
     }
+
+    interface TorrentsViewerListener{
+
+        void onAddTorrentRequested(String torrentURL);
+
+    }
+
+    TorrentsViewerListener torrentsViewerListener;
+
+    public void setTorrentsViewerListener(TorrentsViewerListener listener){
+
+        torrentsViewerListener=listener;
+
+    }
+
 
 
     @Override
@@ -41,8 +55,18 @@ public class TorrentViewerFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_torrent_viewer, container, false);
 
+        // inizializza l'handler ai controlli
         torrentsListView = (ListView) view.findViewById(R.id.LVW___TORRENTSLIST___MAIN);
 
+        ImageButton addTorrentButton = (ImageButton) view.findViewById(R.id.BTN___TORRENTSVIEWER_ADDTORRENT);
+        addTorrentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // apre la finestra di dialogo per aggiungere un torrent
+
+            }
+        });
         return view;
 
     }

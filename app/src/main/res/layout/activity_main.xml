@@ -12,16 +12,10 @@
     tools:context="com.apps.lore_f.domoticcontroller.MainActivity">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/TXV___MAIN___HOSTNAME"
-        android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
-
-    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/TXV___MAIN___HOSTUPTIME"
-        android:layout_below="@+id/TXV___MAIN___HOSTNAME"
+        android:text="hostname"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
     <TextView
@@ -30,7 +24,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/TXV___MAIN___HOSTUPTIME"
+        android:layout_below="@+id/TXV___MAIN___HOSTNAME"
+        android:text="general info"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <LinearLayout
@@ -44,19 +39,19 @@
             android:id="@+id/BTN___MAIN___RECONNECT"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            app:srcCompat="@drawable/icon_connect" />
+            app:srcCompat="@drawable/ic_mr_button_connected_00_light" />
 
         <ImageButton
             android:id="@+id/BTN___MAIN___SHUTDOWN"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            app:srcCompat="@drawable/icon_shutdown" />
+            app:srcCompat="@android:drawable/ic_lock_power_off" />
 
         <ImageButton
             android:id="@+id/BTN___MAIN___REBOOT"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            app:srcCompat="@drawable/icon_reboot" />
+            app:srcCompat="@drawable/cast_ic_notification_rewind" />
 
         <ImageButton
             android:id="@+id/BTN___MAIN___FILEMANAGER"

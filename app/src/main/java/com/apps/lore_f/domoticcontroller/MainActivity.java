@@ -137,7 +137,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             Toast.makeText(MainActivity.this, "Ricevuta richiesta di rimozione per ID:"+ torrentID, Toast.LENGTH_SHORT).show();
                         }
                     })
-                    .setNegativeButton(R.string.ALERTDIALOG_NO,null)
+                    .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
                     .setTitle(R.string.ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL).create().show();
 
         }
