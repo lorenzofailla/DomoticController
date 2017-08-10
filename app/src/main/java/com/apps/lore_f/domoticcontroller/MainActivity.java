@@ -566,6 +566,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                 torrentViewerFragment = new TorrentViewerFragment();
                 torrentViewerFragment.localTorrentsListAdapterListener = torrentsListAdapterListener;
+                torrentViewerFragment.setTorrentsViewerListener(new TorrentViewerFragment.TorrentsViewerListener() {
+                    @Override
+                    public void onAddTorrentRequest() {
+
+                        addTorrent();
+
+                    }
+
+                });
 
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -849,6 +858,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     }
                 })
                 .setTitle(R.string.ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL)
+                .create()
+                .show();
+
+    }
+
+    private void addTorrent(){
+
+        final TextView torrentURL = new TextView (this);
+
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.ALERTDIALOG_MESSAGE_ADD_TORRENT)
+                .setView(torrentURL)
+                .setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        Toast.makeText(getApplicationContext(),torrentURL.getText().toString(),Toast.LENGTH_SHORT ).show();
+                        //sendIM(HOME_ADDRESS, "__add_torrent:::"+torrentURL.getText().toString());
+                    }
+                })
+                .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setTitle(R.string.ALERTDIALOG_TITLE_ADD_TORRENT)
                 .create()
                 .show();
 

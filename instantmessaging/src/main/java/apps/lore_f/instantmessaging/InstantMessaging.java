@@ -46,11 +46,20 @@ public class InstantMessaging {
     private IncomingFileTransfer incomingFileTransfer;
     private File fileToDownload;
 
+    public enum ConnectionStatus{
+        NOT_CONNECTED,
+        CONNECTED,
+        LOGGED
+    }
+
+    public ConnectionStatus connectionStatus;
+
     private ConnectionListener connectionListener = new ConnectionListener() {
         @Override
         public void connected(XMPPConnection connection) {
 
             if (instantMessagingListener!=null) instantMessagingListener.onConnected();
+            connectionStatus=ConnectionStatus.CONNECTED;
             Log.d(TAG, "connected");
         }
 
@@ -152,6 +161,8 @@ public class InstantMessaging {
             connection = new XMPPTCPConnection(configBuilder.build());
             connection.addConnectionListener(connectionListener);
 
+            connectionStatus = ConnectionStatus.NOT_CONNECTED;
+
         } catch (XmppStringprepException e) {
 
             e.printStackTrace();
@@ -170,7 +181,6 @@ public class InstantMessaging {
                     try {
 
                         connection.connect();
-                        Log.d(TAG, "connected to " + connection.getHost());
 
                     } catch (XmppStringprepException e) {
                         e.printStackTrace();

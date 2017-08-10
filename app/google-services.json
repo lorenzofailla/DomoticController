@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "410796746391-90680fvhgmhqvaeu87qrrm2551db7h46.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apps.lore_f.domoticcontroller",
+            "certificate_hash": "68353ab9e315e7a05fce03f6662d47405bb6d2e2"
+          }
+        },
+        {
           "client_id": "410796746391-8ta02ttr50t4imae4fo97hqq1bmbms6j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
