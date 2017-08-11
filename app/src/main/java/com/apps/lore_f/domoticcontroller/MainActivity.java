@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -865,7 +866,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void addTorrent(){
 
-        final TextView torrentURL = new TextView (this);
+        final EditText torrentURL = new EditText(this);
+
 
         new AlertDialog.Builder(this)
                 .setMessage(R.string.ALERTDIALOG_MESSAGE_ADD_TORRENT)
@@ -874,8 +876,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        Toast.makeText(getApplicationContext(),torrentURL.getText().toString(),Toast.LENGTH_SHORT ).show();
-                        //sendIM(HOME_ADDRESS, "__add_torrent:::"+torrentURL.getText().toString());
+                        //Toast.makeText(getApplicationContext(),torrentURL.getText().toString(),Toast.LENGTH_SHORT ).show();
+                        sendIM(HOME_ADDRESS, "__add_torrent:::"+torrentURL.getText().toString());
                     }
                 })
                 .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {

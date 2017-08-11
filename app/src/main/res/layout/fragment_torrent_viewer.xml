@@ -15,7 +15,7 @@
             android:id="@+id/BTN___TORRENTSVIEWER_ADDTORRENT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@android:drawable/ic_input_add" />
+            app:srcCompat="@drawable/ic_add_circle_outline_black_24dp" />
 
         <ListView
             android:id="@+id/LVW___TORRENTSLIST___MAIN"
