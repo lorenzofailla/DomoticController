@@ -31,7 +31,6 @@ import org.jxmpp.stringprep.XmppStringprepException;
 import java.io.File;
 import java.io.IOException;
 
-
 /**
  * Created by 105053228 on 23/mar/2017.
  */
@@ -49,7 +48,8 @@ public class InstantMessaging {
     public enum ConnectionStatus{
         NOT_CONNECTED,
         CONNECTED,
-        LOGGED
+        LOGGED,
+        READY
     }
 
     public ConnectionStatus connectionStatus;
@@ -60,13 +60,18 @@ public class InstantMessaging {
 
             if (instantMessagingListener!=null) instantMessagingListener.onConnected();
             connectionStatus=ConnectionStatus.CONNECTED;
+
             Log.d(TAG, "connected");
+
         }
 
         @Override
         public void authenticated(XMPPConnection connection, boolean resumed) {
-            Log.d(TAG, "authenticated");
+
             if (instantMessagingListener!=null) instantMessagingListener.onLogIn();
+            connectionStatus=ConnectionStatus.LOGGED;
+
+            Log.d(TAG, "authenticated");
 
         }
 
@@ -74,16 +79,27 @@ public class InstantMessaging {
         public void connectionClosed() {
 
             if (instantMessagingListener!=null) instantMessagingListener.onDisconnected();
+            connectionStatus=ConnectionStatus.NOT_CONNECTED;
+
             Log.d(TAG, "connectionClosed");
+
         }
 
         @Override
         public void connectionClosedOnError(Exception e) {
+
+            if (instantMessagingListener!=null) instantMessagingListener.onConnectionError(e);
+            connectionStatus=ConnectionStatus.NOT_CONNECTED;
+
             Log.d(TAG, "connectionClosedOnError - " + e.getMessage());
         }
 
         @Override
         public void reconnectionSuccessful() {
+
+            if (instantMessagingListener!=null) instantMessagingListener.onConnected();
+            connectionStatus=ConnectionStatus.CONNECTED;
+
             Log.d(TAG, "reconnectionSuccessful");
         }
 
@@ -94,13 +110,19 @@ public class InstantMessaging {
 
         @Override
         public void reconnectionFailed(Exception e) {
+
+            if (instantMessagingListener!=null) instantMessagingListener.onConnectionError(e);
+            connectionStatus=ConnectionStatus.NOT_CONNECTED;
+
             Log.d(TAG, "reconnectionFailed - " + e.getMessage());
         }
+
     };
 
     public interface InstantMessagingListener{
         void onConnected();
         void onDisconnected();
+        void onConnectionError(Exception e);
         void onLogIn();
         void onChatCreated();
         void onFileTransferManagerCreated();
@@ -128,16 +150,21 @@ public class InstantMessaging {
 
     public void login(){
 
-        try {
-            connection.login();
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        } catch (SmackException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (!(connection.isConnected() && connection.isAuthenticated())) {
+
+            try {
+
+                connection.login();
+
+            } catch (XMPPException | SmackException | IOException | InterruptedException e) {
+
+                if (instantMessagingListener != null) instantMessagingListener.onConnectionError(e);
+
+            }
+
+        } else {
+
+            if (instantMessagingListener != null) instantMessagingListener.onLogIn();
         }
 
     }
@@ -151,16 +178,16 @@ public class InstantMessaging {
         XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
         configBuilder.setUsernameAndPassword(username, password)
         .setSecurityMode(ConnectionConfiguration.SecurityMode.ifpossible)
-        .setKeystoreType(null);
+        .setKeystoreType(null)
+        .setCompressionEnabled(true);
 
         try {
             configBuilder.setResource(resource);
             configBuilder.setXmppDomain(domainName);
 
-            /* faccio costruire al builder l'oggetto AbstractXMPPConnection */
+            /* inizializzo la classe per la connessione al server XMPP */
             connection = new XMPPTCPConnection(configBuilder.build());
             connection.addConnectionListener(connectionListener);
-
             connectionStatus = ConnectionStatus.NOT_CONNECTED;
 
         } catch (XmppStringprepException e) {
@@ -175,27 +202,46 @@ public class InstantMessaging {
 
         if(!connection.isConnected()) {
 
-            new Thread(new Runnable() {
+            new AsyncTask<Void, Void, Boolean>() {
+
+                Exception exception = null;
+
                 @Override
-                public void run() {
+                protected Boolean doInBackground(Void... params) {
+
+
+
                     try {
 
                         connection.connect();
+                        return true;
 
-                    } catch (XmppStringprepException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (SmackException e) {
-                        e.printStackTrace();
-                    } catch (XMPPException e) {
-                        e.printStackTrace();
+                    } catch (IOException | InterruptedException | SmackException | XMPPException e) {
+
+                        exception=e;
+                        return false;
+
+                    }
+                }
+
+                protected void onPostExecute(Boolean result) {
+
+                    if (instantMessagingListener != null) {
+
+                        if (result == Boolean.TRUE) {
+
+                            instantMessagingListener.onConnected();
+
+                        } else {
+
+                            instantMessagingListener.onConnectionError(exception);
+                        }
+
                     }
 
                 }
-            }).start();
+
+            }.execute();
 
         }
 

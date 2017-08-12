@@ -74,9 +74,9 @@
     <FrameLayout
 
         android:id="@+id/VIE___MAIN___SUBVIEW"
-        android:layout_below="@+id/LLO___MAIN___BUTTONSTRIP"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:layout_below="@+id/LLO___MAIN___BUTTONSTRIP">
 
     </FrameLayout>
 

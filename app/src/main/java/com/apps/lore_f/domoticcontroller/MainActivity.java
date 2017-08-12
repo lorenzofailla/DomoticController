@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.DialogInterface;
 import android.net.Uri;
@@ -59,17 +60,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private String remoteHostName;
     private String remoteUpTime;
 
-    private ImageButton shutdownButton;
-    private ImageButton rebootButton;
-    private ImageButton startFileManagerButton;
-    private ImageButton connectButton;
-    private ImageButton startTorrentManagerButton;
-    private ImageButton refreshSSHLinksButton;
-
     private TextView generalInfoTextView;
 
     private FileViewerFragment fileViewerFragment;
     private TorrentViewerFragment torrentViewerFragment;
+    private ConnectionFragment connectionFragment;
 
     private String pendingDownloadFileName;
 
@@ -98,6 +93,42 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     }).create();
 
         }
+    };
+
+    private View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            switch(v.getId()){
+
+                case R.id.BTN___MAIN___SHUTDOWN:
+
+                    shutdownHost();
+
+                    break;
+
+                case R.id.BTN___MAIN___REBOOT:
+
+                    rebootHost();
+
+                    break;
+
+                case R.id.BTN___MAIN___FILEMANAGER:
+
+                    startFileManager();
+
+                    break;
+
+                case R.id.BTN___MAIN___TORRENTMANAGER:
+
+                    startTorrentManager();
+
+                    break;
+
+            }
+
+        }
+
     };
 
     private TorrentsListAdapter.TorrentsListAdapterListener torrentsListAdapterListener = new TorrentsListAdapter.TorrentsListAdapterListener() {
@@ -231,12 +262,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             Log.d(TAG, "connected");
 
-            /* rilascia il flag di interblocco */
-            connectionInProgressFlag=false;
-
             /* modifica il testo del messaggio nel progressDialog */
-            updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___LOGGING_IN_TO_XMPP_SERVER);
-            instantMessaging.login();
+            if(connectionFragment!=null){
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        connectionFragment.setLabelText(R.string.PROGRESSSTATUS_INFO___LOGGING_IN_TO_XMPP_SERVER);
+                    }
+                });
+
+                instantMessaging.login();
+
+            }
 
         }
 
@@ -244,7 +282,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         public void onDisconnected() {
 
             lockControls();
-            manageConnection();
+
+
+        }
+
+        @Override
+        public void onConnectionError(Exception e) {
+
+            if(connectionFragment!=null){
+
+                connectionFragment.setLabelText("connection error: " + e.getMessage());
+
+            }
 
         }
 
@@ -252,8 +301,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         public void onLogIn() {
 
             Log.d(TAG, "logged in");
-            updateGeneralInfoTextView(R.string.PROGRESSSTATUS);
-            instantMessaging.createChat();
+
+            /* modifica il testo del messaggio nel progressDialog */
+            if(connectionFragment!=null){
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        connectionFragment.setLabelText(R.string.PROGRESSSTATUS_INFO___CREATINGFILETRANSFERMANAGER);
+                    }
+                });
+
+                instantMessaging.createChat();
+
+            }
 
         }
 
@@ -261,14 +322,40 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         public void onChatCreated() {
 
             Log.d(TAG, "chat created");
-            updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___HANDSHAKING);
-            instantMessaging.createFileTransferManager();
+
+            /* modifica il testo del messaggio nel progressDialog */
+            if(connectionFragment!=null){
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        connectionFragment.setLabelText(R.string.PROGRESSSTATUS_INFO___CREATINGFILETRANSFERMANAGER);
+                    }
+                });
+
+                instantMessaging.createFileTransferManager();
+
+            }
 
         }
 
         @Override
         public void onFileTransferManagerCreated() {
             Log.d(TAG, "file transfer manager created");
+
+            /* modifica il testo del messaggio nel progressDialog */
+            if(connectionFragment!=null){
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        connectionFragment.setLabelText(R.string.PROGRESSSTATUS_INFO___HANDSHAKING);
+                    }
+                });
+
+
+            }
+
             retrieveHostInfo();
         }
 
@@ -277,7 +364,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             Log.i(TAG, messageBody);
             String command = messageBody.substring(0, 23);
-
 
             switch (command) {
 
@@ -291,6 +377,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                         public void run() {
 
                             updateHostName();
+
                         }
                     });
 
@@ -308,6 +395,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                             updateRemoteUpTime();
 
                         }
+
                     });
 
                     break;
@@ -373,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 case "%%%_torrent_stopped_%%%":
                 case "%%%_torrent_removed_%%%":
                 case "%%%_torrent_added___%%%":
-                    startTorrentManagerButton.callOnClick();
+                    startTorrentManager();
 
                     break;
 
@@ -446,6 +534,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     };
 
+
     private void updateHostName() {
 
         TextView hostNameTextView = (TextView) findViewById(R.id.TXV___MAIN___HOSTNAME);
@@ -496,111 +585,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         }
 
-        /* inizializza l'handler ai controlli */
-        shutdownButton = (ImageButton) findViewById(R.id.BTN___MAIN___SHUTDOWN);
-        rebootButton = (ImageButton) findViewById(R.id.BTN___MAIN___REBOOT);
-        startFileManagerButton = (ImageButton) findViewById(R.id.BTN___MAIN___FILEMANAGER);
-        connectButton = (ImageButton) findViewById(R.id.BTN___MAIN___RECONNECT);
-        startTorrentManagerButton = (ImageButton) findViewById(R.id.BTN___MAIN___TORRENTMANAGER);
-        refreshSSHLinksButton = (ImageButton) findViewById(R.id.BTN___MAIN___SSH_LINK_REFRESH);
-
-        generalInfoTextView =(TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
-
+        /* disabilita i controlli */
         lockControls();
 
-        shutdownButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        /* inizializza l'handler ai controlli */
+        findViewById(R.id.BTN___MAIN___SHUTDOWN).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___MAIN___REBOOT).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___MAIN___FILEMANAGER).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___MAIN___RECONNECT).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___MAIN___TORRENTMANAGER).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___MAIN___SSH_LINK_REFRESH).setOnClickListener(onClickListener);
 
-                shutdownHost();
-
-            }
-        });
-
-        rebootButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                rebootHost();
-            }
-        });
-
-        startFileManagerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                fileViewerFragment = new FileViewerFragment();
-                fileViewerFragment.setFileViewerFragmentListener(fileViewerFragmentListener);
-
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, fileViewerFragment);
-
-                fragmentTransaction.commit();
-
-                /* aggiorna la text view */
-                updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___RETRIEVING_DIRECTORY_DATA);
-
-                /* invia un instant message con la richiesta della directorry iniziale */
-                sendIM(HOME_ADDRESS, "__get_homedir");
-
-            }
-
-        });
-
-        connectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                /* imposta il flag di interblocco */
-                disconnectIfConnected=true;
-
-                manageConnection();
-
-            }
-
-        });
-
-        startTorrentManagerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                torrentViewerFragment = new TorrentViewerFragment();
-                torrentViewerFragment.localTorrentsListAdapterListener = torrentsListAdapterListener;
-                torrentViewerFragment.setTorrentsViewerListener(new TorrentViewerFragment.TorrentsViewerListener() {
-                    @Override
-                    public void onAddTorrentRequest() {
-
-                        addTorrent();
-
-                    }
-
-                });
-
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, torrentViewerFragment);
-
-                fragmentTransaction.commit();
-
-                /* aggiorna la text view */
-                updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___RETRIEVING_TORRENT_DATA);
-
-                /* invia un instant message con la richiesta della lista dei torrents */
-                sendIM(HOME_ADDRESS, "__listTorrents");
-
-            }
-
-        });
-
-        refreshSSHLinksButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                sendIM(HOME_ADDRESS, "__execute_command:::sudo /etc/init.d/manage-tmate-session.sh start_immediately");
-
-            }
-        });
+        generalInfoTextView =(TextView) findViewById(R.id.TXV___MAIN___GENERALINFO);
 
         // inizializza una nuova istanza di InstantMessaging
         instantMessaging = new InstantMessaging("alpha-labs.net", "lorenzofailla-controller", "fornaci12Controller", "authorized-controller");
@@ -616,34 +612,53 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
-    private void manageConnection(){
+    private void startFileManager(){
 
-        if (instantMessaging!=null){
+        fileViewerFragment = new FileViewerFragment();
+        fileViewerFragment.setFileViewerFragmentListener(fileViewerFragmentListener);
 
-            if (!instantMessaging.isConnected()){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, fileViewerFragment);
 
-                if (!connectionInProgressFlag){
-                    connectionInProgressFlag=true;
+        fragmentTransaction.commit();
 
-                    updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___CONNECTING_TO_XMPP_SERVER);
-                    instantMessaging.connect();
-                }
+        /* aggiorna la text view */
+        updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___RETRIEVING_DIRECTORY_DATA);
 
-            } else {
+        /* invia un instant message con la richiesta della directorry iniziale */
+        sendIM(HOME_ADDRESS, "__get_homedir");
 
-                if (disconnectIfConnected) {
+    }
 
-                    disconnectIfConnected=false;
+    private void startTorrentManager(){
 
-                    updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___DISCONNECTING_FROM_XMPP_SERVER);
-                    instantMessaging.disconnect();
+        torrentViewerFragment = new TorrentViewerFragment();
+        torrentViewerFragment.localTorrentsListAdapterListener = torrentsListAdapterListener;
+        torrentViewerFragment.setTorrentsViewerListener(new TorrentViewerFragment.TorrentsViewerListener() {
+            @Override
+            public void onAddTorrentRequest() {
 
-                }
+                addTorrent();
 
             }
 
-        }
+        });
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, torrentViewerFragment);
+
+        fragmentTransaction.commit();
+
+        /* aggiorna la text view */
+        updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___RETRIEVING_TORRENT_DATA);
+
+        /* invia un instant message con la richiesta della lista dei torrents */
+        sendIM(HOME_ADDRESS, "__listTorrents");
+
     }
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -684,10 +699,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onResume() {
 
         super.onResume();
-        /* verifica lo stato di connessione */
-        manageConnection();
 
+        /* inizializza un'istanza della classe ConnectionFragment */
+        connectionFragment = new ConnectionFragment();
         instantMessaging.setInstantMessagingListener(instantMessagingListener);
+        connectionFragment.setConnectionFragmentListener(new ConnectionFragment.ConnectionFragmentListener() {
+
+            @Override
+            public void onViewCreated(ConnectionFragment fragment) {
+
+                /* inizializza la connessione */
+                instantMessaging.connect();
+
+            }
+
+        });
+
+        /* mostra il fragment della gestione della connessione */
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, connectionFragment);
+
+        fragmentTransaction.commit();
 
     }
 
@@ -706,27 +739,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
-    private boolean sendIM(String recipient, String message) {
+    private void sendIM(String recipient, String message) {
 
         try {
 
             instantMessaging.sendMessage(recipient, message);
-            return true;
 
-        } catch (XmppStringprepException e) {
+        } catch (XmppStringprepException | SmackException.NotConnectedException | InterruptedException e) {
 
-            e.printStackTrace();
-            return false;
-
-        } catch (SmackException.NotConnectedException e) {
-
-            e.printStackTrace();
-            return false;
-
-        } catch (InterruptedException e) {
-
-            e.printStackTrace();
-            return false;
+            Toast.makeText(this, e.getMessage(),Toast.LENGTH_SHORT).show();
 
         }
 
@@ -735,22 +756,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void releaseControls(){
 
         /* abilita */
-        shutdownButton.setEnabled(true);
-        rebootButton.setEnabled(true);
-        startFileManagerButton.setEnabled(true);
-        startTorrentManagerButton.setEnabled(true);
-        refreshSSHLinksButton.setEnabled(true);
+        findViewById(R.id.BTN___MAIN___SHUTDOWN).setEnabled(true);
+        findViewById(R.id.BTN___MAIN___REBOOT).setEnabled(true);
+        findViewById(R.id.BTN___MAIN___FILEMANAGER).setEnabled(true);
+        findViewById(R.id.BTN___MAIN___RECONNECT).setEnabled(true);
+        findViewById(R.id.BTN___MAIN___TORRENTMANAGER).setEnabled(true);
+        findViewById(R.id.BTN___MAIN___SSH_LINK_REFRESH).setEnabled(true);
 
     }
 
     private void lockControls(){
 
         /* disabilita */
-        shutdownButton.setEnabled(false);
-        rebootButton.setEnabled(false);
-        startFileManagerButton.setEnabled(false);
-        startTorrentManagerButton.setEnabled(false);
-        refreshSSHLinksButton.setEnabled(false);
+        findViewById(R.id.BTN___MAIN___SHUTDOWN).setEnabled(false);
+        findViewById(R.id.BTN___MAIN___REBOOT).setEnabled(false);
+        findViewById(R.id.BTN___MAIN___FILEMANAGER).setEnabled(false);
+        findViewById(R.id.BTN___MAIN___RECONNECT).setEnabled(false);
+        findViewById(R.id.BTN___MAIN___TORRENTMANAGER).setEnabled(false);
+        findViewById(R.id.BTN___MAIN___SSH_LINK_REFRESH).setEnabled(false);
 
     }
 
