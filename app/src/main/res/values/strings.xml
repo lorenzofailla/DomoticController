@@ -2,11 +2,14 @@
 
     <string name="app_name">Rasberry-Pi Remote Control</string>
 
+    <string name="EMPTY"></string>
+
     <string name="PROGRESSSTATUS_INFO___STARTING_CONNECTION">Starting Connection...</string>
     <string name="PROGRESSSTATUS_INFO___CONNECTING_TO_XMPP_SERVER">Connecting to IM support server...</string>
     <string name="PROGRESSSTATUS_INFO___LOGGING_IN_TO_XMPP_SERVER">Connected to IM support server. Logging in...</string>
     <string name="PROGRESSSTATUS_INFO___CREATINGFILETRANSFERMANAGER">Logged in. Initializing...</string>
     <string name="PROGRESSSTATUS_INFO___HANDSHAKING">Handshaking remote host...</string>
+    <string name="PROGRESSSTATUS_INFO___CONNECTED_TO_HOST">Connected to %hostname%</string>
     <string name="PROGRESSSTATUS_INFO___RETRIEVING_DIRECTORY_DATA">Retrieving remote host directory data...</string>
     <string name="PROGRESSSTATUS_INFO___DISCONNECTING_FROM_XMPP_SERVER">Disconnecting from IM support server...</string>
     <string name="PROGRESSSTATUS_INFO___RETRIEVING_TORRENT_DATA">Retrieving remote host torrent data...</string>
@@ -22,6 +25,9 @@
     <string name="ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL">Do you really want to remove the selected torrent ?</string>
     <string name="ALERTDIALOG_MESSAGE_ADD_TORRENT">Enter the URL to add</string>
     <string name="ALERTDIALOG_TITLE_ADD_TORRENT">New torrent</string>
+
+    <string name="CONNECTIONFGM_BTN_CONNECT">Connect</string>
+    <string name="CONNECTIONFGM_BTN_RECONNECT">Reconnect</string>
 
     <string name="PROGRESSDIALOG_GOOGLESIGNIN___LOADING">Loading...</string>
 

@@ -262,19 +262,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             Log.d(TAG, "connected");
 
-            /* modifica il testo del messaggio nel progressDialog */
+            /* modifica il l'aspetto del fragment */
             if(connectionFragment!=null){
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectionFragment.setLabelText(R.string.PROGRESSSTATUS_INFO___LOGGING_IN_TO_XMPP_SERVER);
-                    }
-                });
-
-                instantMessaging.login();
+                connectionFragment.currentAction=getString(R.string.PROGRESSSTATUS_INFO___LOGGING_IN_TO_XMPP_SERVER);
+                connectionFragment.connectionStatus= ConnectionFragment.ConnectionStatus.IN_PROGRESS;
+                connectionFragment.updateView();
 
             }
+
+            instantMessaging.login();
 
         }
 
@@ -283,15 +280,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             lockControls();
 
+            /* modifica il l'aspetto del fragment */
+            if(connectionFragment!=null){
+
+                connectionFragment.connectionStatus= ConnectionFragment.ConnectionStatus.NOT_CONNECTED;
+                connectionFragment.updateView();
+
+            }
 
         }
 
         @Override
         public void onConnectionError(Exception e) {
 
+            /* modifica l'aspetto del fragment */
             if(connectionFragment!=null){
 
-                connectionFragment.setLabelText("connection error: " + e.getMessage());
+                connectionFragment.connectionStatus= ConnectionFragment.ConnectionStatus.NOT_CONNECTED;
+                connectionFragment.updateView();
 
             }
 
@@ -302,19 +308,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             Log.d(TAG, "logged in");
 
-            /* modifica il testo del messaggio nel progressDialog */
+            /* modifica il l'aspetto del fragment */
             if(connectionFragment!=null){
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectionFragment.setLabelText(R.string.PROGRESSSTATUS_INFO___CREATINGFILETRANSFERMANAGER);
-                    }
-                });
-
-                instantMessaging.createChat();
+                connectionFragment.currentAction = getString(R.string.PROGRESSSTATUS_INFO___CREATINGFILETRANSFERMANAGER);
+                connectionFragment.connectionStatus = ConnectionFragment.ConnectionStatus.IN_PROGRESS;
+                connectionFragment.updateView();
 
             }
+
+            instantMessaging.createChat();
 
         }
 
@@ -323,36 +326,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             Log.d(TAG, "chat created");
 
-            /* modifica il testo del messaggio nel progressDialog */
+           /* modifica l'aspetto del fragment */
             if(connectionFragment!=null){
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectionFragment.setLabelText(R.string.PROGRESSSTATUS_INFO___CREATINGFILETRANSFERMANAGER);
-                    }
-                });
-
-                instantMessaging.createFileTransferManager();
+                connectionFragment.currentAction = getString(R.string.PROGRESSSTATUS_INFO___CREATINGFILETRANSFERMANAGER);
+                connectionFragment.connectionStatus= ConnectionFragment.ConnectionStatus.IN_PROGRESS;
+                connectionFragment.updateView();
 
             }
+
+            instantMessaging.createFileTransferManager();
 
         }
 
         @Override
         public void onFileTransferManagerCreated() {
+
             Log.d(TAG, "file transfer manager created");
 
-            /* modifica il testo del messaggio nel progressDialog */
+            /* modifica l'aspetto del fragment */
             if(connectionFragment!=null){
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectionFragment.setLabelText(R.string.PROGRESSSTATUS_INFO___HANDSHAKING);
-                    }
-                });
-
+                connectionFragment.currentAction = getString(R.string.PROGRESSSTATUS_INFO___HANDSHAKING);
+                connectionFragment.connectionStatus= ConnectionFragment.ConnectionStatus.IN_PROGRESS;
+                connectionFragment.updateView();
 
             }
 
@@ -372,31 +369,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     remoteHostName = messageBody.substring(23);
                     Log.i(TAG, remoteHostName);
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
+                    /* modifica il l'aspetto del fragment */
+                    if(connectionFragment!=null){
+                        connectionFragment.currentAction=getString(R.string.PROGRESSSTATUS_INFO___CONNECTED_TO_HOST).replace("%hostname%", remoteHostName);
+                        connectionFragment.connectionStatus= ConnectionFragment.ConnectionStatus.READY;
+                        connectionFragment.updateView();
 
-                            updateHostName();
+                    }
 
-                        }
-                    });
-
+                    releaseControls();
                     break;
 
                 case "%%%_uptime__message_%%%":
 
                     remoteUpTime = messageBody.substring(23);
-                    Log.i(TAG, remoteUpTime);
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            updateRemoteUpTime();
-
-                        }
-
-                    });
+                    updateRemoteUpTime();
 
                     break;
 
@@ -546,8 +533,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         updateGeneralInfoTextView(remoteUpTime);
 
-        releaseControls();
-
     }
 
     private void retrieveHostInfo() {
@@ -645,11 +630,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         });
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, torrentViewerFragment);
-
-        fragmentTransaction.commit();
+        showFragment(torrentViewerFragment);
 
         /* aggiorna la text view */
         updateGeneralInfoTextView(R.string.PROGRESSSTATUS_INFO___RETRIEVING_TORRENT_DATA);
@@ -657,6 +638,56 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         /* invia un instant message con la richiesta della lista dei torrents */
         sendIM(HOME_ADDRESS, "__listTorrents");
 
+    }
+
+    private void startConnectionFragment(){
+
+        /* associa il listener all'InstantMessaging */
+        instantMessaging.setInstantMessagingListener(instantMessagingListener);
+
+        /* inizializza un'istanza della classe ConnectionFragment */
+        connectionFragment = new ConnectionFragment();
+
+        connectionFragment.setConnectionFragmentListener(new ConnectionFragment.ConnectionFragmentListener() {
+
+            @Override
+            public void onViewCreated(ConnectionFragment fragment) {
+
+                /* modifica l'aspetto del fragment */
+                fragment.currentAction=getString(R.string.PROGRESSSTATUS_INFO___CONNECTING_TO_XMPP_SERVER);
+                fragment.connectionStatus = ConnectionFragment.ConnectionStatus.IN_PROGRESS;
+                fragment.updateView();
+
+                /* inizializza la connessione */
+                instantMessaging.connect();
+
+            }
+
+            @Override
+            public void onConnectRequest() {
+
+            }
+
+            @Override
+            public void onReconnectRequest() {
+
+            }
+
+        });
+
+        showFragment(connectionFragment);
+
+
+    }
+
+    private void showFragment(Fragment fragment) {
+
+        /* mostra il fragment passato in argomento */
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, fragment);
+
+        fragmentTransaction.commit();
     }
 
     /**
@@ -700,27 +731,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         super.onResume();
 
-        /* inizializza un'istanza della classe ConnectionFragment */
-        connectionFragment = new ConnectionFragment();
-        instantMessaging.setInstantMessagingListener(instantMessagingListener);
-        connectionFragment.setConnectionFragmentListener(new ConnectionFragment.ConnectionFragmentListener() {
-
-            @Override
-            public void onViewCreated(ConnectionFragment fragment) {
-
-                /* inizializza la connessione */
-                instantMessaging.connect();
-
-            }
-
-        });
-
-        /* mostra il fragment della gestione della connessione */
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.VIE___MAIN___SUBVIEW, connectionFragment);
-
-        fragmentTransaction.commit();
+        startConnectionFragment();
 
     }
 
@@ -755,25 +766,40 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void releaseControls(){
 
-        /* abilita */
-        findViewById(R.id.BTN___MAIN___SHUTDOWN).setEnabled(true);
-        findViewById(R.id.BTN___MAIN___REBOOT).setEnabled(true);
-        findViewById(R.id.BTN___MAIN___FILEMANAGER).setEnabled(true);
-        findViewById(R.id.BTN___MAIN___RECONNECT).setEnabled(true);
-        findViewById(R.id.BTN___MAIN___TORRENTMANAGER).setEnabled(true);
-        findViewById(R.id.BTN___MAIN___SSH_LINK_REFRESH).setEnabled(true);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                /* abilita */
+                findViewById(R.id.BTN___MAIN___SHUTDOWN).setEnabled(true);
+                findViewById(R.id.BTN___MAIN___REBOOT).setEnabled(true);
+                findViewById(R.id.BTN___MAIN___FILEMANAGER).setEnabled(true);
+                findViewById(R.id.BTN___MAIN___RECONNECT).setEnabled(true);
+                findViewById(R.id.BTN___MAIN___TORRENTMANAGER).setEnabled(true);
+                findViewById(R.id.BTN___MAIN___SSH_LINK_REFRESH).setEnabled(true);
+
+            }
+        });
+
 
     }
 
     private void lockControls(){
 
-        /* disabilita */
-        findViewById(R.id.BTN___MAIN___SHUTDOWN).setEnabled(false);
-        findViewById(R.id.BTN___MAIN___REBOOT).setEnabled(false);
-        findViewById(R.id.BTN___MAIN___FILEMANAGER).setEnabled(false);
-        findViewById(R.id.BTN___MAIN___RECONNECT).setEnabled(false);
-        findViewById(R.id.BTN___MAIN___TORRENTMANAGER).setEnabled(false);
-        findViewById(R.id.BTN___MAIN___SSH_LINK_REFRESH).setEnabled(false);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                /* disabilita */
+                findViewById(R.id.BTN___MAIN___SHUTDOWN).setEnabled(false);
+                findViewById(R.id.BTN___MAIN___REBOOT).setEnabled(false);
+                findViewById(R.id.BTN___MAIN___FILEMANAGER).setEnabled(false);
+                findViewById(R.id.BTN___MAIN___RECONNECT).setEnabled(false);
+                findViewById(R.id.BTN___MAIN___TORRENTMANAGER).setEnabled(false);
+                findViewById(R.id.BTN___MAIN___SSH_LINK_REFRESH).setEnabled(false);
+            }
+
+        });
 
     }
 

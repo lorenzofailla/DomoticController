@@ -24,6 +24,7 @@ import org.jivesoftware.smackx.filetransfer.FileTransferNegotiator;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
 
+import org.jivesoftware.smackx.si.packet.StreamInitiation;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
@@ -45,21 +46,13 @@ public class InstantMessaging {
     private IncomingFileTransfer incomingFileTransfer;
     private File fileToDownload;
 
-    public enum ConnectionStatus{
-        NOT_CONNECTED,
-        CONNECTED,
-        LOGGED,
-        READY
-    }
-
-    public ConnectionStatus connectionStatus;
+    private StreamInitiation streamInitiation;
 
     private ConnectionListener connectionListener = new ConnectionListener() {
         @Override
         public void connected(XMPPConnection connection) {
 
-            if (instantMessagingListener!=null) instantMessagingListener.onConnected();
-            connectionStatus=ConnectionStatus.CONNECTED;
+            if (instantMessagingListener != null) instantMessagingListener.onConnected();
 
             Log.d(TAG, "connected");
 
@@ -68,8 +61,7 @@ public class InstantMessaging {
         @Override
         public void authenticated(XMPPConnection connection, boolean resumed) {
 
-            if (instantMessagingListener!=null) instantMessagingListener.onLogIn();
-            connectionStatus=ConnectionStatus.LOGGED;
+            if (instantMessagingListener != null) instantMessagingListener.onLogIn();
 
             Log.d(TAG, "authenticated");
 
@@ -78,8 +70,7 @@ public class InstantMessaging {
         @Override
         public void connectionClosed() {
 
-            if (instantMessagingListener!=null) instantMessagingListener.onDisconnected();
-            connectionStatus=ConnectionStatus.NOT_CONNECTED;
+            if (instantMessagingListener != null) instantMessagingListener.onDisconnected();
 
             Log.d(TAG, "connectionClosed");
 
@@ -88,8 +79,7 @@ public class InstantMessaging {
         @Override
         public void connectionClosedOnError(Exception e) {
 
-            if (instantMessagingListener!=null) instantMessagingListener.onConnectionError(e);
-            connectionStatus=ConnectionStatus.NOT_CONNECTED;
+            if (instantMessagingListener != null) instantMessagingListener.onConnectionError(e);
 
             Log.d(TAG, "connectionClosedOnError - " + e.getMessage());
         }
@@ -97,8 +87,7 @@ public class InstantMessaging {
         @Override
         public void reconnectionSuccessful() {
 
-            if (instantMessagingListener!=null) instantMessagingListener.onConnected();
-            connectionStatus=ConnectionStatus.CONNECTED;
+            if (instantMessagingListener != null) instantMessagingListener.onConnected();
 
             Log.d(TAG, "reconnectionSuccessful");
         }
@@ -111,44 +100,53 @@ public class InstantMessaging {
         @Override
         public void reconnectionFailed(Exception e) {
 
-            if (instantMessagingListener!=null) instantMessagingListener.onConnectionError(e);
-            connectionStatus=ConnectionStatus.NOT_CONNECTED;
+            if (instantMessagingListener != null) instantMessagingListener.onConnectionError(e);
 
             Log.d(TAG, "reconnectionFailed - " + e.getMessage());
         }
 
     };
 
-    public interface InstantMessagingListener{
+    public interface InstantMessagingListener {
         void onConnected();
+
         void onDisconnected();
+
         void onConnectionError(Exception e);
+
         void onLogIn();
+
         void onChatCreated();
+
         void onFileTransferManagerCreated();
+
         void onMessageReceived(String sender, String messageBody);
+
         void onFileTransferRequest(FileTransferRequest request);
+
         void onFileTranferUpdate(double progress, long bytesWritten);
+
         void onFileTransferCompleted();
+
         void onFileTransferCompletedWithError();
 
     }
 
     private InstantMessagingListener instantMessagingListener;
 
-    public void setInstantMessagingListener(InstantMessagingListener listener){
+    public void setInstantMessagingListener(InstantMessagingListener listener) {
 
-        instantMessagingListener=listener;
-
-    }
-
-    public void removeInstantMessagingListener(){
-
-        instantMessagingListener=null;
+        instantMessagingListener = listener;
 
     }
 
-    public void login(){
+    public void removeInstantMessagingListener() {
+
+        instantMessagingListener = null;
+
+    }
+
+    public void login() {
 
         if (!(connection.isConnected() && connection.isAuthenticated())) {
 
@@ -168,27 +166,29 @@ public class InstantMessaging {
         }
 
     }
-    public InstantMessaging(String domainName, String username, String password, String resource){
+
+    public InstantMessaging(String domainName, String username, String password, String resource) {
 
         /***
          * costruttore
-        */
+         */
 
         /* Creo un nuovo oggetto XMPPTCPConnectionConfiguration.Builder */
         XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
         configBuilder.setUsernameAndPassword(username, password)
-        .setSecurityMode(ConnectionConfiguration.SecurityMode.ifpossible)
-        .setKeystoreType(null)
-        .setCompressionEnabled(true);
+                .setSecurityMode(ConnectionConfiguration.SecurityMode.ifpossible)
+                .setKeystoreType(null)
+                .setConnectTimeout(15000);
 
         try {
+
             configBuilder.setResource(resource);
             configBuilder.setXmppDomain(domainName);
 
             /* inizializzo la classe per la connessione al server XMPP */
             connection = new XMPPTCPConnection(configBuilder.build());
+            connection.setPacketReplyTimeout(30000);
             connection.addConnectionListener(connectionListener);
-            connectionStatus = ConnectionStatus.NOT_CONNECTED;
 
         } catch (XmppStringprepException e) {
 
@@ -198,9 +198,9 @@ public class InstantMessaging {
 
     }
 
-    public void connect(){
+    public void connect() {
 
-        if(!connection.isConnected()) {
+        if (!connection.isConnected()) {
 
             new AsyncTask<Void, Void, Boolean>() {
 
@@ -210,7 +210,6 @@ public class InstantMessaging {
                 protected Boolean doInBackground(Void... params) {
 
 
-
                     try {
 
                         connection.connect();
@@ -218,7 +217,7 @@ public class InstantMessaging {
 
                     } catch (IOException | InterruptedException | SmackException | XMPPException e) {
 
-                        exception=e;
+                        exception = e;
                         return false;
 
                     }
@@ -247,13 +246,13 @@ public class InstantMessaging {
 
     }
 
-    public void disconnect(){
+    public void disconnect() {
 
         connection.disconnect();
 
     }
 
-    public boolean isConnected(){
+    public boolean isConnected() {
 
         return connection.isConnected();
 
@@ -261,19 +260,19 @@ public class InstantMessaging {
 
     public void sendMessage(String recipient, String messageText) throws XmppStringprepException, SmackException.NotConnectedException, InterruptedException {
 
-        if (chatManager!=null) {
+        if (chatManager != null) {
 
             EntityBareJid jid = JidCreate.entityBareFrom(recipient);
             Chat chat = chatManager.chatWith(jid);
             chat.send(messageText);
 
-            Log.i(TAG, "Message <"+messageText+"> sent to <"+recipient +">");
+            Log.i(TAG, "Message <" + messageText + "> sent to <" + recipient + ">");
 
         }
 
     }
 
-    public void createChat(){
+    public void createChat() {
 
         chatManager = ChatManager.getInstanceFor(connection);
 
@@ -281,7 +280,7 @@ public class InstantMessaging {
             @Override
             public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {
 
-                if(instantMessagingListener!=null){
+                if (instantMessagingListener != null) {
 
                     instantMessagingListener.onMessageReceived(from.asEntityBareJidString(), message.getBody());
                 }
@@ -289,35 +288,39 @@ public class InstantMessaging {
             }
         });
 
-        if(instantMessagingListener!=null) instantMessagingListener.onChatCreated();
+        if (instantMessagingListener != null) instantMessagingListener.onChatCreated();
 
     }
 
-    public void createFileTransferManager(){
+    public void createFileTransferManager() {
 
         FileTransferManager fileTransferManager = FileTransferManager.getInstanceFor(connection);
-        
-        FileTransferNegotiator.IBB_ONLY=true; // TODO: 04/07/2017 deve essere un parametro impostabile
-        
+
+        FileTransferNegotiator.IBB_ONLY = true; // TODO: 04/07/2017 deve essere un parametro impostabile
+
         fileTransferManager.addFileTransferListener(new FileTransferListener() {
             @Override
             public void fileTransferRequest(FileTransferRequest request) {
 
-                if (instantMessagingListener!=null && pendingFileTransferRequest==null) {
+                if (instantMessagingListener != null && pendingFileTransferRequest == null) {
 
                     /* non ci sono trasferimenti in corso */
-                    pendingFileTransferRequest=request;
+                    pendingFileTransferRequest = request;
 
                     /* invia la notifica al listener */
                     instantMessagingListener.onFileTransferRequest(pendingFileTransferRequest);
 
-
                 } else {
+
                     /* un trasferimento è già in corso */
                     try {
+
                         request.reject();
+
                     } catch (SmackException.NotConnectedException | InterruptedException e) {
+
                         Log.e(TAG, e.toString());
+
                     }
 
                 }
@@ -326,27 +329,38 @@ public class InstantMessaging {
 
         });
 
-        if (instantMessagingListener!=null) instantMessagingListener.onFileTransferManagerCreated();
+
+
+        if (instantMessagingListener != null)
+
+            instantMessagingListener.onFileTransferManagerCreated();
 
     }
 
-    public void rejectFileTransfer(){
+    public void rejectFileTransfer() {
 
-        if (pendingFileTransferRequest!=null){
+        if (pendingFileTransferRequest != null) {
+
             try {
+
                 pendingFileTransferRequest.reject();
+
             } catch (SmackException.NotConnectedException e) {
+
                 e.printStackTrace();
+
             } catch (InterruptedException e) {
+
                 e.printStackTrace();
+
             }
 
-            pendingFileTransferRequest=null;
+            pendingFileTransferRequest = null;
         }
 
     }
 
-    public void acceptFileTransfer(File file){
+    public void acceptFileTransfer(File file) {
 
         fileToDownload = file;
         incomingFileTransfer = pendingFileTransferRequest.accept();
@@ -360,32 +374,38 @@ public class InstantMessaging {
                     incomingFileTransfer.recieveFile(fileToDownload);
                     String logText;
 
-                    while(!incomingFileTransfer.isDone()){
-                        if(instantMessagingListener!=null) instantMessagingListener.onFileTranferUpdate(incomingFileTransfer.getProgress(), incomingFileTransfer.getAmountWritten());
-                        logText= incomingFileTransfer.getProgress()+"; "+
-                                incomingFileTransfer.getAmountWritten()+"; "+
-                                incomingFileTransfer.getStatus().toString()+"; "+
-                                incomingFileTransfer.getFileName()+"; "+
+                    while (!incomingFileTransfer.isDone()) {
+                        if (instantMessagingListener != null)
+                            instantMessagingListener.onFileTranferUpdate(incomingFileTransfer.getProgress(), incomingFileTransfer.getAmountWritten());
+                        logText = incomingFileTransfer.getProgress() + "; " +
+                                incomingFileTransfer.getAmountWritten() + "; " +
+                                incomingFileTransfer.getStatus().toString() + "; " +
+                                incomingFileTransfer.getFileName() + "; " +
                                 incomingFileTransfer.getFileSize();
 
-                        if (incomingFileTransfer.getError()!=null) logText +="Error: "+incomingFileTransfer.getError().toString() +"; ";
-                        if (incomingFileTransfer.getException()!=null) logText +="Error: "+incomingFileTransfer.getException().toString() +"; ";
+                        if (incomingFileTransfer.getError() != null)
+                            logText += "Error: " + incomingFileTransfer.getError().toString() + "; ";
+                        if (incomingFileTransfer.getException() != null)
+                            logText += "Error: " + incomingFileTransfer.getException().toString() + "; ";
 
-                        Log.d(TAG,logText);
+                        Log.d(TAG, logText);
                         sleep(100);
 
                     }
 
-                    logText="";
-                    if (incomingFileTransfer.getError()!=null) logText +="Error: "+incomingFileTransfer.getError().toString() +"; ";
-                    if (incomingFileTransfer.getException()!=null) logText +="Error: "+incomingFileTransfer.getException().toString() +"; ";
+                    logText = "";
+                    if (incomingFileTransfer.getError() != null)
+                        logText += "Error: " + incomingFileTransfer.getError().toString() + "; ";
+                    if (incomingFileTransfer.getException() != null)
+                        logText += "Error: " + incomingFileTransfer.getException().toString() + "; ";
 
-                    Log.d(TAG,logText);
+                    Log.d(TAG, logText);
 
-                    if(instantMessagingListener!=null) instantMessagingListener.onFileTransferCompleted();
+                    if (instantMessagingListener != null)
+                        instantMessagingListener.onFileTransferCompleted();
 
-                    pendingFileTransferRequest=null;
-                    incomingFileTransfer=null;
+                    pendingFileTransferRequest = null;
+                    incomingFileTransfer = null;
 
                 } catch (SmackException e) {
 
@@ -407,7 +427,7 @@ public class InstantMessaging {
 
     }
 
-    public void cancelFileTransfer(){
+    public void cancelFileTransfer() {
 
         incomingFileTransfer.cancel();
 

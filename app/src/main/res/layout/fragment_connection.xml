@@ -7,25 +7,41 @@
     <!-- TODO: Update blank fragment layout -->
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|center_horizontal"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <ProgressBar
-            android:id="@+id/PBR___CONNECTIONFRAGMENT"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical" />
-
-        <TextView
-            android:id="@+id/TXV___CONNECTIONFRAGMENT___MAIN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center_vertical|center_horizontal"
             android:gravity="center_vertical"
-            android:paddingLeft="8dp"
-            android:text="@string/hello_blank_fragment" />
+            android:orientation="horizontal">
+
+            <ProgressBar
+                android:id="@+id/PBR___CONNECTIONFRAGMENT"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:id="@+id/TXV___CONNECTIONFRAGMENT___MAIN"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:paddingLeft="8dp"
+                android:text="MAIN" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/BTN___CONNECTIONFRAGMENT___CONNECTIONACTION"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_weight="1"
+            android:text="CONNECTIONACTION" />
 
     </LinearLayout>
 
