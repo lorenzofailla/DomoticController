@@ -1,1 +1,1 @@
-include ':app', ':instantmessaging'
+include ':app'

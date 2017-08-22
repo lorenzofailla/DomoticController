@@ -24,6 +24,8 @@ public class TorrentViewerFragment extends Fragment {
     private List<TorrentInfo> torrents = new ArrayList<>();
     private ListView torrentsListView;
 
+    public boolean viewCreated=false;
+
     public TorrentViewerFragment() {
         // Required empty public constructor
     }
@@ -69,6 +71,8 @@ public class TorrentViewerFragment extends Fragment {
 
             }
         });
+
+        viewCreated=true;
         return view;
 
     }
@@ -90,27 +94,21 @@ public class TorrentViewerFragment extends Fragment {
 
     public void updateContent(){
 
-        torrents = getTorrentsList(rawTorrentDataLines);
+        if(rawTorrentDataLines!=null) {
+            torrents = getTorrentsList(rawTorrentDataLines);
 
-        torrentsListAdapter = new TorrentsListAdapter(getContext(), R.layout.torrents_list_row, torrents);
-        if (localTorrentsListAdapterListener!=null) torrentsListAdapter.setTorrentsListAdapterListener(localTorrentsListAdapterListener);
+            torrentsListAdapter = new TorrentsListAdapter(getContext(), R.layout.torrents_list_row, torrents);
+            if (localTorrentsListAdapterListener != null)
+                torrentsListAdapter.setTorrentsListAdapterListener(localTorrentsListAdapterListener);
 
-        torrentsListView.setAdapter(torrentsListAdapter);
-        torrentsListView.setVisibility(View.VISIBLE);
+            torrentsListView.setAdapter(torrentsListAdapter);
+            torrentsListView.setVisibility(View.VISIBLE);
+        } else {
 
+            torrentsListView.setVisibility(View.INVISIBLE);
+        }
     }
 
-    public void hideContent(){
-
-        /*
-        currentDirectoryTextView.setText(R.string.PROGRESSSTATUS_INFO___RETRIEVING_DIRECTORY_DATA);
-        currentDirectoryListView.setEnabled(false);
-        currentDirectoryListView.setAlpha(0.2f);
-        */
-        torrentsListView.setVisibility(View.INVISIBLE);
-
-
-    }
 
     private List<TorrentInfo> getTorrentsList(String[] rawDataLines) {
 

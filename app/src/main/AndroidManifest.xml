@@ -13,10 +13,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
         <activity android:name=".PermissionsRequestActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -26,7 +27,9 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".GoogleSignInActivity"></activity>
+        <activity android:name=".GoogleSignInActivity" />
+        <activity android:name=".DeviceSelectionActivity" />
+        <activity android:name=".DeviceViewActivity"></activity>
     </application>
 
 </manifest>

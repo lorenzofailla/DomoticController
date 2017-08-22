@@ -41,7 +41,7 @@ public class FileListAdapter extends ArrayAdapter<FileInfo> {
 
         if(fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_DIRECTORY){
 
-            fileTypeIVW.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.open_folder));
+            fileTypeIVW.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.directory));
 
         } else if (fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_FILE) {
 

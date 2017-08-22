@@ -57,10 +57,11 @@ public class FileInfo {
 
                 fileRoorDir = rootDirectory;
 
+        fileSize = 0L;
+
         String[] supportString = rawFileData.split(" +");
 
         fileName=supportString[8];
-        fileSize = 0L;
 
         /* determina il tipo di file */
         if (supportString[0].charAt(0) == 'd'){

@@ -14,21 +14,17 @@ import java.util.List;
 
 public class FileViewerFragment extends Fragment {
 
-    List<FileInfo> fileInfoList;
-    String rawDirData;
-    String currentDirName;
+    public String rawDirData;
+    public String currentDirName;
 
-    TextView currentDirectoryTextView;
-    ListView currentDirectoryListView;
+    public boolean viewCreated=false;
 
-    FileListAdapter.FileListAdapterListener fileListAdapterListener = new FileListAdapter.FileListAdapterListener() {
-        @Override
-        public void onItemSelected(FileInfo fileInfo) {
+    private TextView currentDirectoryTextView;
+    private ListView currentDirectoryListView;
 
-            if(fileViewerFragmentListener!=null) fileViewerFragmentListener.onItemSelected(fileInfo);
+    private List<FileInfo> fileInfoList;
 
-        }
-    };
+    public FileListAdapter.FileListAdapterListener fileListAdapterListener;
 
     public FileViewerFragment() {
 
@@ -36,7 +32,7 @@ public class FileViewerFragment extends Fragment {
 
     interface FileViewerFragmentListener{
 
-        public void onItemSelected(FileInfo fileInfo);
+        void onViewCreated();
 
     }
 
@@ -64,6 +60,10 @@ public class FileViewerFragment extends Fragment {
 
         updateContent();
 
+        if(fileViewerFragmentListener!=null)
+            fileViewerFragmentListener.onViewCreated();
+
+        viewCreated=true;
         return view;
 
     }
