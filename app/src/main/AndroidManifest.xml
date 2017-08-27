@@ -29,7 +29,15 @@
 
         <activity android:name=".GoogleSignInActivity" />
         <activity android:name=".DeviceSelectionActivity" />
-        <activity android:name=".DeviceViewActivity"></activity>
+        <activity android:name=".DeviceViewActivity" />
+
+        <service
+            android:name=".DownloadFileFromCloud"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".DownloadFromCloud"
+            android:exported="false"></service>
     </application>
 
 </manifest>

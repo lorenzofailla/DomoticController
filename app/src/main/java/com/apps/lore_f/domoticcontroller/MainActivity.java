@@ -53,145 +53,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     FirebaseAuth firebaseAuth;
     FirebaseUser firebaseUser;
 
-    private String pendingDownloadFileName;
-
-    private Runnable hostReplyTimeout = new Runnable() {
-        @Override
-        public void run() {
-
-            /* messaggio utente */
-            AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext())
-                    .setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                        }
-                    })
-                    .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-
-                        }
-                    }).create();
-
-        }
-    };
-
-    /*
-    */
-
-   /*
-
-        @Override
-        public void onMessageReceived(String sender, String messageBody) {
-
-            Log.i(TAG, messageBody);
-            String command = messageBody.substring(0, 23);
-
-            switch (command) {
-
-                case "%%%_home_directory__%%%":
-
-                    fileViewerFragment.currentDirName = messageBody.substring(23).replace("\n","");
-                    sendIM(HOME_ADDRESS, "__get_directory_content:::"+fileViewerFragment.currentDirName);
-                    break;
-
-                case "%%%_dir_content_____%%%":
-
-                    fileViewerFragment.rawDirData= messageBody.substring(23);
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            fileViewerFragment.updateContent();
-
-                        }
-
-                    });
-
-
-                    break;
-
-                case "%%%_command_reply___%%%":
-                    Log.i(TAG,messageBody.substring(23));
-                    break;
-
-
-
-                    break;
-
-
-
-            }
-
-        }
-
-        @Override
-        public void onFileTransferRequest(FileTransferRequest request) {
-
-            // inizializza il file su cui verrà effettuato il download della risorsa remota
-            File downloadDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Raspberry-pi remote");
-            if (!downloadDirectory.exists()){
-                downloadDirectory.mkdir();
-            }
-
-            File downloadFileResource = new File(downloadDirectory.getPath() + File.separator + pendingDownloadFileName);
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    fileViewerFragment.hideContent();
-
-                }
-            });
-
-            instantMessaging.acceptFileTransfer(downloadFileResource);
-
-        }
-
-        @Override
-        public void onFileTranferUpdate(double progress, long bytesWritten) {
-
-            final double progressToShow = progress;
-            final long bytesWrittenToShow = bytesWritten;
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    fileViewerFragment.updateFileTransferProgress(progressToShow, bytesWrittenToShow);
-
-                }
-            });
-
-        }
-
-        @Override
-        public void onFileTransferCompleted() {
-
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    fileViewerFragment.updateContent();
-
-                }
-            });
-
-        }
-
-        @Override
-        public void onFileTransferCompletedWithError() {
-
-        }
-
-    };
-
-    */
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -232,11 +93,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         return true;
 
     }
-
-
-
-
-
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -317,9 +173,5 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
-
-
-
-
 
 }

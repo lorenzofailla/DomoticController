@@ -42,6 +42,12 @@
             android:layout_height="50dp"
             app:srcCompat="@drawable/reboot" />
 
+       <ImageButton
+           android:id="@+id/BTN___DEVICEVIEW___CLOUDSTORAGE"
+           android:layout_width="50dp"
+           android:layout_height="50dp"
+           app:srcCompat="@drawable/cloud" />
+
         <ImageButton
             android:id="@+id/BTN___DEVICEVIEW___FILEMANAGER"
             android:layout_width="50dp"

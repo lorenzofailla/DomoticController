@@ -1,12 +1,20 @@
 package com.apps.lore_f.domoticcontroller;
 
+import android.app.Notification;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.renderscript.ScriptGroup;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -30,9 +38,9 @@ public class DeviceViewActivity extends AppCompatActivity {
     private DeviceInfoFragment deviceInfoFragment;
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
+    private CloudStorageFragment cloudStorageFragment;
 
     // Listener per nuovi record nel nodo dei messaggi in ingresso.
-
     private ChildEventListener newCommandsToProcess = new ChildEventListener() {
 
         @Override
@@ -164,6 +172,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___SHUTDOWN).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___REBOOT).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___DEVICEVIEW___CLOUDSTORAGE).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___SSH_LINK_REFRESH).setOnClickListener(onClickListener);
@@ -314,6 +323,17 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 break;
 
+            case "GENERIC_NOTIFICATION":
+
+                Notification notification = new NotificationCompat.Builder(this)
+                        .setContentTitle("Message from "+inMsg.getReplyto())
+                        .setContentText(inMsg.getBody())
+                        .setSmallIcon(R.drawable.home)
+                        .build();
+
+
+
+
         }
 
         // se il flag 'deleteMsg' è stato impostato su true, elimina il messaggio dalla coda
@@ -457,11 +477,44 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     break;
 
+                case R.id.BTN___DEVICEVIEW___CLOUDSTORAGE:
+
+                    startCloudStorage();
+
+                    break;
+
             }
 
         }
 
     };
+
+    private void startCloudStorage(){
+
+        // crea una nuova istanza di CloudStorageFragment
+        cloudStorageFragment = new CloudStorageFragment();
+        cloudStorageFragment.databaseReference = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/CloudStorage");
+        cloudStorageFragment.addCloudStorageFragmentListener(new CloudStorageFragment.CloudStorageFragmentListener() {
+            @Override
+            public void onFileDownloadRequest(FileInCloudStorage file) {
+
+                startCloudDownloadService(file);
+
+            }
+
+        });
+
+        showFragment(cloudStorageFragment);
+    }
+
+    private void startCloudDownloadService(FileInCloudStorage f){
+
+        Intent intent = new Intent(this, DownloadFileFromCloud.class);
+        intent.putExtra("__file_to_download", f.getFileName());
+
+        startService(intent);
+
+    }
 
     private void rebootHost() {
 
@@ -627,7 +680,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             if (fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_FILE) {
 
                 // attiva la procedura di upload del file da parte del dispositivo remoto sulla piattaforma Firebase Storage
-                // TODO: 22/08/2017
+                sendCommandToDevice(new Message("__get_file",fileInfo.getFileRoorDir()+"/"+fileInfo.getFileName(),thisDevice));
 
             } else {
 
