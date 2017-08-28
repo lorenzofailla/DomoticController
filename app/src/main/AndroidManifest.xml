@@ -35,9 +35,6 @@
             android:name=".DownloadFileFromCloud"
             android:enabled="true"
             android:exported="true" />
-        <service
-            android:name=".DownloadFromCloud"
-            android:exported="false"></service>
     </application>
 
 </manifest>

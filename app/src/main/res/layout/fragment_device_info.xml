@@ -61,6 +61,51 @@
             android:layout_below="@+id/TXV___DEVICEVIEW___FREEDISKSPACE_LABEL"
             android:text="" />
 
+        <TextView
+            android:id="@+id/TXV___DEVICEVIEW___AVAILABLE_OPERATIONS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/TXV___DEVICEVIEW___FREEDISKSPACE_VALUE"
+            android:text="@string/DEVICEVIEW_LABEL_DEVICE_OPERATIONS"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+        <LinearLayout
+            android:id="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/TXV___DEVICEVIEW___AVAILABLE_OPERATIONS"
+            android:layout_toEndOf="@+id/TXV___DEVICEVIEW___FREEDISKSPACE_VALUE"
+            android:layout_toRightOf="@+id/TXV___DEVICEVIEW___FREEDISKSPACE_VALUE"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/BTN___DEVICEINFOFRAGMENT___SHUTDOWN"
+                android:src="@drawable/shutdown"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <ImageButton
+                android:id="@+id/BTN___DEVICEINFOFRAGMENT___REBOOT"
+                android:src="@drawable/reboot"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+            <ImageButton
+                android:id="@+id/BTN___DEVICEINFOFRAGMENT___CLEARLOG"
+                android:src="@drawable/clear_log"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/RWV___CLOUDSTORAGEFRAGMENT___MAIN"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP"/>
+
+
     </RelativeLayout>
 
 </FrameLayout>

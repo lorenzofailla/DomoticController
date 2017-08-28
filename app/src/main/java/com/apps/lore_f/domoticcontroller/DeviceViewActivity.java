@@ -509,8 +509,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void startCloudDownloadService(FileInCloudStorage f){
 
+        String[] param = {f.getFileName()};
         Intent intent = new Intent(this, DownloadFileFromCloud.class);
-        intent.putExtra("__file_to_download", f.getFileName());
+        intent.putExtra("__file_to_download", param);
 
         startService(intent);
 

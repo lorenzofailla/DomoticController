@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+
+    <TextView
+        android:id="@+id/TXV___LOG___DATETIME"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
+    <TextView
+        android:id="@+id/TXV___LOG___LOGTYPE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/TXV___LOG___DATETIME"
+        android:layout_toEndOf="@+id/TXV___LOG___DATETIME"
+        android:layout_toRightOf="@+id/TXV___LOG___DATETIME"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
+    <TextView
+        android:id="@+id/TXV___LOG___LOGDESC"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/TXV___LOG___DATETIME"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
+</RelativeLayout>

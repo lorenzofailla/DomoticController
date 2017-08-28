@@ -30,17 +30,7 @@
             android:layout_height="50dp"
             app:srcCompat="@drawable/info_icon" />
 
-        <ImageButton
-            android:id="@+id/BTN___DEVICEVIEW___SHUTDOWN"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:srcCompat="@drawable/shutdown" />
 
-        <ImageButton
-            android:id="@+id/BTN___DEVICEVIEW___REBOOT"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:srcCompat="@drawable/reboot" />
 
        <ImageButton
            android:id="@+id/BTN___DEVICEVIEW___CLOUDSTORAGE"
@@ -76,6 +66,7 @@
         android:layout_below="@+id/LLO___DEVICEVIEW___BUTTONSTRIP">
 
     </FrameLayout>
+
 
 
 

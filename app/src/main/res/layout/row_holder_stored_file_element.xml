@@ -78,6 +78,15 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        app:srcCompat="@drawable/cloud_download" />
+        android:src="@drawable/cloud_download" />
+
+    <ImageButton
+        android:id="@+id/BTN___STOREDFILE___DELETE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/BTN___STOREDFILE___DOWNLOAD"
+        android:layout_toStartOf="@+id/BTN___STOREDFILE___DOWNLOAD"
+        android:src="@drawable/delete" />
 
 </RelativeLayout>
