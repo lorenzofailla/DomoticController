@@ -1,13 +1,8 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.app.Notification;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.renderscript.ScriptGroup;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -38,7 +33,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private DeviceInfoFragment deviceInfoFragment;
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
-    private CloudStorageFragment cloudStorageFragment;
+    private CloudStorageActivity cloudStorageActivity;
 
     // Listener per nuovi record nel nodo dei messaggi in ingresso.
     private ChildEventListener newCommandsToProcess = new ChildEventListener() {
@@ -170,9 +165,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // assegna gli OnClickListener ai pulsanti
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICEVIEW___SHUTDOWN).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICEVIEW___REBOOT).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICEVIEW___CLOUDSTORAGE).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___SSH_LINK_REFRESH).setOnClickListener(onClickListener);
@@ -189,7 +181,15 @@ public class DeviceViewActivity extends AppCompatActivity {
     protected void onPause() {
 
         super.onPause();
+
+        // rimuove il ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessages.removeEventListener(newCommandsToProcess);
+
+        // rimuove gli OnClickListener ai pulsanti
+        findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(null);
+        findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(null);
+        findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
+        findViewById(R.id.BTN___DEVICEVIEW___SSH_LINK_REFRESH).setOnClickListener(null);
 
     }
 
@@ -406,8 +406,6 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void lockControls() {
 
         // nasconde i pulsanti
-        findViewById(R.id.BTN___DEVICEVIEW___SHUTDOWN).setVisibility(View.GONE);
-        findViewById(R.id.BTN___DEVICEVIEW___REBOOT).setVisibility(View.GONE);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.GONE);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.GONE);
         findViewById(R.id.BTN___DEVICEVIEW___SSH_LINK_REFRESH).setVisibility(View.GONE);
@@ -421,11 +419,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         for (String serviceName : servicesArray) {
 
             switch (serviceName) {
-
-                case "UnixFS":
-                    findViewById(R.id.BTN___DEVICEVIEW___SHUTDOWN).setVisibility(View.VISIBLE);
-                    findViewById(R.id.BTN___DEVICEVIEW___REBOOT).setVisibility(View.VISIBLE);
-                    break;
 
                 case "Torrent":
                     findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.VISIBLE);
@@ -453,17 +446,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     break;
 
-                case R.id.BTN___DEVICEVIEW___SHUTDOWN:
-
-                    shutdownHost();
-
-                    break;
-
-                case R.id.BTN___DEVICEVIEW___REBOOT:
-
-                    rebootHost();
-
-                    break;
 
                 case R.id.BTN___DEVICEVIEW___FILEMANAGER:
 
@@ -477,35 +459,12 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     break;
 
-                case R.id.BTN___DEVICEVIEW___CLOUDSTORAGE:
-
-                    startCloudStorage();
-
-                    break;
 
             }
 
         }
 
     };
-
-    private void startCloudStorage(){
-
-        // crea una nuova istanza di CloudStorageFragment
-        cloudStorageFragment = new CloudStorageFragment();
-        cloudStorageFragment.databaseReference = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/CloudStorage");
-        cloudStorageFragment.addCloudStorageFragmentListener(new CloudStorageFragment.CloudStorageFragmentListener() {
-            @Override
-            public void onFileDownloadRequest(FileInCloudStorage file) {
-
-                startCloudDownloadService(file);
-
-            }
-
-        });
-
-        showFragment(cloudStorageFragment);
-    }
 
     private void startCloudDownloadService(FileInCloudStorage f){
 

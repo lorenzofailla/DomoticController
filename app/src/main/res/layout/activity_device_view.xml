@@ -28,21 +28,13 @@
             android:id="@+id/BTN___DEVICEVIEW___DEVICEINFO"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            app:srcCompat="@drawable/info_icon" />
-
-
-
-       <ImageButton
-           android:id="@+id/BTN___DEVICEVIEW___CLOUDSTORAGE"
-           android:layout_width="50dp"
-           android:layout_height="50dp"
-           app:srcCompat="@drawable/cloud" />
+            android:src="@drawable/info_icon" />
 
         <ImageButton
             android:id="@+id/BTN___DEVICEVIEW___FILEMANAGER"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            app:srcCompat="@drawable/directory" />
+            android:src="@drawable/directory" />
 
         <ImageButton
             android:id="@+id/BTN___DEVICEVIEW___TORRENTMANAGER"

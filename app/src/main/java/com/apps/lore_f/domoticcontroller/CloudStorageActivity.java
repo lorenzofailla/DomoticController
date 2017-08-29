@@ -1,8 +1,8 @@
 package com.apps.lore_f.domoticcontroller;
 
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
@@ -19,71 +18,68 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-
 /**
  * A simple {@link Fragment} subclass.
  */
-public class CloudStorageFragment extends Fragment {
+public class CloudStorageActivity extends AppCompatActivity {
 
     public DatabaseReference databaseReference;
 
-    public boolean viewCreated=false;
 
-    private static final String TAG = "CloudStorageF";
+    private static final String TAG = "CloudStorage";
 
     public RecyclerView storedFilesRecyclerView;
     public LinearLayoutManager linearLayoutManager;
     public FirebaseRecyclerAdapter<FileInCloudStorage, StoredFilesHolder> firebaseAdapter;
 
-    interface CloudStorageFragmentListener{
+   private ValueEventListener valueEventListener = new ValueEventListener() {
 
-        void onFileDownloadRequest(FileInCloudStorage file);
+       @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
 
-    }
+            Log.i(TAG, dataSnapshot.getValue().toString());
 
-    CloudStorageFragmentListener cloudStorageFragmentListener;
+            // aggiorna l'adapter
+            refreshAdapter();
+        }
 
-    public void addCloudStorageFragmentListener(CloudStorageFragmentListener listener){
-        cloudStorageFragmentListener=listener;
-    }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
 
-    public void removeCloudStorageFragmentListener(){
-        cloudStorageFragmentListener=null;
-    }
+        }
 
-    public CloudStorageFragment() {
-        // Required empty public constructor
+    };
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_device_view);
+
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    protected void onPause(){
 
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_cloud_storage, container, false);
+        super.onPause();
 
-        storedFilesRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___CLOUDSTORAGEFRAGMENT___MAIN);
-
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                Log.i(TAG, dataSnapshot.getValue().toString());
-
-                // aggiorna l'adapter
-                refreshAdapter();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        viewCreated=true;
-
-        return view;
+        // rimuove il ValueEventListener dal nodo
+        databaseReference.removeEventListener(valueEventListener);
     }
+
+    @Override
+    protected void onResume(){
+
+        super.onResume();
+
+        storedFilesRecyclerView = (RecyclerView) findViewById(R.id.RWV___CLOUDSTORAGEFRAGMENT___MAIN);
+
+        // aggiunge un ValueEventListener al nodo
+        databaseReference.addValueEventListener(valueEventListener);
+
+
+    }
+
 
     public static class StoredFilesHolder extends RecyclerView.ViewHolder {
 
@@ -93,6 +89,7 @@ public class CloudStorageFragment extends Fragment {
         public TextView nOfDownloadsTXV;
 
         public ImageButton downloadBTN;
+        public ImageButton deleteBTN;
 
         public StoredFilesHolder(View v) {
             super(v);
@@ -102,14 +99,14 @@ public class CloudStorageFragment extends Fragment {
             nOfDownloadsTXV = (TextView) itemView.findViewById(R.id.TXV___STOREDFILE___NOFDOWNLOADS_VALUE);
 
             downloadBTN = (ImageButton) itemView.findViewById(R.id.BTN___STOREDFILE___DOWNLOAD);
-
+            deleteBTN = (ImageButton) itemView.findViewById(R.id.BTN___STOREDFILE___DELETE);
         }
 
     }
 
     private void refreshAdapter(){
 
-        linearLayoutManager = new LinearLayoutManager(this.getContext());
+        linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setStackFromEnd(false);
 
         firebaseAdapter = new FirebaseRecyclerAdapter<FileInCloudStorage, StoredFilesHolder>(
@@ -130,11 +127,19 @@ public class CloudStorageFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
 
-                        if(cloudStorageFragmentListener!=null)
-                            cloudStorageFragmentListener.onFileDownloadRequest(cloudFile);
+                        // avvia la procedura di download del file richiesto
 
                     }
 
+                });
+
+                holder.deleteBTN.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        // rimuove il file selezionato dal cloud storage
+
+                    }
                 });
 
             }
