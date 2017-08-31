@@ -94,7 +94,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
 
-            deviceName = extras.getString("DEVICE_TO_CONNECT");
+            deviceName = extras.getString("__DEVICE_TO_CONNECT");
 
         } else {
 
@@ -121,6 +121,8 @@ public class DeviceViewActivity extends AppCompatActivity {
                 deviceInfoFragment.updateView();
             }
         });
+
+        deviceInfoFragment.logsNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/"+deviceName+"/Log");
 
         showFragment(deviceInfoFragment);
 
@@ -200,18 +202,12 @@ public class DeviceViewActivity extends AppCompatActivity {
         switch (inMsg.getHeader()) {
 
             case "WELCOME_MESSAGE":
+                
                 // servizi disponibili nel dispositivo remoto
 
-                // modifica il l'aspetto del fragment
-                if (deviceInfoFragment != null) {
-                    deviceInfoFragment.availableServices = inMsg.getBody();
+                // TODO: 31-Aug-17 ferma il timer per mettere il dispositivo come offline 
 
-                    if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
-
-                }
-
-                // abilita i controlli associati ai servizi disponibili
-                releaseControls(inMsg.getBody().replace("\n", ""));
+                
 
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;

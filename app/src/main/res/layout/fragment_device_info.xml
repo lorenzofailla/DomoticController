@@ -9,23 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___AVAILABLESERVICES_LABEL"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:text="@string/DEVICEVIEW_LABEL_AVAILABLESERVICES"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
-
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___AVAILABLESERVICES_VALUE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/TXV___DEVICEVIEW___AVAILABLESERVICES_LABEL"
-            android:text="" />
-
 
         <TextView
             android:id="@+id/TXV___DEVICEVIEW___UPTIME_LABEL"
@@ -81,29 +64,30 @@
 
             <ImageButton
                 android:id="@+id/BTN___DEVICEINFOFRAGMENT___SHUTDOWN"
-                android:src="@drawable/shutdown"
                 android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_height="50dp"
+                android:src="@drawable/shutdown" />
 
             <ImageButton
                 android:id="@+id/BTN___DEVICEINFOFRAGMENT___REBOOT"
-                android:src="@drawable/reboot"
                 android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_height="50dp"
+                android:src="@drawable/reboot" />
 
             <ImageButton
                 android:id="@+id/BTN___DEVICEINFOFRAGMENT___CLEARLOG"
-                android:src="@drawable/clear_log"
                 android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_height="50dp"
+                android:src="@drawable/clear_log" />
 
         </LinearLayout>
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/RWV___CLOUDSTORAGEFRAGMENT___MAIN"
+            android:id="@+id/RWV___DEVICEINFOFRAGMENT___LOG"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP"/>
+            android:layout_below="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP"
+            android:layout_alignParentBottom="true"/>
 
 
     </RelativeLayout>

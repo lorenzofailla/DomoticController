@@ -56,6 +56,8 @@ public class CloudStorageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_view);
 
+        // TODO: 31-Aug-17  crea la referenza al nodo del database
+        storedFilesRecyclerView = (RecyclerView) findViewById(R.id.RWV___CLOUDSTORAGEFRAGMENT___MAIN);
     }
 
     @Override
@@ -72,11 +74,10 @@ public class CloudStorageActivity extends AppCompatActivity {
 
         super.onResume();
 
-        storedFilesRecyclerView = (RecyclerView) findViewById(R.id.RWV___CLOUDSTORAGEFRAGMENT___MAIN);
+        
 
         // aggiunge un ValueEventListener al nodo
         databaseReference.addValueEventListener(valueEventListener);
-
 
     }
 
