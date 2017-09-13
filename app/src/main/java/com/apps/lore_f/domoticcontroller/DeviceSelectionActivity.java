@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -52,12 +53,17 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         public TextView deviceNameTXV;
         public ImageButton connectToDeviceBTN;
 
+        public ImageView torrentIMG;
+        public ImageView directoryNaviIMG;
+
 
         public DevicesHolder(View v) {
             super(v);
             deviceNameTXV = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___DEVICENAME);
 
             connectToDeviceBTN = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___CONNECT);
+            torrentIMG = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
+            directoryNaviIMG = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
 
         }
 
@@ -142,11 +148,29 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 holder.deviceNameTXV.setText(device.getDeviceName());
 
+                // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
+                //
+                if(device.getHasTorrentManagement()){
+                    //
+                    holder.torrentIMG.setVisibility(View.VISIBLE);
+
+                }
+
+                if(device.getHasDirectoryNavigation()){
+                    //
+                    holder.directoryNaviIMG.setVisibility(View.VISIBLE);
+
+                }
+
                 holder.connectToDeviceBTN.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
-                        connectToDevice(device.getDeviceName());
+                        connectToDevice(
+                                device.getDeviceName(),
+                                device.getHasTorrentManagement(),
+                                device.getHasDirectoryNavigation()
+                        );
 
                     }
 
@@ -178,10 +202,12 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     }
 
-    private void connectToDevice(String deviceName){
+    private void connectToDevice(String deviceName, boolean torrent, boolean dirNavi){
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
         intent.putExtra("__DEVICE_TO_CONNECT", deviceName);
+        intent.putExtra("__HAS_TORRENT_MANAGEMENT", torrent);
+        intent.putExtra("__HAS_DIRECTORY_NAVIGATION", dirNavi);
 
         startActivity(intent);
 

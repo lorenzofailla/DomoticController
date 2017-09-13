@@ -26,14 +26,16 @@ public class DeviceViewActivity extends AppCompatActivity {
     // Firebase Database
     private DatabaseReference incomingMessages;
 
-    private String deviceName;
-    private String thisDevice = "lorenzofailla-g3";
+    private String remoteDeviceName;
+    private boolean remoteDeviceTorrent;
+    private boolean remoteDeviceDirNavi;
+
+    private String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
 
     // Fragments
     private DeviceInfoFragment deviceInfoFragment;
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
-    private CloudStorageActivity cloudStorageActivity;
 
     // Listener per nuovi record nel nodo dei messaggi in ingresso.
     private ChildEventListener newCommandsToProcess = new ChildEventListener() {
@@ -90,11 +92,15 @@ public class DeviceViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_view);
 
-        // recupera l'extra dall'intent, ottiene il nome del dispositivo remoto
+        // recupera l'extra dall'intent,
+        // ottiene il nome del dispositivo remoto e altri parametri
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
 
-            deviceName = extras.getString("__DEVICE_TO_CONNECT");
+            remoteDeviceName = extras.getString("__DEVICE_TO_CONNECT");
+            remoteDeviceTorrent = extras.getBoolean("__HAS_TORRENT_MANAGEMENT");
+            remoteDeviceDirNavi = extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
 
         } else {
 
@@ -109,8 +115,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void showDeviceInfo() {
 
-        // nasconde i pulsanti
-        lockControls();
+        // gestisce la visualizzazione dei pulsanti
+        releaseControls();
 
         // mostra il Fragment 'deviceInfoFragment'
         deviceInfoFragment = new DeviceInfoFragment();
@@ -122,13 +128,13 @@ public class DeviceViewActivity extends AppCompatActivity {
             }
         });
 
-        deviceInfoFragment.logsNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/"+deviceName+"/Log");
+        deviceInfoFragment.logsNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/" + remoteDeviceName + "/Log");
 
         showFragment(deviceInfoFragment);
 
         // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
         TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
-        remoteHostName.setText(deviceName);
+        remoteHostName.setText(remoteDeviceName);
 
         // invia al dispositivo remoto il comando per avere la lista dei servizi disponibili
         sendCommandToDevice(
@@ -202,12 +208,11 @@ public class DeviceViewActivity extends AppCompatActivity {
         switch (inMsg.getHeader()) {
 
             case "WELCOME_MESSAGE":
-                
+
                 // servizi disponibili nel dispositivo remoto
 
                 // TODO: 31-Aug-17 ferma il timer per mettere il dispositivo come offline 
 
-                
 
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
@@ -288,16 +293,16 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "HOME_DIRECTORY":
 
-                if(fileViewerFragment!=null){
+                if (fileViewerFragment != null) {
 
-                    fileViewerFragment.currentDirName = inMsg.getBody().replace("\n","");
+                    fileViewerFragment.currentDirName = inMsg.getBody().replace("\n", "");
                     if (fileViewerFragment.viewCreated)
                         fileViewerFragment.updateContent();
 
                 }
 
                 // invia un instant message con la richiesta del contenuto della directory home ricevuta
-                sendCommandToDevice(new Message("__get_directory_content",inMsg.getBody(),thisDevice));
+                sendCommandToDevice(new Message("__get_directory_content", inMsg.getBody(), thisDevice));
 
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
@@ -306,7 +311,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "DIRECTORY_CONTENT":
 
-                if(fileViewerFragment!=null){
+                if (fileViewerFragment != null) {
 
                     fileViewerFragment.rawDirData = inMsg.getBody();
                     if (fileViewerFragment.viewCreated)
@@ -322,12 +327,10 @@ public class DeviceViewActivity extends AppCompatActivity {
             case "GENERIC_NOTIFICATION":
 
                 Notification notification = new NotificationCompat.Builder(this)
-                        .setContentTitle("Message from "+inMsg.getReplyto())
+                        .setContentTitle("Message from " + inMsg.getReplyto())
                         .setContentText(inMsg.getBody())
                         .setSmallIcon(R.drawable.home)
                         .build();
-
-
 
 
         }
@@ -345,7 +348,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // aggiunge il messaggio al nodo
         deviceIncomingCommands
-                .child(deviceName)
+                .child(remoteDeviceName)
                 .child("IncomingCommands")
                 .child("" + System.currentTimeMillis())
                 .setValue(command);
@@ -408,23 +411,25 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void releaseControls(String services) {
+    private void releaseControls() {
 
-        String[] servicesArray = services.split(",");
+        if (remoteDeviceTorrent) {
+            //
+            findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.VISIBLE);
 
-        for (String serviceName : servicesArray) {
+        } else {
+            //
+            findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.GONE);
 
-            switch (serviceName) {
+        }
 
-                case "Torrent":
-                    findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.VISIBLE);
-                    break;
+        if (remoteDeviceDirNavi) {
+            //
+            findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.VISIBLE);
 
-                case "DirNav":
-                    findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.VISIBLE);
-                    break;
-
-            }
+        } else {
+            //
+            findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.GONE);
 
         }
 
@@ -462,7 +467,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
-    private void startCloudDownloadService(FileInCloudStorage f){
+    private void startCloudDownloadService(FileInCloudStorage f) {
 
         String[] param = {f.getFileName()};
         Intent intent = new Intent(this, DownloadFileFromCloud.class);
@@ -550,7 +555,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         showFragment(fileViewerFragment);
 
         // invia al dispositivo remoto la richiesta di conoscere la directory corrente
-        sendCommandToDevice(new Message("__get_homedir","null",thisDevice));
+        sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
 
     }
 
@@ -636,7 +641,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             if (fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_FILE) {
 
                 // attiva la procedura di upload del file da parte del dispositivo remoto sulla piattaforma Firebase Storage
-                sendCommandToDevice(new Message("__get_file",fileInfo.getFileRoorDir()+"/"+fileInfo.getFileName(),thisDevice));
+                sendCommandToDevice(new Message("__get_file", fileInfo.getFileRoorDir() + "/" + fileInfo.getFileName(), thisDevice));
 
             } else {
 

@@ -120,6 +120,9 @@ public class DeviceInfoFragment extends Fragment {
 
         logRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___DEVICEINFOFRAGMENT___LOG);
 
+        if(logsNode!=null)
+            logsNode.addValueEventListener(valueEventListener);
+
         // aggiorna il flag e effettua il trigger del metodo nel listener
         viewCreated = true;
         if(deviceInfoFragmentListener!=null) deviceInfoFragmentListener.onViewCreated();
@@ -195,6 +198,5 @@ public class DeviceInfoFragment extends Fragment {
         logRecyclerView.setAdapter(firebaseAdapter);
 
     }
-
 
 }

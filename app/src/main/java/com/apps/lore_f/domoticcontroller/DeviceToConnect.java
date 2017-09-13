@@ -17,15 +17,18 @@ public class DeviceToConnect {
     public DeviceToConnect() {
     }
 
-    public DeviceToConnect(String fileName, String requestor, String mediaLink, long size, int nOfDownloads) {
-        this.deviceName = fileName;
-
-    }
 
     public String getDeviceName() {
         return deviceName;
     }
 
+    public boolean getHasTorrentManagement() {
+        return hasTorrentManagement;
+    }
+
+    public boolean getHasDirectoryNavigation() {
+        return hasDirectoryNavigation;
+    }
 }
 
 

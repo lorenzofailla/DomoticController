@@ -30,6 +30,7 @@
         <activity android:name=".GoogleSignInActivity" />
         <activity android:name=".DeviceSelectionActivity" />
         <activity android:name=".DeviceViewActivity" />
+        <activity android:name=".CloudStorageActivity" />
 
         <service
             android:name=".DownloadFileFromCloud"

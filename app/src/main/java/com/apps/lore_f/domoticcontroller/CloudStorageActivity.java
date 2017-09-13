@@ -16,6 +16,7 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 /**
@@ -23,8 +24,7 @@ import com.google.firebase.database.ValueEventListener;
  */
 public class CloudStorageActivity extends AppCompatActivity {
 
-    public DatabaseReference databaseReference;
-
+    private DatabaseReference databaseReference;
 
     private static final String TAG = "CloudStorage";
 
@@ -57,6 +57,7 @@ public class CloudStorageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_device_view);
 
         // TODO: 31-Aug-17  crea la referenza al nodo del database
+        databaseReference = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/CloudStorage");
         storedFilesRecyclerView = (RecyclerView) findViewById(R.id.RWV___CLOUDSTORAGEFRAGMENT___MAIN);
     }
 
@@ -73,8 +74,6 @@ public class CloudStorageActivity extends AppCompatActivity {
     protected void onResume(){
 
         super.onResume();
-
-        
 
         // aggiunge un ValueEventListener al nodo
         databaseReference.addValueEventListener(valueEventListener);
@@ -107,7 +106,7 @@ public class CloudStorageActivity extends AppCompatActivity {
 
     private void refreshAdapter(){
 
-        linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(false);
 
         firebaseAdapter = new FirebaseRecyclerAdapter<FileInCloudStorage, StoredFilesHolder>(
