@@ -173,6 +173,10 @@ public class DeviceInfoFragment extends Fragment {
             @Override
             protected void populateViewHolder(DeviceLogHolder holder, final LogEntry log, int position) {
 
+                holder.dateTimeTXV.setText(log.getDatetime());
+                holder.logTypeTXV.setText(log.getLogtype());
+                holder.logDescTXV.setText(log.getLogdesc());
+
             }
 
         };

@@ -54,11 +54,11 @@ public class CloudStorageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_device_view);
+        setContentView(R.layout.activity_cloud_storage);
 
-        // TODO: 31-Aug-17  crea la referenza al nodo del database
         databaseReference = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/CloudStorage");
-        storedFilesRecyclerView = (RecyclerView) findViewById(R.id.RWV___CLOUDSTORAGEFRAGMENT___MAIN);
+        storedFilesRecyclerView = (RecyclerView) findViewById(R.id.RWV___CLOUDSTORAGE___MAIN);
+
     }
 
     @Override

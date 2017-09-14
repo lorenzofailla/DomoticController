@@ -44,6 +44,8 @@
     <string name="CLOUDSTORAGE_LABEL_SIZE">Size: </string>
     <string name="CLOUDSTORAGE_LABEL_NOFDOWNLOADS">N. of downloads: </string>
 
+    <string name="DEVICESELECTION_LABEL_SELECT_DEVICE">Select the device to connect to:</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

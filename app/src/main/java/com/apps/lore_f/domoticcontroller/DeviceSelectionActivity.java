@@ -63,7 +63,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
             connectToDeviceBTN = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___CONNECT);
             torrentIMG = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
-            directoryNaviIMG = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
+            directoryNaviIMG = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
 
         }
 

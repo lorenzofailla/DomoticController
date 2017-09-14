@@ -11,7 +11,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
 
     <ImageButton
         android:id="@+id/BTN___ROWDEVICE___CONNECT"

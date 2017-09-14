@@ -128,7 +128,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             }
         });
 
-        deviceInfoFragment.logsNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/" + remoteDeviceName + "/Log");
+        deviceInfoFragment.logsNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + remoteDeviceName + "/Log");
 
         showFragment(deviceInfoFragment);
 
