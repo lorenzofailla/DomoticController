@@ -1,7 +1,10 @@
 package com.apps.lore_f.domoticcontroller;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,9 +22,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class CloudStorageActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
@@ -128,6 +128,7 @@ public class CloudStorageActivity extends AppCompatActivity {
                     public void onClick(View v) {
 
                         // avvia la procedura di download del file richiesto
+                        startCloudDownloadService(cloudFile);
 
                     }
 
@@ -138,6 +139,30 @@ public class CloudStorageActivity extends AppCompatActivity {
                     public void onClick(View view) {
 
                         // rimuove il file selezionato dal cloud storage
+
+
+
+                        AlertDialog.Builder alertDialogBuilder= new AlertDialog.Builder(getApplicationContext())
+                                .setMessage(R.string.ALERTDIALOG_MESSAGE_CONFIRM_DELETE_FROM_CLOUD)
+
+                                .setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        // elimina il file dal cloud
+                                        deleteFileFromCloud(cloudFile);
+                                    }
+                                })
+                                .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        // chiude la finestra di dialogo
+                                        dialogInterface.dismiss();
+                                    }
+                                })
+                                .setTitle(R.string.ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL);
+
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
 
                     }
                 });
@@ -165,6 +190,20 @@ public class CloudStorageActivity extends AppCompatActivity {
 
         storedFilesRecyclerView.setLayoutManager(linearLayoutManager);
         storedFilesRecyclerView.setAdapter(firebaseAdapter);
+
+    }
+
+    private void startCloudDownloadService(FileInCloudStorage f) {
+
+        String[] param = {f.getFileName()};
+        Intent intent = new Intent(this, DownloadFileFromCloud.class);
+        intent.putExtra("__file_to_download", param);
+
+        startService(intent);
+
+    }
+
+    private void deleteFileFromCloud(FileInCloudStorage f) {
 
     }
 

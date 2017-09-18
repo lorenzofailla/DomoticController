@@ -126,6 +126,22 @@ public class DeviceViewActivity extends AppCompatActivity {
             public void onViewCreated() {
                 deviceInfoFragment.updateView();
             }
+
+            @Override
+            public void onRebootRemoteDeviceRequest(){
+
+                // invia il comando per riavviare il dispositivo remoto
+                rebootHost();
+            };
+
+            @Override
+            public void onShutdownRemoteDeviceRequest(){
+
+                // invia il comando per spengere il dispositivo remoto
+                shutdownHost();
+
+            };
+
         });
 
         deviceInfoFragment.logsNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + remoteDeviceName + "/Log");
@@ -467,15 +483,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
-    private void startCloudDownloadService(FileInCloudStorage f) {
 
-        String[] param = {f.getFileName()};
-        Intent intent = new Intent(this, DownloadFileFromCloud.class);
-        intent.putExtra("__file_to_download", param);
-
-        startService(intent);
-
-    }
 
     private void rebootHost() {
 

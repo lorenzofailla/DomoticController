@@ -25,7 +25,9 @@
     <string name="ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL">Torrent removal</string>
     <string name="ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL">Do you really want to remove the selected torrent ?</string>
     <string name="ALERTDIALOG_MESSAGE_ADD_TORRENT">Enter the URL to add</string>
+    <string name="ALERTDIALOG_MESSAGE_CONFIRM_DELETE_FROM_CLOUD">Please confirm you want to remove this file from the cloud storage.\nThis cannot be undone.</string>
     <string name="ALERTDIALOG_TITLE_ADD_TORRENT">New torrent</string>
+    <string name="ALERTDIALOG_TITLE_CONFIRM_DELETE_FROM_CLOUD">Confirm removal.</string>
 
     <string name="CONNECTIONFGM_BTN_CONNECT">Connect</string>
     <string name="CONNECTIONFGM_BTN_RECONNECT">Reconnect</string>

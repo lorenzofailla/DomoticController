@@ -1,6 +1,7 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -42,8 +43,39 @@ public class DeviceInfoFragment extends Fragment {
     interface DeviceInfoFragmentListener{
 
         void onViewCreated();
+        void onRebootRemoteDeviceRequest();
+        void onShutdownRemoteDeviceRequest();
 
     }
+
+    private View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+            switch(view.getId()){
+
+                case R.id.BTN___DEVICEINFOFRAGMENT___REBOOT:
+
+                    if(deviceInfoFragmentListener!=null)
+                        deviceInfoFragmentListener.onRebootRemoteDeviceRequest();
+                    break;
+
+                case R.id.BTN___DEVICEINFOFRAGMENT___SHUTDOWN:
+                    if(deviceInfoFragmentListener!=null)
+                        deviceInfoFragmentListener.onShutdownRemoteDeviceRequest();
+                    break;
+
+                case R.id.BTN___DEVICEINFOFRAGMENT___CLEARLOG:
+                    if(logsNode!=null)
+                        logsNode.removeValue();
+
+                    break;
+
+            }
+
+        }
+    };
+
 
     public static class DeviceLogHolder extends RecyclerView.ViewHolder {
 
@@ -120,8 +152,10 @@ public class DeviceInfoFragment extends Fragment {
 
         logRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___DEVICEINFOFRAGMENT___LOG);
 
-        if(logsNode!=null)
-            logsNode.addValueEventListener(valueEventListener);
+        // assegna un OnClickListener ai pulsanti
+        view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___CLEARLOG).setOnClickListener(onClickListener);
+        view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___REBOOT).setOnClickListener(onClickListener);
+        view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___SHUTDOWN).setOnClickListener(onClickListener);
 
         // aggiorna il flag e effettua il trigger del metodo nel listener
         viewCreated = true;
@@ -146,6 +180,11 @@ public class DeviceInfoFragment extends Fragment {
 
         if(logsNode!=null)
             logsNode.removeEventListener(valueEventListener);
+
+        // rimuove l'OnClickListener ai pulsanti
+        fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___CLEARLOG).setOnClickListener(null);
+        fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___REBOOT).setOnClickListener(null);
+        fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___SHUTDOWN).setOnClickListener(null);
 
     }
 
