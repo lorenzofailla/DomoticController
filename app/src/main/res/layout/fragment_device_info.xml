@@ -4,11 +4,9 @@
     android:layout_height="match_parent"
     tools:context="com.apps.lore_f.domoticcontroller.DeviceInfoFragment">
 
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
 
         <TextView
             android:id="@+id/TXV___DEVICEVIEW___UPTIME_LABEL"

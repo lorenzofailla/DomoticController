@@ -14,7 +14,7 @@
         android:id="@+id/TXV___DEVICEVIEW___HOSTNAME"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
    <LinearLayout
         android:id="@+id/LLO___DEVICEVIEW___BUTTONSTRIP"
@@ -39,13 +39,8 @@
             android:id="@+id/BTN___DEVICEVIEW___TORRENTMANAGER"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            app:srcCompat="@drawable/torrent" />
+            android:src="@drawable/torrent" />
 
-        <ImageButton
-            android:id="@+id/BTN___DEVICEVIEW___SSH_LINK_REFRESH"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:srcCompat="@drawable/ssh" />
 
     </LinearLayout>
 

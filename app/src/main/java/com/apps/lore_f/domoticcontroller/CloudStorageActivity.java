@@ -3,6 +3,7 @@ package com.apps.lore_f.domoticcontroller;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,11 +17,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class CloudStorageActivity extends AppCompatActivity {
 
@@ -137,32 +142,10 @@ public class CloudStorageActivity extends AppCompatActivity {
                 holder.deleteBTN.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        //
+                        askForFileDeletionConfirmation(cloudFile);
 
-                        // rimuove il file selezionato dal cloud storage
 
-
-
-                        AlertDialog.Builder alertDialogBuilder= new AlertDialog.Builder(getApplicationContext())
-                                .setMessage(R.string.ALERTDIALOG_MESSAGE_CONFIRM_DELETE_FROM_CLOUD)
-
-                                .setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        // elimina il file dal cloud
-                                        deleteFileFromCloud(cloudFile);
-                                    }
-                                })
-                                .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        // chiude la finestra di dialogo
-                                        dialogInterface.dismiss();
-                                    }
-                                })
-                                .setTitle(R.string.ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL);
-
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-                        alertDialog.show();
 
                     }
                 });
@@ -203,7 +186,49 @@ public class CloudStorageActivity extends AppCompatActivity {
 
     }
 
-    private void deleteFileFromCloud(FileInCloudStorage f) {
+    private void deleteFileFromCloud(final FileInCloudStorage f) {
+
+        // ottiene un riferimento alla posizione di storage sul cloud
+        StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl("gs://domotic-28a5e.appspot.com/Users/lorenzofailla/uploads/"+f.getFileName());
+
+        // avvia la procedura di eliminazione del file
+        storageRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/CloudStorage");
+                databaseReference.child(f.getFileName()).removeValue();
+
+            }
+
+        });
+
+    }
+
+    private void askForFileDeletionConfirmation(final FileInCloudStorage fileToBeDeleted){
+
+        // rimuove il file selezionato dal cloud storage
+        AlertDialog.Builder alertDialogBuilder= new AlertDialog.Builder(this)
+                .setMessage(R.string.ALERTDIALOG_MESSAGE_CONFIRM_DELETE_FROM_CLOUD)
+
+                .setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // elimina il file dal cloud
+                        deleteFileFromCloud(fileToBeDeleted);
+                    }
+                })
+                .setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // chiude la finestra di dialogo
+                        dialogInterface.dismiss();
+                    }
+                })
+                .setTitle(R.string.ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL);
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
 
     }
 

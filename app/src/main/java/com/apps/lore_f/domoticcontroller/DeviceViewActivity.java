@@ -109,6 +109,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
+        // inizia la connessione al dispositivo: invia una
         showDeviceInfo();
 
     }
@@ -191,7 +192,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICEVIEW___SSH_LINK_REFRESH).setOnClickListener(onClickListener);
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso
         incomingMessages = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/lorenzofailla-g3/IncomingCommands");
@@ -213,7 +213,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
-        findViewById(R.id.BTN___DEVICEVIEW___SSH_LINK_REFRESH).setOnClickListener(null);
 
     }
 
@@ -240,7 +239,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 // modifica il l'aspetto del fragment
                 if (deviceInfoFragment != null) {
-                    deviceInfoFragment.upTime = inMsg.getBody();
+                    deviceInfoFragment.upTime = inMsg.getBody().replace("\n", "");
 
                     if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
 
@@ -256,7 +255,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 // modifica il l'aspetto del fragment
                 if (deviceInfoFragment != null) {
-                    deviceInfoFragment.freeSpace = inMsg.getBody();
+                    deviceInfoFragment.freeSpace = inMsg.getBody().replace("\n", "");
 
                     if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
 
@@ -415,15 +414,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // invia un instant message con la richiesta della lista dei torrents
         sendCommandToDevice(new Message("__listTorrents", "null", thisDevice));
-
-    }
-
-    private void lockControls() {
-
-        // nasconde i pulsanti
-        findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.GONE);
-        findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.GONE);
-        findViewById(R.id.BTN___DEVICEVIEW___SSH_LINK_REFRESH).setVisibility(View.GONE);
 
     }
 
