@@ -19,6 +19,7 @@
 
     <string name="ALERTDIALOG_YES">Yes</string>
     <string name="ALERTDIALOG_NO">No</string>
+    <string name="ALERTDIALOG_GOT_IT">Got it</string>
     <string name="ALERTDIALOG_MESSAGE_REBOOT">This will reboot the remote host.</string>
     <string name="ALERTDIALOG_MESSAGE_SHUTDOWN">This will shutdown the remote host.</string>
     <string name="ALERTDIALOG_MESSAGE_REPLY_TIMEOUT">The remote host did not reply. Do you want to keep waiting ?</string>
@@ -26,8 +27,10 @@
     <string name="ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL">Do you really want to remove the selected torrent ?</string>
     <string name="ALERTDIALOG_MESSAGE_ADD_TORRENT">Enter the URL to add</string>
     <string name="ALERTDIALOG_MESSAGE_CONFIRM_DELETE_FROM_CLOUD">Please confirm you want to remove this file from the cloud storage.\nThis cannot be undone.</string>
+    <string name="ALERTDIALOG_MESSAGE_REMOTE_DEVICE_NOT_RESPONDING">The remote device does not answer to requests.\nPlease ensure the remote device is actually on line.\n</string>
     <string name="ALERTDIALOG_TITLE_ADD_TORRENT">New torrent</string>
     <string name="ALERTDIALOG_TITLE_CONFIRM_DELETE_FROM_CLOUD">Confirm removal.</string>
+    <string name="ALERTDIALOG_TITLE_REMOTE_DEVICE_NOT_RESPONDING">Remote device is off-line</string>
 
     <string name="CONNECTIONFGM_BTN_CONNECT">Connect</string>
     <string name="CONNECTIONFGM_BTN_RECONNECT">Reconnect</string>

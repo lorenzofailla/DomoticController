@@ -42,7 +42,11 @@ public class CloudStorageActivity extends AppCompatActivity {
        @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            Log.i(TAG, dataSnapshot.getValue().toString());
+           if (dataSnapshot.getValue()!=null) {
+
+                   Log.i(TAG, dataSnapshot.getValue().toString());
+
+           }
 
             // aggiorna l'adapter
             refreshAdapter();
@@ -145,8 +149,6 @@ public class CloudStorageActivity extends AppCompatActivity {
                         //
                         askForFileDeletionConfirmation(cloudFile);
 
-
-
                     }
                 });
 
@@ -197,7 +199,7 @@ public class CloudStorageActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
 
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/CloudStorage");
-                databaseReference.child(f.getFileName()).removeValue();
+                databaseReference.child(f.getItemID()).removeValue();
 
             }
 

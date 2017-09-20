@@ -6,6 +6,7 @@ package com.apps.lore_f.domoticcontroller;
 
 public class FileInCloudStorage {
 
+    private String itemID;
     private String fileName;
     private String requestor;
     private String mediaLink;
@@ -13,15 +14,19 @@ public class FileInCloudStorage {
     private int nOfDownloads;
 
     // empty constructor
-    public FileInCloudStorage() {
-    }
+    public FileInCloudStorage(){}
 
-    public FileInCloudStorage(String fileName, String requestor, String mediaLink, long size, int nOfDownloads) {
+    public FileInCloudStorage(String itemID, String fileName, String requestor, String mediaLink, long size, int nOfDownloads) {
+        this.itemID = itemID;
         this.fileName = fileName;
         this.requestor = requestor;
         this.mediaLink = mediaLink;
         this.size = size;
         this.nOfDownloads = nOfDownloads;
+    }
+
+    public String getItemID() {
+        return itemID;
     }
 
     public String getFileName() {
@@ -45,5 +50,6 @@ public class FileInCloudStorage {
     }
 
 }
+
 
 

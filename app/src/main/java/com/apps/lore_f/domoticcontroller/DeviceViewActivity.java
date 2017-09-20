@@ -3,6 +3,7 @@ package com.apps.lore_f.domoticcontroller;
 import android.app.Notification;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -21,6 +22,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 
+import java.util.TimerTask;
+
 public class DeviceViewActivity extends AppCompatActivity {
 
     // Firebase Database
@@ -31,11 +34,27 @@ public class DeviceViewActivity extends AppCompatActivity {
     private boolean remoteDeviceDirNavi;
 
     private String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
+    private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
+    private long replyTimeoutBase = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
+
+    private Handler handler;
 
     // Fragments
     private DeviceInfoFragment deviceInfoFragment;
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
+
+    // Estensione di un timertask per assicurarsi che il dispositivo sia connesso e che risponda alle richieste
+    private Runnable watchDog = new Runnable() {
+
+        @Override
+        public void run() {
+
+            manageRemoteDeviceNotResponding();
+
+        }
+
+    };
 
     // Listener per nuovi record nel nodo dei messaggi in ingresso.
     private ChildEventListener newCommandsToProcess = new ChildEventListener() {
@@ -109,8 +128,18 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        // inizia la connessione al dispositivo: invia una
-        showDeviceInfo();
+        // inizia la connessione al dispositivo: invia la richiesta iniziale
+        sendCommandToDevice(
+                new Message(
+                        "__requestWelcomeMessage",
+                        "null",
+                        thisDevice
+                )
+        );
+
+        // attiva il timer
+        handler=new Handler();
+        handler.postDelayed(watchDog, replyTimeoutConnection);
 
     }
 
@@ -153,14 +182,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
         remoteHostName.setText(remoteDeviceName);
 
-        // invia al dispositivo remoto il comando per avere la lista dei servizi disponibili
-        sendCommandToDevice(
-                new Message(
-                        "__requestWelcomeMessage",
-                        "null",
-                        thisDevice
-                )
-        );
+
 
         // invia al dispositivo remoto il comando per avere l'uptime
         sendCommandToDevice(
@@ -692,5 +714,25 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
     };
+
+    private void manageRemoteDeviceNotResponding(){
+
+        // costruisce un AlertDialog e lo mostra a schermo
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.ALERTDIALOG_TITLE_REMOTE_DEVICE_NOT_RESPONDING)
+                .setMessage(R.string.ALERTDIALOG_MESSAGE_REMOTE_DEVICE_NOT_RESPONDING)
+                .setPositiveButton(R.string.ALERTDIALOG_GOT_IT, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        // aggiorna il database cloud impostando la proprietà online del dispositivo remoto a false
+                        finish();
+                    }
+                })
+                .create()
+                .show();
+
+
+    }
 
 }
