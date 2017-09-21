@@ -44,6 +44,7 @@
     <string name="DEVICEVIEW_LABEL_UPTIME_REPLY">\"uptime\" reply:</string>
     <string name="DEVICEVIEW_LABEL_FREE_DISK_SPACE">Free disk space:</string>
     <string name="DEVICEVIEW_LABEL_DEVICE_OPERATIONS">Device Operations:</string>
+    <string name="DEVICEVIEW_REFRESHING_DEVICE_CONNECTION">Connecting to device...</string>
 
     <string name="CLOUDSTORAGE_LABEL_REQUESTOR">Uploaded by: </string>
     <string name="CLOUDSTORAGE_LABEL_SIZE">Size: </string>

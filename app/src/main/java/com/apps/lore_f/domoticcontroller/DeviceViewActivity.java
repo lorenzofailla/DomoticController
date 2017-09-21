@@ -35,7 +35,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
-    private long replyTimeoutBase = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
+    private long replyTimeoutBase = 2*60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
 
     private Handler handler;
 
@@ -44,13 +44,38 @@ public class DeviceViewActivity extends AppCompatActivity {
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
 
-    // Estensione di un timertask per assicurarsi che il dispositivo sia connesso e che risponda alle richieste
+    // Runnable per chiudere l'Activity in caso il dispositivo non risponda alle chiamate entro il timeout
     private Runnable watchDog = new Runnable() {
 
         @Override
         public void run() {
 
             manageRemoteDeviceNotResponding();
+
+        }
+
+    };
+
+    // Runnable per chiudere l'Activity in caso il dispositivo non risponda alle chiamate entro il timeout
+    private Runnable sendWelcomeMessage = new Runnable() {
+
+        @Override
+        public void run() {
+
+            // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
+            TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
+            remoteHostName.setText(R.string.DEVICEVIEW_REFRESHING_DEVICE_CONNECTION);
+
+            // inizia la connessione al dispositivo: invia la richiesta iniziale
+            sendCommandToDevice(
+                    new Message(
+                            "__requestWelcomeMessage",
+                            "null",
+                            thisDevice
+                    )
+            );
+
+            handler.postDelayed(watchDog, replyTimeoutConnection);
 
         }
 
@@ -128,19 +153,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        // inizia la connessione al dispositivo: invia la richiesta iniziale
-        sendCommandToDevice(
-                new Message(
-                        "__requestWelcomeMessage",
-                        "null",
-                        thisDevice
-                )
-        );
-
-        // attiva il timer
-        handler=new Handler();
-        handler.postDelayed(watchDog, replyTimeoutConnection);
-
     }
 
     private void showDeviceInfo() {
@@ -178,10 +190,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         showFragment(deviceInfoFragment);
 
-        // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
-        TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
-        remoteHostName.setText(remoteDeviceName);
-
 
 
         // invia al dispositivo remoto il comando per avere l'uptime
@@ -202,7 +210,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                 )
         );
 
-
     }
 
     @Override
@@ -221,6 +228,10 @@ public class DeviceViewActivity extends AppCompatActivity {
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessages.addChildEventListener(newCommandsToProcess);
 
+        // attiva il ciclo di richieste
+        handler=new Handler();
+        handler.postDelayed(sendWelcomeMessage, 0);
+
     }
 
     @Override
@@ -236,6 +247,10 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
 
+        // rimuove gli eventuali task ritardati sull'handler
+        handler.removeCallbacks(sendWelcomeMessage);
+        handler.removeCallbacks(watchDog);
+
     }
 
     public void processIncomingMessage(Message inMsg, String msgKey) {
@@ -246,10 +261,12 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "WELCOME_MESSAGE":
 
-                // servizi disponibili nel dispositivo remoto
+                handler.removeCallbacks(watchDog);
+                handler.postDelayed(sendWelcomeMessage, replyTimeoutBase);
 
-                // TODO: 31-Aug-17 ferma il timer per mettere il dispositivo come offline 
-
+                // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
+                TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
+                remoteHostName.setText(remoteDeviceName);
 
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
