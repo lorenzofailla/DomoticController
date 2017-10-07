@@ -36,6 +36,8 @@
             android:name=".DownloadFileFromCloud"
             android:enabled="true"
             android:exported="true" />
+
+        <activity android:name=".ZoneMinderControlActivity"></activity>
     </application>
 
 </manifest>

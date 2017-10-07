@@ -11,7 +11,7 @@ public class DeviceToConnect {
     private boolean isUnix;
     private boolean hasDirectoryNavigation;
     private boolean hasTorrentManagement;
-    private boolean hasCamera;
+    private boolean hasZoneMinderManagement;
 
     // empty constructor
     public DeviceToConnect() {
@@ -29,6 +29,9 @@ public class DeviceToConnect {
     public boolean getHasDirectoryNavigation() {
         return hasDirectoryNavigation;
     }
+
+    public boolean getHasZoneMinderManagement() {return hasZoneMinderManagement; }
+
 }
 
 

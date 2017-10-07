@@ -56,6 +56,14 @@
             android:src="@drawable/directory"
             android:visibility="gone" />
 
+        <ImageView
+            android:id="@+id/IMG___ROWDEVICE___ZONEMINDER"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/videocam"
+            android:visibility="gone" />
+
     </LinearLayout>
 
 

@@ -55,6 +55,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         public ImageView torrentIMG;
         public ImageView directoryNaviIMG;
+        public ImageView zoneMinderMgmIMG;
 
 
         public DevicesHolder(View v) {
@@ -64,6 +65,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             connectToDeviceBTN = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___CONNECT);
             torrentIMG = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
             directoryNaviIMG = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
+            zoneMinderMgmIMG = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___ZONEMINDER);
 
         }
 
@@ -162,6 +164,12 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 }
 
+                if(device.getHasZoneMinderManagement()){
+                    //
+                    holder.zoneMinderMgmIMG.setVisibility(View.VISIBLE);
+
+                }
+
                 holder.connectToDeviceBTN.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -169,7 +177,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                         connectToDevice(
                                 device.getDeviceName(),
                                 device.getHasTorrentManagement(),
-                                device.getHasDirectoryNavigation()
+                                device.getHasDirectoryNavigation(),
+                                device.getHasZoneMinderManagement()
                         );
 
                     }
@@ -202,12 +211,13 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     }
 
-    private void connectToDevice(String deviceName, boolean torrent, boolean dirNavi){
+    private void connectToDevice(String deviceName, boolean torrent, boolean dirNavi, boolean zm){
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
         intent.putExtra("__DEVICE_TO_CONNECT", deviceName);
         intent.putExtra("__HAS_TORRENT_MANAGEMENT", torrent);
         intent.putExtra("__HAS_DIRECTORY_NAVIGATION", dirNavi);
+        intent.putExtra("__HAS_ZONEMINDER_MANAGEMENT", zm);
 
         startActivity(intent);
 

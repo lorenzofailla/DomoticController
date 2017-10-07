@@ -41,6 +41,11 @@
             android:layout_height="50dp"
             android:src="@drawable/torrent" />
 
+       <ImageButton
+           android:id="@+id/BTN___DEVICEVIEW___ZONEMINDER"
+           android:layout_width="50dp"
+           android:layout_height="50dp"
+           android:src="@drawable/videocam" />
 
     </LinearLayout>
 

@@ -32,6 +32,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private String remoteDeviceName;
     private boolean remoteDeviceTorrent;
     private boolean remoteDeviceDirNavi;
+    private boolean remoteDeviceZoneMinder;
 
     private String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
@@ -145,6 +146,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             remoteDeviceName = extras.getString("__DEVICE_TO_CONNECT");
             remoteDeviceTorrent = extras.getBoolean("__HAS_TORRENT_MANAGEMENT");
             remoteDeviceDirNavi = extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
+            remoteDeviceZoneMinder = extras.getBoolean("__HAS_ZONEMINDER_MANAGEMENT");
 
         } else {
 
@@ -221,6 +223,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setOnClickListener(onClickListener);
+
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso
         incomingMessages = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/lorenzofailla-g3/IncomingCommands");
@@ -246,6 +250,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
+        findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setOnClickListener(null);
 
         // rimuove gli eventuali task ritardati sull'handler
         handler.removeCallbacks(sendWelcomeMessage);
@@ -475,6 +480,16 @@ public class DeviceViewActivity extends AppCompatActivity {
         } else {
             //
             findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.GONE);
+
+        }
+
+        if (remoteDeviceZoneMinder){
+
+            findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setVisibility(View.VISIBLE);
+
+        } else {
+            //
+            findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setVisibility(View.GONE);
 
         }
 
