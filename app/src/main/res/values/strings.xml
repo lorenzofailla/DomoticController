@@ -28,9 +28,12 @@
     <string name="ALERTDIALOG_MESSAGE_ADD_TORRENT">Enter the URL to add</string>
     <string name="ALERTDIALOG_MESSAGE_CONFIRM_DELETE_FROM_CLOUD">Please confirm you want to remove this file from the cloud storage.\nThis cannot be undone.</string>
     <string name="ALERTDIALOG_MESSAGE_REMOTE_DEVICE_NOT_RESPONDING">The remote device does not answer to requests.\nPlease ensure the remote device is actually on line.\n</string>
+    <string name="ALERTDIALOG_MESSAGE_ZM_NOT_RESPONDING">Server did not reply.</string>
     <string name="ALERTDIALOG_TITLE_ADD_TORRENT">New torrent</string>
     <string name="ALERTDIALOG_TITLE_CONFIRM_DELETE_FROM_CLOUD">Confirm removal.</string>
     <string name="ALERTDIALOG_TITLE_REMOTE_DEVICE_NOT_RESPONDING">Remote device is off-line</string>
+    <string name="ALERTDIALOG_TITLE_ZM_NOT_RESPONDING">ZoneMinder reply timeout</string>
+
 
     <string name="CONNECTIONFGM_BTN_CONNECT">Connect</string>
     <string name="CONNECTIONFGM_BTN_RECONNECT">Reconnect</string>
@@ -49,6 +52,9 @@
     <string name="CLOUDSTORAGE_LABEL_REQUESTOR">Uploaded by: </string>
     <string name="CLOUDSTORAGE_LABEL_SIZE">Size: </string>
     <string name="CLOUDSTORAGE_LABEL_NOFDOWNLOADS">N. of downloads: </string>
+
+    <string name="ZMMGM_PD_LABEL_CONNECTING">Waiting for reply...</string>
+    <string name="ZMMGM_PD_TITLE_CONNECTING">Connecting to ZoneMinder</string>
 
     <string name="DEVICESELECTION_LABEL_SELECT_DEVICE">Select the device to connect to:</string>
 

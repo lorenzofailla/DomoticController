@@ -1,6 +1,7 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.app.Notification;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
@@ -22,8 +23,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 
-import java.util.TimerTask;
-
 public class DeviceViewActivity extends AppCompatActivity {
 
     // Firebase Database
@@ -37,13 +36,17 @@ public class DeviceViewActivity extends AppCompatActivity {
     private String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutBase = 2*60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
+    private long zmReplyTimeout = 30000L; // ms
 
     private Handler handler;
+
+    private ProgressDialog zmProgressDialog;
 
     // Fragments
     private DeviceInfoFragment deviceInfoFragment;
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
+    private ZoneMinderControlFragment zoneMinderControlFragment;
 
     // Runnable per chiudere l'Activity in caso il dispositivo non risponda alle chiamate entro il timeout
     private Runnable watchDog = new Runnable() {
@@ -77,6 +80,16 @@ public class DeviceViewActivity extends AppCompatActivity {
             );
 
             handler.postDelayed(watchDog, replyTimeoutConnection);
+
+        }
+
+    };
+
+    private Runnable zoneMinderTimeOut = new Runnable() {
+        @Override
+        public void run() {
+
+            manageZoneMinderTimeOut();
 
         }
 
@@ -148,6 +161,8 @@ public class DeviceViewActivity extends AppCompatActivity {
             remoteDeviceDirNavi = extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
             remoteDeviceZoneMinder = extras.getBoolean("__HAS_ZONEMINDER_MANAGEMENT");
 
+            releaseControls();
+
         } else {
 
             finish();
@@ -158,9 +173,6 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     private void showDeviceInfo() {
-
-        // gestisce la visualizzazione dei pulsanti
-        releaseControls();
 
         // mostra il Fragment 'deviceInfoFragment'
         deviceInfoFragment = new DeviceInfoFragment();
@@ -251,6 +263,9 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setOnClickListener(null);
+        
+        // rimuove i listener ai fragment
+        // TODO: 08/10/2017 implementare 
 
         // rimuove gli eventuali task ritardati sull'handler
         handler.removeCallbacks(sendWelcomeMessage);
@@ -391,6 +406,26 @@ public class DeviceViewActivity extends AppCompatActivity {
                         .setSmallIcon(R.drawable.home)
                         .build();
 
+                // valorizza il flag per eliminare il messaggio dalla coda
+                deleteMsg = true;
+
+                break;
+
+            case "ZONEMINDER_DATA_UPDATED":
+
+                if(zmProgressDialog.isShowing()){
+
+                    handler.removeCallbacks(zoneMinderTimeOut);
+                    zmProgressDialog.dismiss();
+
+                    zoneMinderControlFragment=new ZoneMinderControlFragment();
+
+                    showFragment(zoneMinderControlFragment);
+
+                }
+
+                // valorizza il flag per eliminare il messaggio dalla coda
+                deleteMsg = true;
 
         }
 
@@ -520,6 +555,11 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     break;
 
+                case R.id.BTN___DEVICEVIEW___ZONEMINDER:
+
+                    startZoneMinder();
+
+                    break;
 
             }
 
@@ -527,7 +567,20 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
+    private void startZoneMinder(){
 
+        zmProgressDialog = new ProgressDialog(this);
+        zmProgressDialog.setCancelable(true);
+        zmProgressDialog.setTitle(R.string.ZMMGM_PD_TITLE_CONNECTING);
+        zmProgressDialog.setIndeterminate(true);
+
+        zmProgressDialog.show();
+
+        sendCommandToDevice(new Message("__update_zoneminder_data","null",thisDevice));
+
+        handler.postDelayed(zoneMinderTimeOut, zmReplyTimeout);
+
+    }
 
     private void rebootHost() {
 
@@ -764,6 +817,26 @@ public class DeviceViewActivity extends AppCompatActivity {
                 .create()
                 .show();
 
+
+    }
+
+    private void manageZoneMinderTimeOut(){
+
+        zmProgressDialog.cancel();
+
+        // costruisce un AlertDialog e lo mostra a schermo
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.ALERTDIALOG_TITLE_ZM_NOT_RESPONDING)
+                .setMessage(R.string.ALERTDIALOG_MESSAGE_ZM_NOT_RESPONDING)
+                .setPositiveButton(R.string.ALERTDIALOG_GOT_IT, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+
+                })
+                .create()
+                .show();
 
     }
 

@@ -76,7 +76,6 @@ public class DeviceInfoFragment extends Fragment {
         }
     };
 
-
     public static class DeviceLogHolder extends RecyclerView.ViewHolder {
 
         public TextView dateTimeTXV;
