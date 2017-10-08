@@ -3,6 +3,8 @@ package com.apps.lore_f.domoticcontroller;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -77,9 +79,15 @@ public class ZoneMinderControlFragment extends Fragment {
 
                 case R.id.BTN___ZMMGM___CAMERAMANAGER:
 
+                    ZoneMinderCameraListFragment zoneMinderCameraListFragment = new ZoneMinderCameraListFragment();
+                    showFragment(zoneMinderCameraListFragment);
+
                     break;
 
                 case R.id.BTN___ZMMGM___LOGS:
+
+                    ZoneMinderEventViewerFragment zoneMinderEventViewerFragment = new ZoneMinderEventViewerFragment();
+                    showFragment(zoneMinderEventViewerFragment);
 
                     break;
 
@@ -87,5 +95,15 @@ public class ZoneMinderControlFragment extends Fragment {
 
         }
     };
+
+    private void showFragment(Fragment fragment) {
+
+        /* mostra il fragment passato in argomento */
+        FragmentManager fragmentManager = getChildFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.VIE___ZMMGM___SUBVIEW, fragment);
+
+        fragmentTransaction.commit();
+    }
 
 }

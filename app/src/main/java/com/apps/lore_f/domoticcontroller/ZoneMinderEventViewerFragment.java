@@ -4,25 +4,19 @@ package com.apps.lore_f.domoticcontroller;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 
-public class ZoneMinderCameraListFragment extends Fragment {
+public class ZoneMinderEventViewerFragment extends Fragment {
 
     public boolean viewCreated=false;
 
     private View fragmentview;
 
-    public DatabaseReference camerasNode;
-    public DatabaseReference alarmsNode;
-
-    public ZoneMinderCameraListFragment() {
+    public ZoneMinderEventViewerFragment() {
         // Required empty public constructor
     }
 
@@ -36,7 +30,7 @@ public class ZoneMinderCameraListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_zoneminder_cameralist, container, false);
+        View view = inflater.inflate(R.layout.fragment_zoneminder_eventviewer, container, false);
 
         fragmentview=view;
 

@@ -40,6 +40,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private Handler handler;
 
+    private ProgressDialog connectionProgressDialog;
     private ProgressDialog zmProgressDialog;
 
     // Fragments
@@ -161,8 +162,6 @@ public class DeviceViewActivity extends AppCompatActivity {
             remoteDeviceDirNavi = extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
             remoteDeviceZoneMinder = extras.getBoolean("__HAS_ZONEMINDER_MANAGEMENT");
 
-            releaseControls();
-
         } else {
 
             finish();
@@ -231,15 +230,17 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onResume();
 
+        // nasconde i controlli
+        hideControls();
+
         // assegna gli OnClickListener ai pulsanti
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setOnClickListener(onClickListener);
 
-
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso
-        incomingMessages = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/lorenzofailla-g3/IncomingCommands");
+        incomingMessages = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+thisDevice+"/IncomingCommands");
 
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessages.addChildEventListener(newCommandsToProcess);
@@ -248,6 +249,11 @@ public class DeviceViewActivity extends AppCompatActivity {
         handler=new Handler();
         handler.postDelayed(sendWelcomeMessage, 0);
 
+        // mostra un ProgressDialog
+        connectionProgressDialog = new ProgressDialog(this);
+        connectionProgressDialog.setIndeterminate(true);
+        connectionProgressDialog.setTitle(R.string.DEVICEVIEW_REFRESHING_DEVICE_CONNECTION);
+        connectionProgressDialog.show();
     }
 
     @Override
@@ -280,6 +286,12 @@ public class DeviceViewActivity extends AppCompatActivity {
         switch (inMsg.getHeader()) {
 
             case "WELCOME_MESSAGE":
+
+                if(connectionProgressDialog.isShowing()){
+                    connectionProgressDialog.dismiss();
+                }
+
+                releaseControls();
 
                 handler.removeCallbacks(watchDog);
                 handler.postDelayed(sendWelcomeMessage, replyTimeoutBase);
@@ -498,6 +510,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void releaseControls() {
 
+        findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setVisibility(View.VISIBLE);
+
         if (remoteDeviceTorrent) {
             //
             findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.VISIBLE);
@@ -527,6 +541,15 @@ public class DeviceViewActivity extends AppCompatActivity {
             findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setVisibility(View.GONE);
 
         }
+
+    }
+
+    private void hideControls() {
+
+        findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setVisibility(View.GONE);
+        findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.GONE);
+        findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.GONE);
+        findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setVisibility(View.GONE);
 
     }
 
@@ -801,6 +824,13 @@ public class DeviceViewActivity extends AppCompatActivity {
     };
 
     private void manageRemoteDeviceNotResponding(){
+
+
+        if (connectionProgressDialog.isShowing()){
+
+            connectionProgressDialog.dismiss();
+
+        }
 
         // costruisce un AlertDialog e lo mostra a schermo
         new AlertDialog.Builder(this)

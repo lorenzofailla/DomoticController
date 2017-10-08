@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.apps.lore_f.domoticcontroller.ZoneMinderCameraListFragment">
+    tools:context="com.apps.lore_f.domoticcontroller.ZoneMinderEventViewerFragment">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ZoneMinder Camera List"/>
+        android:text="ZoneMinder Event Viewer"/>
 
 </RelativeLayout>
