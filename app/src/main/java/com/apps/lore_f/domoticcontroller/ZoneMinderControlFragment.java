@@ -77,7 +77,7 @@ public class ZoneMinderControlFragment extends Fragment {
                 case R.id.BTN___ZMMGM___CAMERAMANAGER:
 
                     ZoneMinderCameraListFragment zoneMinderCameraListFragment = new ZoneMinderCameraListFragment();
-                    zoneMinderCameraListFragment.camerasNode=zoneminderDBNode;
+                    zoneMinderCameraListFragment.camerasNode=zoneminderDBNode.child("Monitors").getRef();
 
                     showFragment(zoneMinderCameraListFragment);
 

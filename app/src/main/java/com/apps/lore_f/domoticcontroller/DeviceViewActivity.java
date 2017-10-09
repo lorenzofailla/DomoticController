@@ -431,7 +431,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                     zmProgressDialog.dismiss();
 
                     zoneMinderControlFragment=new ZoneMinderControlFragment();
-                    zoneMinderControlFragment.zoneminderDBNode=FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+remoteDeviceName+"/Zoneminder");
+                    zoneMinderControlFragment.zoneminderDBNode=FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+remoteDeviceName+"/ZoneMinder");
 
                     showFragment(zoneMinderControlFragment);
 

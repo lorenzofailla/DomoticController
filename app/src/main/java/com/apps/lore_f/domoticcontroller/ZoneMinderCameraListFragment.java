@@ -98,7 +98,7 @@ public class ZoneMinderCameraListFragment extends Fragment {
         fragmentview=view;
 
         camerasRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS);
-        availableCameras = camerasNode.child("Monitors").orderByChild("Available").equalTo(true);
+        availableCameras = camerasNode.orderByChild("Available").equalTo(true);
         availableCameras.addValueEventListener(valueEventListener);
 
         viewCreated=true;
