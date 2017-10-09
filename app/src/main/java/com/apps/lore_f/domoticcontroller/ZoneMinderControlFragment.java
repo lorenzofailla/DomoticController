@@ -24,10 +24,7 @@ public class ZoneMinderControlFragment extends Fragment {
 
     private View fragmentview;
 
-    public DatabaseReference camerasNode;
-    public DatabaseReference alarmsNode;
-
-
+    public DatabaseReference zoneminderDBNode;
 
     public ZoneMinderControlFragment() {
         // Required empty public constructor
@@ -80,6 +77,8 @@ public class ZoneMinderControlFragment extends Fragment {
                 case R.id.BTN___ZMMGM___CAMERAMANAGER:
 
                     ZoneMinderCameraListFragment zoneMinderCameraListFragment = new ZoneMinderCameraListFragment();
+                    zoneMinderCameraListFragment.camerasNode=zoneminderDBNode.child("Monitors").getRef();
+
                     showFragment(zoneMinderCameraListFragment);
 
                     break;

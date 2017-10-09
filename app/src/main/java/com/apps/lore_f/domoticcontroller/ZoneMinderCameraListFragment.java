@@ -6,12 +6,22 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import static android.content.ContentValues.TAG;
 
 public class ZoneMinderCameraListFragment extends Fragment {
 
@@ -20,7 +30,54 @@ public class ZoneMinderCameraListFragment extends Fragment {
     private View fragmentview;
 
     public DatabaseReference camerasNode;
-    public DatabaseReference alarmsNode;
+    private Query availableCameras;
+
+    private LinearLayoutManager linearLayoutManager;
+    private FirebaseRecyclerAdapter<ZMCameraDevice, CamerasHolder> firebaseAdapter;
+    private RecyclerView camerasRecyclerView;
+
+    private ValueEventListener valueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            try {
+
+                Log.i(TAG, dataSnapshot.getValue().toString());
+
+            } catch (NullPointerException e) {
+
+                Log.i(TAG, "Cannot show datasnapshot");
+
+            }
+
+            // aggiorna l'adapter
+            if(viewCreated)
+                refreshAdapter();
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+
+
+    };
+
+    public static class CamerasHolder extends RecyclerView.ViewHolder {
+
+        public TextView cameraNameTXV;
+        public ImageView cameraConnectBTN;
+
+
+        public CamerasHolder(View v) {
+            super(v);
+
+            cameraNameTXV = (TextView) itemView.findViewById(R.id.TXV___ZMCAMERADEVICE___DEVICENAME);
+            cameraConnectBTN = (ImageView) itemView.findViewById(R.id.BTN___ZMCAMERADEVICE___CONNECT);
+
+        }
+
+    }
 
     public ZoneMinderCameraListFragment() {
         // Required empty public constructor
@@ -40,6 +97,10 @@ public class ZoneMinderCameraListFragment extends Fragment {
 
         fragmentview=view;
 
+        camerasRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS);
+        availableCameras = camerasNode.orderByChild("Available").equalTo(true);
+        availableCameras.addValueEventListener(valueEventListener);
+
         viewCreated=true;
         return view;
 
@@ -55,28 +116,23 @@ public class ZoneMinderCameraListFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
 
-
     }
 
-
-    /*
     private void refreshAdapter(){
 
         linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setStackFromEnd(false);
 
-        firebaseAdapter = new FirebaseRecyclerAdapter<LogEntry, DeviceInfoFragment.DeviceLogHolder>(
-                LogEntry.class,
-                R.layout.row_holder_log_element,
-                DeviceInfoFragment.DeviceLogHolder.class,
-                logsNode) {
+        firebaseAdapter = new FirebaseRecyclerAdapter<ZMCameraDevice, CamerasHolder>(
+                ZMCameraDevice.class,
+                R.layout.row_holder_zmcamera_element,
+                CamerasHolder.class,
+                availableCameras) {
 
             @Override
-            protected void populateViewHolder(DeviceInfoFragment.DeviceLogHolder holder, final LogEntry log, int position) {
+            protected void populateViewHolder(CamerasHolder holder, final ZMCameraDevice camera, int position) {
 
-                holder.dateTimeTXV.setText(log.getDatetime());
-                holder.logTypeTXV.setText(log.getLogtype());
-                holder.logDescTXV.setText(log.getLogdesc());
+                holder.cameraNameTXV.setText(camera.getName());
 
             }
 
@@ -92,17 +148,17 @@ public class ZoneMinderCameraListFragment extends Fragment {
                 // to the bottom of the list to show the newly added message.
                 if (lastVisiblePosition == -1 ||
                         (positionStart >= (mediaCount - 1) && lastVisiblePosition == (positionStart - 1))) {
-                    logRecyclerView.scrollToPosition(positionStart);
+                    camerasRecyclerView.scrollToPosition(positionStart);
                 }
 
             }
 
         });
 
-        logRecyclerView.setLayoutManager(linearLayoutManager);
-        logRecyclerView.setAdapter(firebaseAdapter);
+        camerasRecyclerView.setLayoutManager(linearLayoutManager);
+        camerasRecyclerView.setAdapter(firebaseAdapter);
 
     }
-    */
+
 
 }

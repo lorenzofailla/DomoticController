@@ -4,13 +4,13 @@ package com.apps.lore_f.domoticcontroller;
  * Created by lore_f on 08/10/2017.
  */
 
-public class CameraDevice {
+public class ZMCameraDevice {
 
     private String Id;
     private String Name;
 
     // empty constructor
-    public CameraDevice() {
+    public ZMCameraDevice() {
     }
 
     public String getId() {
