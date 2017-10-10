@@ -1,11 +1,14 @@
 package com.apps.lore_f.domoticcontroller;
 
-
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,10 +24,19 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import static android.content.ContentValues.TAG;
 
 public class ZoneMinderCameraListFragment extends Fragment {
 
+    public ZoneMinderControlFragment parent;
     public boolean viewCreated=false;
 
     private View fragmentview;
@@ -36,9 +48,12 @@ public class ZoneMinderCameraListFragment extends Fragment {
     private FirebaseRecyclerAdapter<ZMCameraDevice, CamerasHolder> firebaseAdapter;
     private RecyclerView camerasRecyclerView;
 
+
+
     private ValueEventListener valueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
+
             try {
 
                 Log.i(TAG, dataSnapshot.getValue().toString());
@@ -116,6 +131,8 @@ public class ZoneMinderCameraListFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
 
+        availableCameras.removeEventListener(valueEventListener);
+
     }
 
     private void refreshAdapter(){
@@ -133,6 +150,19 @@ public class ZoneMinderCameraListFragment extends Fragment {
             protected void populateViewHolder(CamerasHolder holder, final ZMCameraDevice camera, int position) {
 
                 holder.cameraNameTXV.setText(camera.getName());
+                holder.cameraConnectBTN.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        ZoneMinderCameraViewerFragment zoneMinderCameraViewerFragment = new ZoneMinderCameraViewerFragment();
+                        zoneMinderCameraViewerFragment.parent = parent;
+                        zoneMinderCameraViewerFragment.zmMonitorId = camera.getId();
+                        zoneMinderCameraViewerFragment.zmMonitorName = camera.getName();
+
+                        parent.showFragment(zoneMinderCameraViewerFragment);
+
+                    }
+                });
 
             }
 

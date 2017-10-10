@@ -28,12 +28,12 @@ public class DeviceViewActivity extends AppCompatActivity {
     // Firebase Database
     private DatabaseReference incomingMessages;
 
-    private String remoteDeviceName;
+    public String remoteDeviceName;
     private boolean remoteDeviceTorrent;
     private boolean remoteDeviceDirNavi;
     private boolean remoteDeviceZoneMinder;
 
-    private String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
+    public String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutBase = 2*60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long zmReplyTimeout = 30000L; // ms
@@ -279,7 +279,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    public void processIncomingMessage(Message inMsg, String msgKey) {
+    private void processIncomingMessage(Message inMsg, String msgKey) {
 
         boolean deleteMsg = false;
 
@@ -431,7 +431,8 @@ public class DeviceViewActivity extends AppCompatActivity {
                     zmProgressDialog.dismiss();
 
                     zoneMinderControlFragment=new ZoneMinderControlFragment();
-                    zoneMinderControlFragment.zoneminderDBNode=FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+thisDevice+"/Zoneminder");
+                    zoneMinderControlFragment.zoneminderDBNode=FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+remoteDeviceName+"/ZoneMinder");
+                    zoneMinderControlFragment.parent=this;
 
                     showFragment(zoneMinderControlFragment);
 
@@ -448,7 +449,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void sendCommandToDevice(Message command) {
+    public void sendCommandToDevice(Message command) {
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo remoto selezionato
         DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices");

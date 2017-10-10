@@ -8,6 +8,7 @@ public class ZMCameraDevice {
 
     private String Id;
     private String Name;
+    private boolean Available;
 
     // empty constructor
     public ZMCameraDevice() {
@@ -21,4 +22,7 @@ public class ZMCameraDevice {
         return Name;
     }
 
+    public boolean isAvailable() {
+        return Available;
+    }
 }

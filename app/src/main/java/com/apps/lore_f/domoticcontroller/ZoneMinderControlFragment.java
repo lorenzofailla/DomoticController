@@ -23,8 +23,10 @@ public class ZoneMinderControlFragment extends Fragment {
     public boolean viewCreated=false;
 
     private View fragmentview;
+    private ZoneMinderControlFragment me = this;
 
     public DatabaseReference zoneminderDBNode;
+    public DeviceViewActivity parent;
 
     public ZoneMinderControlFragment() {
         // Required empty public constructor
@@ -77,7 +79,8 @@ public class ZoneMinderControlFragment extends Fragment {
                 case R.id.BTN___ZMMGM___CAMERAMANAGER:
 
                     ZoneMinderCameraListFragment zoneMinderCameraListFragment = new ZoneMinderCameraListFragment();
-                    zoneMinderCameraListFragment.camerasNode=zoneminderDBNode.child("Monitors").getRef();
+                    zoneMinderCameraListFragment.camerasNode=zoneminderDBNode.child("Monitors");
+                    zoneMinderCameraListFragment.parent = me;
 
                     showFragment(zoneMinderCameraListFragment);
 
@@ -95,7 +98,7 @@ public class ZoneMinderControlFragment extends Fragment {
         }
     };
 
-    private void showFragment(Fragment fragment) {
+    public void showFragment(Fragment fragment) {
 
         /* mostra il fragment passato in argomento */
         FragmentManager fragmentManager = getChildFragmentManager();
