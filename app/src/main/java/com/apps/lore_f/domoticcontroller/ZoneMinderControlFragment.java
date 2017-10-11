@@ -18,11 +18,14 @@ import android.widget.ListView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 public class ZoneMinderControlFragment extends Fragment {
 
     public boolean viewCreated=false;
 
-    private View fragmentview;
+    private View fragmentView;
     private ZoneMinderControlFragment me = this;
 
     public DatabaseReference zoneminderDBNode;
@@ -47,7 +50,9 @@ public class ZoneMinderControlFragment extends Fragment {
         view.findViewById(R.id.BTN___ZMMGM___CAMERAMANAGER).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___ZMMGM___LOGS).setOnClickListener(onClickListener);
 
-        fragmentview=view;
+        fragmentView=view;
+
+        manageFullScreenMode(false);
 
         viewCreated=true;
         return view;
@@ -64,8 +69,8 @@ public class ZoneMinderControlFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
 
-        fragmentview.findViewById(R.id.BTN___ZMMGM___CAMERAMANAGER).setOnClickListener(null);
-        fragmentview.findViewById(R.id.BTN___ZMMGM___LOGS).setOnClickListener(null);
+        fragmentView.findViewById(R.id.BTN___ZMMGM___CAMERAMANAGER).setOnClickListener(null);
+        fragmentView.findViewById(R.id.BTN___ZMMGM___LOGS).setOnClickListener(null);
 
     }
 
@@ -106,6 +111,20 @@ public class ZoneMinderControlFragment extends Fragment {
         fragmentTransaction.replace(R.id.VIE___ZMMGM___SUBVIEW, fragment);
 
         fragmentTransaction.commit();
+
+    }
+
+    public void manageFullScreenMode(boolean sts){
+
+        if(sts){
+
+            fragmentView.findViewById(R.id.LLO_ZMMGM_BUTTONSTRIP).setVisibility(GONE);
+
+        } else {
+
+            fragmentView.findViewById(R.id.LLO_ZMMGM_BUTTONSTRIP).setVisibility(VISIBLE);
+        }
+
     }
 
 }

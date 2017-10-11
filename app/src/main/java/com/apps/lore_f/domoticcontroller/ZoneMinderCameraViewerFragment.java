@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -39,6 +40,8 @@ public class ZoneMinderCameraViewerFragment extends Fragment {
 
     private View fragmentview;
 
+    private boolean fullScreenMode=false;
+
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -48,6 +51,14 @@ public class ZoneMinderCameraViewerFragment extends Fragment {
                 case R.id.BTN___ZMCAMERAVIEW___REQUESTSHOT:
                     requestSingleShot();
                     break;
+
+                case R.id.BTN___ZMCAMERAVIEW___REQUESTSHOTSERIES:
+                    requestShotSeries();
+                    break;
+
+                case R.id.IVW___ZMCAMERAVIEW___SHOTVIEW:
+                    fullScreenMode=!fullScreenMode;
+                    manageFullScreenMode();
             }
 
         }
@@ -63,29 +74,40 @@ public class ZoneMinderCameraViewerFragment extends Fragment {
 
     }
 
-    private ValueEventListener valueEventListener = new ValueEventListener() {
+    private ChildEventListener childEventListener = new ChildEventListener() {
         @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-            try {
+            byte[] shotImageData = getByteArray(dataSnapshot);
 
-                byte[] shotImageData = getByteArray(dataSnapshot);
+            if (shotImageData!=null) {
+                shotImage = BitmapFactory.decodeByteArray(shotImageData, 0, shotImageData.length);
 
-                if (shotImageData!=null) {
-                    shotImage = BitmapFactory.decodeByteArray(shotImageData, 0, shotImageData.length);
-                    shotView.setImageBitmap(shotImage);
+                // adatta le dimensioni dell'immagine a quelle disponibili su schermo
+                shotView.setImageBitmap(shotImage);
 
-                    shotNode.removeValue();
 
-                } else {
-                    // TODO: 10-Oct-17 mostra un'immagine standard
-                }
+            } else {
 
-            } catch (NullPointerException e) {
+                //shotView.setImageDrawable(R.drawable.broken);
 
-                Log.i(TAG, "Cannot show datasnapshot");
 
             }
+
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
         }
 
@@ -105,12 +127,17 @@ public class ZoneMinderCameraViewerFragment extends Fragment {
         cameraNameTXVview.setText(zmMonitorName);
 
         shotView = (ImageView) view.findViewById(R.id.IVW___ZMCAMERAVIEW___SHOTVIEW);
+        shotView.setOnClickListener(onClickListener);
 
         view.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOT).setOnClickListener(onClickListener);
-        shotNode= FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+parent.parent.remoteDeviceName+"/ZoneMinder/Monitors/"+zmMonitorId+"/Shot");
-        shotNode.addValueEventListener(valueEventListener);
+        view.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(onClickListener);
+
+        shotNode= FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+parent.parent.remoteDeviceName+"/ZoneMinder/Monitors/"+zmMonitorId+"/Shots");
+        shotNode.addChildEventListener(childEventListener);
 
         fragmentview=view;
+
+        manageFullScreenMode();
 
         viewCreated=true;
         return view;
@@ -128,7 +155,13 @@ public class ZoneMinderCameraViewerFragment extends Fragment {
         super.onDetach();
 
         fragmentview.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOT).setOnClickListener(null);
-        shotNode.removeEventListener(valueEventListener);
+        fragmentview.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(null);
+
+        shotView.setOnClickListener(null);
+        shotNode.removeEventListener(childEventListener);
+
+        // elimina i dati
+        shotNode.removeValue();
     }
 
     public void requestSingleShot(){
@@ -136,6 +169,18 @@ public class ZoneMinderCameraViewerFragment extends Fragment {
         parent.parent.sendCommandToDevice(
                 new Message(
                         "__request_single_shot",
+                        zmMonitorId,
+                        parent.parent.thisDevice
+                )
+        );
+
+    }
+
+    public void requestShotSeries(){
+
+        parent.parent.sendCommandToDevice(
+                new Message(
+                        "__request_shot_series",
                         zmMonitorId,
                         parent.parent.thisDevice
                 )
@@ -179,6 +224,24 @@ public class ZoneMinderCameraViewerFragment extends Fragment {
 
         }
         return null;
+
+    }
+
+    private void manageFullScreenMode(){
+
+        if(fullScreenMode){
+
+            fragmentview.findViewById(R.id.LLO_ZMCAMERAVIEW___BUTTONSTRIP).setVisibility(View.GONE);
+            fragmentview.findViewById(R.id.TXV___ZMCAMERAVIEW___CAMERANAME).setVisibility(View.GONE);
+
+        } else {
+
+            fragmentview.findViewById(R.id.LLO_ZMCAMERAVIEW___BUTTONSTRIP).setVisibility(View.VISIBLE);
+            fragmentview.findViewById(R.id.TXV___ZMCAMERAVIEW___CAMERANAME).setVisibility(View.VISIBLE);
+        }
+
+        parent.manageFullScreenMode(fullScreenMode);
+
 
     }
 
