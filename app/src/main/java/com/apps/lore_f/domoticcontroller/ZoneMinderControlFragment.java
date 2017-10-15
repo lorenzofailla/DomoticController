@@ -94,6 +94,7 @@ public class ZoneMinderControlFragment extends Fragment {
                 case R.id.BTN___ZMMGM___LOGS:
 
                     ZoneMinderEventViewerFragment zoneMinderEventViewerFragment = new ZoneMinderEventViewerFragment();
+                    zoneMinderEventViewerFragment.parent=me;
                     showFragment(zoneMinderEventViewerFragment);
 
                     break;

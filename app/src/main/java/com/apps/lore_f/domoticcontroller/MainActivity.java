@@ -36,6 +36,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.io.File;
 
@@ -79,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             return;
 
         }
+
+        // sottoscrive l'app ai topic per ricevere le notifiche
+        FirebaseMessaging.getInstance().subscribeToTopic("lorenzofailla-home");
 
         // lancia DeviceSelectionActivity per selezionare il dispositivo a cui connettersi
         startActivity(new Intent(this, DeviceSelectionActivity.class));
