@@ -94,14 +94,14 @@ public class WakeOnLanFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_device_info, container, false);
+        View view = inflater.inflate(R.layout.fragment_wol_devices, container, false);
 
         // inizializza l'handler alla view, in questo modo i componenti possono essere ritrovati
         fragmentView=view;
 
         wolDevicesRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___WOLDEVICESFRAGMENT___DEVICES);
 
-        wolDevicesNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + parent.remoteDeviceName + "/WakeOnLan");
+        wolDevicesNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + parent.remoteDeviceName + "/WOLDevices");
         wolDevicesNode.addValueEventListener(valueEventListener);
 
         // aggiorna il flag e effettua il trigger del metodo nel listener
@@ -147,7 +147,7 @@ public class WakeOnLanFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
 
-                        parent.sendCommandToDevice(new Message("__wakeonlan",wolDevice.getId(),parent.thisDevice));
+                        parent.sendCommandToDevice(new Message("__wakeonlan", wolDevice.getId(),parent.thisDevice));
 
                     }
 

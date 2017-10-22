@@ -51,6 +51,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
     private ZoneMinderControlFragment zoneMinderControlFragment;
+    private WakeOnLanFragment wakeOnLanFragment;
 
     // Runnable per chiudere l'Activity in caso il dispositivo non risponda alle chiamate entro il timeout
     private Runnable watchDog = new Runnable() {
@@ -230,6 +231,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(onClickListener);
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso
         incomingMessages = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+thisDevice+"/IncomingCommands");
@@ -273,6 +275,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setOnClickListener(null);
+        findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(null);
         
         // rimuove i listener ai fragment
         // TODO: 08/10/2017 implementare 
@@ -598,6 +601,11 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     break;
 
+                case R.id.BTN___DEVICEVIEW___WAKEONLAN:
+
+                    startWakeOnLan();
+
+                    break;
             }
 
         }
@@ -616,6 +624,15 @@ public class DeviceViewActivity extends AppCompatActivity {
         sendCommandToDevice(new Message("__update_zoneminder_data","null",thisDevice));
 
         handler.postDelayed(zoneMinderTimeOut, zmReplyTimeout);
+
+    }
+
+    private void startWakeOnLan(){
+
+        wakeOnLanFragment = new WakeOnLanFragment();
+        wakeOnLanFragment.parent = this;
+
+        showFragment(wakeOnLanFragment);
 
     }
 

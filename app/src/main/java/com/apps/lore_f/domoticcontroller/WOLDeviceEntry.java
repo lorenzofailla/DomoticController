@@ -24,4 +24,5 @@ public class WOLDeviceEntry {
     public String getAddress() {
         return Address;
     }
+
 }
