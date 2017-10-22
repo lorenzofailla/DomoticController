@@ -1,0 +1,28 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.apps.lore_f.domoticcontroller.WakeOnLanFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/TXV___WOLDEVICESFRAGMENT___LABEL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="@string/WOL_DEVICES_LABEL_SELECT_DEVICE"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/RWV___WOLDEVICESFRAGMENT___DEVICES"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/TXV___WOLDEVICESFRAGMENT___LABEL" />
+
+    </RelativeLayout>
+
+</FrameLayout>

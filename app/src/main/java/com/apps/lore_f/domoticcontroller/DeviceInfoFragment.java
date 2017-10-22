@@ -38,15 +38,9 @@ public class DeviceInfoFragment extends Fragment {
     public LinearLayoutManager linearLayoutManager;
     public FirebaseRecyclerAdapter<LogEntry, DeviceLogHolder> firebaseAdapter;
 
-    public DatabaseReference logsNode;
+    private DatabaseReference logsNode;
 
-    interface DeviceInfoFragmentListener{
-
-        void onViewCreated();
-        void onRebootRemoteDeviceRequest();
-        void onShutdownRemoteDeviceRequest();
-
-    }
+    public DeviceViewActivity parent;
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -56,13 +50,12 @@ public class DeviceInfoFragment extends Fragment {
 
                 case R.id.BTN___DEVICEINFOFRAGMENT___REBOOT:
 
-                    if(deviceInfoFragmentListener!=null)
-                        deviceInfoFragmentListener.onRebootRemoteDeviceRequest();
+                    parent.rebootHost();
                     break;
 
                 case R.id.BTN___DEVICEINFOFRAGMENT___SHUTDOWN:
-                    if(deviceInfoFragmentListener!=null)
-                        deviceInfoFragmentListener.onShutdownRemoteDeviceRequest();
+
+                    parent.shutdownHost();
                     break;
 
                 case R.id.BTN___DEVICEINFOFRAGMENT___CLEARLOG:
@@ -91,12 +84,6 @@ public class DeviceInfoFragment extends Fragment {
 
         }
 
-    }
-
-    private DeviceInfoFragmentListener deviceInfoFragmentListener;
-
-    public void setDeviceInfoFragmentListener(DeviceInfoFragmentListener listener){
-        deviceInfoFragmentListener=listener;
     }
 
     private ValueEventListener valueEventListener = new ValueEventListener() {
@@ -136,13 +123,12 @@ public class DeviceInfoFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_device_info, container, false);
 
@@ -151,6 +137,9 @@ public class DeviceInfoFragment extends Fragment {
 
         logRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___DEVICEINFOFRAGMENT___LOG);
 
+        logsNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + parent.remoteDeviceName + "/Log");
+        logsNode.addValueEventListener(valueEventListener);
+
         // assegna un OnClickListener ai pulsanti
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___CLEARLOG).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___REBOOT).setOnClickListener(onClickListener);
@@ -158,7 +147,6 @@ public class DeviceInfoFragment extends Fragment {
 
         // aggiorna il flag e effettua il trigger del metodo nel listener
         viewCreated = true;
-        if(deviceInfoFragmentListener!=null) deviceInfoFragmentListener.onViewCreated();
 
         return view;
 
@@ -168,8 +156,6 @@ public class DeviceInfoFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if(logsNode!=null)
-            logsNode.addValueEventListener(valueEventListener);
 
     }
 

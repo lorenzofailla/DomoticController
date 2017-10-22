@@ -43,6 +43,9 @@ public class DeviceViewActivity extends AppCompatActivity {
     private ProgressDialog connectionProgressDialog;
     private ProgressDialog zmProgressDialog;
 
+    private long lastOnlineReply;
+    private static final String LAST_ONLINE_REPLY = "lastOnlineReply" ;
+
     // Fragments
     private DeviceInfoFragment deviceInfoFragment;
     private TorrentViewerFragment torrentViewerFragment;
@@ -169,41 +172,33 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
+        // recupera i dati dalla sessione salvata
+        if(savedInstanceState!=null){
+
+            // recupera il tempo dell'ultima risposta online
+            lastOnlineReply = savedInstanceState.getLong(LAST_ONLINE_REPLY);
+
+        }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // Save the user's current game state
+        savedInstanceState.putLong(LAST_ONLINE_REPLY, lastOnlineReply);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     private void showDeviceInfo() {
 
         // mostra il Fragment 'deviceInfoFragment'
         deviceInfoFragment = new DeviceInfoFragment();
-
-        deviceInfoFragment.setDeviceInfoFragmentListener(new DeviceInfoFragment.DeviceInfoFragmentListener() {
-            @Override
-            public void onViewCreated() {
-                deviceInfoFragment.updateView();
-            }
-
-            @Override
-            public void onRebootRemoteDeviceRequest(){
-
-                // invia il comando per riavviare il dispositivo remoto
-                rebootHost();
-            };
-
-            @Override
-            public void onShutdownRemoteDeviceRequest(){
-
-                // invia il comando per spengere il dispositivo remoto
-                shutdownHost();
-
-            };
-
-        });
-
-        deviceInfoFragment.logsNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + remoteDeviceName + "/Log");
+        deviceInfoFragment.parent = this;
 
         showFragment(deviceInfoFragment);
-
-
 
         // invia al dispositivo remoto il comando per avere l'uptime
         sendCommandToDevice(
@@ -230,9 +225,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onResume();
 
-        // nasconde i controlli
-        hideControls();
-
         // assegna gli OnClickListener ai pulsanti
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
@@ -245,15 +237,27 @@ public class DeviceViewActivity extends AppCompatActivity {
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessages.addChildEventListener(newCommandsToProcess);
 
-        // attiva il ciclo di richieste
-        handler=new Handler();
-        handler.postDelayed(sendWelcomeMessage, 0);
+        // calcola il tempo trascorso dall'ultima risposta online
+        if (System.currentTimeMillis()-lastOnlineReply > replyTimeoutBase) {
 
-        // mostra un ProgressDialog
-        connectionProgressDialog = new ProgressDialog(this);
-        connectionProgressDialog.setIndeterminate(true);
-        connectionProgressDialog.setTitle(R.string.DEVICEVIEW_REFRESHING_DEVICE_CONNECTION);
-        connectionProgressDialog.show();
+            // nasconde i controlli
+            hideControls();
+
+            // mostra un ProgressDialog
+            connectionProgressDialog = new ProgressDialog(this);
+            connectionProgressDialog.setIndeterminate(true);
+            connectionProgressDialog.setTitle(R.string.DEVICEVIEW_REFRESHING_DEVICE_CONNECTION);
+            connectionProgressDialog.show();
+
+        } else {
+
+            releaseControls();
+
+        }
+
+        // attiva il ciclo di richieste
+        handler = new Handler();
+        handler.postDelayed(sendWelcomeMessage, 0);
     }
 
     @Override
@@ -287,11 +291,16 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "WELCOME_MESSAGE":
 
-                if(connectionProgressDialog.isShowing()){
-                    connectionProgressDialog.dismiss();
-                }
+                if(connectionProgressDialog!=null) {
 
-                releaseControls();
+                    if (connectionProgressDialog.isShowing()) {
+
+                        connectionProgressDialog.dismiss();
+                        releaseControls();
+
+                    }
+
+                }
 
                 handler.removeCallbacks(watchDog);
                 handler.postDelayed(sendWelcomeMessage, replyTimeoutBase);
@@ -299,6 +308,9 @@ public class DeviceViewActivity extends AppCompatActivity {
                 // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
                 TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
                 remoteHostName.setText(remoteDeviceName);
+
+                // aggiorna il valore del tempo dell'ultima risposta
+                lastOnlineReply = System.currentTimeMillis();
 
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
@@ -607,7 +619,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void rebootHost() {
+    public void rebootHost() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -639,7 +651,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void shutdownHost() {
+    public void shutdownHost() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
