@@ -41,10 +41,20 @@
     </LinearLayout>
 
     <ImageButton
+        android:id="@+id/BTN___FILELISTROW___UPLOADASDATASLOT"
         android:layout_width="38dp"
         android:layout_height="38dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         android:src="@drawable/download" />
+
+    <ImageButton
+        android:id="@+id/BTN___FILELISTROW___UPLOADTOCLOUD"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/BTN___FILELISTROW___UPLOADASDATASLOT"
+        android:src="@drawable/cloud_upload" />
 
 </RelativeLayout>

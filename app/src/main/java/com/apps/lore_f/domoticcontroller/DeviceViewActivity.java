@@ -35,7 +35,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     public String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
-    private long replyTimeoutBase = 2*60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
+    private long replyTimeoutBase = 2 * 60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long zmReplyTimeout = 30000L; // ms
 
     private Handler handler;
@@ -44,7 +44,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private ProgressDialog zmProgressDialog;
 
     private long lastOnlineReply;
-    private static final String LAST_ONLINE_REPLY = "lastOnlineReply" ;
+    private static final String LAST_ONLINE_REPLY = "lastOnlineReply";
 
     // Fragments
     private DeviceInfoFragment deviceInfoFragment;
@@ -174,7 +174,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
         // recupera i dati dalla sessione salvata
-        if(savedInstanceState!=null){
+        if (savedInstanceState != null) {
 
             // recupera il tempo dell'ultima risposta online
             lastOnlineReply = savedInstanceState.getLong(LAST_ONLINE_REPLY);
@@ -234,13 +234,13 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(onClickListener);
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso
-        incomingMessages = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+thisDevice+"/IncomingCommands");
+        incomingMessages = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + thisDevice + "/IncomingCommands");
 
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessages.addChildEventListener(newCommandsToProcess);
 
         // calcola il tempo trascorso dall'ultima risposta online
-        if (System.currentTimeMillis()-lastOnlineReply > replyTimeoutBase) {
+        if (System.currentTimeMillis() - lastOnlineReply > replyTimeoutBase) {
 
             // nasconde i controlli
             hideControls();
@@ -276,7 +276,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(null);
-        
+
         // rimuove i listener ai fragment
         // TODO: 08/10/2017 implementare 
 
@@ -294,7 +294,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "WELCOME_MESSAGE":
 
-                if(connectionProgressDialog!=null) {
+                if (connectionProgressDialog != null) {
 
                     if (connectionProgressDialog.isShowing()) {
 
@@ -418,6 +418,10 @@ public class DeviceViewActivity extends AppCompatActivity {
                     if (fileViewerFragment.viewCreated)
                         fileViewerFragment.updateContent();
 
+                } else {
+
+                    startFileManager();
+
                 }
 
                 // valorizza il flag per eliminare il messaggio dalla coda
@@ -440,14 +444,14 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "ZONEMINDER_DATA_UPDATED":
 
-                if(zmProgressDialog.isShowing()){
+                if (zmProgressDialog.isShowing()) {
 
                     handler.removeCallbacks(zoneMinderTimeOut);
                     zmProgressDialog.dismiss();
 
-                    zoneMinderControlFragment=new ZoneMinderControlFragment();
-                    zoneMinderControlFragment.zoneminderDBNode=FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+remoteDeviceName+"/ZoneMinder");
-                    zoneMinderControlFragment.parent=this;
+                    zoneMinderControlFragment = new ZoneMinderControlFragment();
+                    zoneMinderControlFragment.zoneminderDBNode = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + remoteDeviceName + "/ZoneMinder");
+                    zoneMinderControlFragment.parent = this;
 
                     showFragment(zoneMinderControlFragment);
 
@@ -461,6 +465,12 @@ public class DeviceViewActivity extends AppCompatActivity {
         // se il flag 'deleteMsg' è stato impostato su true, elimina il messaggio dalla coda
         if (deleteMsg)
             deleteMessage(msgKey);
+
+    }
+
+    private void removeFragmentsLinks() {
+
+        if(fileViewerFragment !=null) fileViewerFragment =null;
 
     }
 
@@ -585,7 +595,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 case R.id.BTN___DEVICEVIEW___FILEMANAGER:
 
-                    startFileManager();
+                    // invia al dispositivo remoto la richiesta di conoscere la directory corrente
+                    sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
 
                     break;
 
@@ -701,20 +712,10 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void startFileManager() {
 
         fileViewerFragment = new FileViewerFragment();
-        fileViewerFragment.fileListAdapterListener = fileListFragmentAdapterListener;
-        fileViewerFragment.setFileViewerFragmentListener(new FileViewerFragment.FileViewerFragmentListener() {
-            @Override
-            public void onViewCreated() {
-
-                fileViewerFragment.updateContent();
-            }
-        });
+        fileViewerFragment.parent = this;
 
         // mostra il Fragment
         showFragment(fileViewerFragment);
-
-        // invia al dispositivo remoto la richiesta di conoscere la directory corrente
-        sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
 
     }
 
@@ -793,9 +794,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
-    private FileListAdapter.FileListAdapterListener fileListFragmentAdapterListener = new FileListAdapter.FileListAdapterListener() {
-        @Override
-        public void onItemSelected(FileInfo fileInfo) {
+    private void manageFileViewerFragmentRequest(FileInfo fileInfo) {
 
             if (fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_FILE) {
 
@@ -852,7 +851,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-    };
 
     private void manageRemoteDeviceNotResponding(){
 
@@ -898,6 +896,12 @@ public class DeviceViewActivity extends AppCompatActivity {
                 })
                 .create()
                 .show();
+
+    }
+
+    public void uploadAsDataSlot(FileInfo fileInfo){
+
+        sendCommandToDevice(new Message("__upload_file", fileInfo.getFileName(), thisDevice));
 
     }
 

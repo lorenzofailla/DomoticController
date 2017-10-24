@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,10 +20,13 @@ import java.util.List;
 
 public class FileListAdapter extends ArrayAdapter<FileInfo> {
 
-        public FileListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<FileInfo> objects) {
+        public FileListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<FileInfo> objects, final DeviceViewActivity parentDeviceViewActivity) {
         super(context, resource, objects);
 
+            parentDVA = parentDeviceViewActivity;
     }
+
+    final DeviceViewActivity parentDVA;
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
@@ -33,6 +37,8 @@ public class FileListAdapter extends ArrayAdapter<FileInfo> {
         TextView fileNameTXV=(TextView) convertView.findViewById(R.id.TXV___FILELISTROW___FILENAME);
         TextView fileSizeTXV = (TextView) convertView.findViewById(R.id.TXV___FILELISTROW___FILESIZE);
         ImageView fileTypeIVW = (ImageView)  convertView.findViewById(R.id.IVW___FILELISTROW___FILETYPEICON);
+        ImageButton uplodaFileAsDataSlot = (ImageButton) convertView.findViewById(R.id.BTN___FILELISTROW___UPLOADASDATASLOT);
+        ImageButton uplodaFileToCloud = (ImageButton) convertView.findViewById(R.id.BTN___FILELISTROW___UPLOADTOCLOUD);
 
         final FileInfo fileInfo = getItem(position);
 
@@ -49,28 +55,15 @@ public class FileListAdapter extends ArrayAdapter<FileInfo> {
 
         }
 
-        convertView.setOnClickListener(new View.OnClickListener() {
+        uplodaFileAsDataSlot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if(fileListAdapterListener!=null) fileListAdapterListener.onItemSelected(fileInfo);
+                parentDVA.uploadAsDataSlot(fileInfo);
 
             }
         });
 
         return convertView;
-
-    }
-
-    interface FileListAdapterListener{
-        void onItemSelected(FileInfo fileInfo);
-    }
-
-    FileListAdapterListener fileListAdapterListener;
-
-    public void setFileListAdapterListener(FileListAdapterListener listener){
-
-        fileListAdapterListener=listener;
 
     }
 

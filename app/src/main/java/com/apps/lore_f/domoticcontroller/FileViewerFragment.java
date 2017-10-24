@@ -24,23 +24,9 @@ public class FileViewerFragment extends Fragment {
 
     private List<FileInfo> fileInfoList;
 
-    public FileListAdapter.FileListAdapterListener fileListAdapterListener;
+    public DeviceViewActivity parent;
 
     public FileViewerFragment() {
-
-    }
-
-    interface FileViewerFragmentListener{
-
-        void onViewCreated();
-
-    }
-
-    FileViewerFragmentListener fileViewerFragmentListener;
-
-    public void setFileViewerFragmentListener(FileViewerFragmentListener listener){
-
-        fileViewerFragmentListener=listener;
 
     }
 
@@ -60,9 +46,6 @@ public class FileViewerFragment extends Fragment {
 
         updateContent();
 
-        if(fileViewerFragmentListener!=null)
-            fileViewerFragmentListener.onViewCreated();
-
         viewCreated=true;
         return view;
 
@@ -77,11 +60,12 @@ public class FileViewerFragment extends Fragment {
 
             fileInfoList = refreshFilesList();
 
-            FileListAdapter fileListAdapter = new FileListAdapter(getContext(), R.layout.fragment_fileviewer, fileInfoList);
-            fileListAdapter.setFileListAdapterListener(fileListAdapterListener);
+            FileListAdapter fileListAdapter = new FileListAdapter(getContext(), R.layout.fragment_fileviewer, fileInfoList, this.parent);
+
             currentDirectoryListView.setAdapter(fileListAdapter);
             currentDirectoryListView.setEnabled(true);
             currentDirectoryListView.setAlpha(1.0f);
+
         }
 
     }
@@ -125,5 +109,7 @@ public class FileViewerFragment extends Fragment {
         return tmpFilesInfos;
 
     }
+
+
 
 }
