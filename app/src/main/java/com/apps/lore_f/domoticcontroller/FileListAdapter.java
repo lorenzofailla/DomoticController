@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import static android.view.View.GONE;
+
 /**
  * Created by lore_f on 04/06/2017.
  */
@@ -38,7 +40,6 @@ public class FileListAdapter extends ArrayAdapter<FileInfo> {
         TextView fileSizeTXV = (TextView) convertView.findViewById(R.id.TXV___FILELISTROW___FILESIZE);
         ImageView fileTypeIVW = (ImageView)  convertView.findViewById(R.id.IVW___FILELISTROW___FILETYPEICON);
         ImageButton uplodaFileAsDataSlot = (ImageButton) convertView.findViewById(R.id.BTN___FILELISTROW___UPLOADASDATASLOT);
-        ImageButton uplodaFileToCloud = (ImageButton) convertView.findViewById(R.id.BTN___FILELISTROW___UPLOADTOCLOUD);
 
         final FileInfo fileInfo = getItem(position);
 
@@ -48,20 +49,24 @@ public class FileListAdapter extends ArrayAdapter<FileInfo> {
         if(fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_DIRECTORY){
 
             fileTypeIVW.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.directory));
+            uplodaFileAsDataSlot.setVisibility(GONE);
 
         } else if (fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_FILE) {
 
             fileTypeIVW.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.file));
 
+
+            uplodaFileAsDataSlot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    parentDVA.uploadAsDataSlot(fileInfo);
+
+                }
+            });
+
         }
 
-        uplodaFileAsDataSlot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                parentDVA.uploadAsDataSlot(fileInfo);
 
-            }
-        });
 
         return convertView;
 
