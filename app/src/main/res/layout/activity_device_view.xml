@@ -25,33 +25,39 @@
 
         <ImageButton
             android:id="@+id/BTN___DEVICEVIEW___DEVICEINFO"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:src="@drawable/info_icon" />
 
         <ImageButton
             android:id="@+id/BTN___DEVICEVIEW___FILEMANAGER"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:src="@drawable/directory" />
 
         <ImageButton
             android:id="@+id/BTN___DEVICEVIEW___TORRENTMANAGER"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:src="@drawable/torrent" />
 
        <ImageButton
            android:id="@+id/BTN___DEVICEVIEW___ZONEMINDER"
-           android:layout_width="50dp"
-           android:layout_height="50dp"
+           android:layout_width="45dp"
+           android:layout_height="45dp"
            android:src="@drawable/videocam" />
 
        <ImageButton
            android:id="@+id/BTN___DEVICEVIEW___WAKEONLAN"
-           android:layout_width="50dp"
-           android:layout_height="50dp"
+           android:layout_width="45dp"
+           android:layout_height="45dp"
            android:src="@drawable/alarm" />
+
+       <ImageButton
+           android:id="@+id/BTN___DEVICEVIEW___SSH"
+           android:layout_width="45dp"
+           android:layout_height="45dp"
+           android:src="@drawable/computer" />
 
     </LinearLayout>
 

@@ -17,6 +17,9 @@
     <string name="PROGRESSSTATUS_INFO___NO_ACTIVE_TORRENT">No active torrent.</string>
     <string name="PROGRESSSTATUS_INFO___ACTIVE_TORRENTS">active torrents.</string>
 
+    <!-- *** Alertdialogs ***-->
+    <!-- ***   - Generic -->
+
     <string name="ALERTDIALOG_YES">Yes</string>
     <string name="ALERTDIALOG_NO">No</string>
     <string name="ALERTDIALOG_GOT_IT">Got it</string>
@@ -34,6 +37,9 @@
     <string name="ALERTDIALOG_TITLE_REMOTE_DEVICE_NOT_RESPONDING">Remote device is off-line</string>
     <string name="ALERTDIALOG_TITLE_ZM_NOT_RESPONDING">ZoneMinder reply timeout</string>
 
+    <!-- ***   - SSH Shell fragment -->
+    <string name="ALERTDIALOG_TITLE_ENTER_SSH_COMMAND">SSH Shell command</string>
+    <string name="ALERTDIALOG_MESSAGE_ENTER_SSH_COMMAND">Enter command:</string>
 
     <string name="CONNECTIONFGM_BTN_CONNECT">Connect</string>
     <string name="CONNECTIONFGM_BTN_RECONNECT">Reconnect</string>

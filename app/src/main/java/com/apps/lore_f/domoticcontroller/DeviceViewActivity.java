@@ -52,6 +52,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private FileViewerFragment fileViewerFragment;
     private ZoneMinderControlFragment zoneMinderControlFragment;
     private WakeOnLanFragment wakeOnLanFragment;
+    private DeviceSSHFragment deviceSSHFragment;
 
     // Runnable per chiudere l'Activity in caso il dispositivo non risponda alle chiamate entro il timeout
     private Runnable watchDog = new Runnable() {
@@ -232,6 +233,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___DEVICEVIEW___SSH).setOnClickListener(onClickListener);
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso
         incomingMessages = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + thisDevice + "/IncomingCommands");
@@ -276,9 +278,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(null);
-
-        // rimuove i listener ai fragment
-        // TODO: 08/10/2017 implementare 
+        findViewById(R.id.BTN___DEVICEVIEW___SSH).setOnClickListener(null);
 
         // rimuove gli eventuali task ritardati sull'handler
         handler.removeCallbacks(sendWelcomeMessage);
@@ -367,25 +367,24 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "TORRENTS_LIST":
 
-                if (torrentViewerFragment != null) {
+                if (torrentViewerFragment == null)
+                    startTorrentManager();
 
-                    torrentViewerFragment.nOfTorrents = inMsg.getBody().split("\n").length - 2;
+                torrentViewerFragment.nOfTorrents = inMsg.getBody().split("\n").length - 2;
 
-                    if (torrentViewerFragment.nOfTorrents > 0) {
+                if (torrentViewerFragment.nOfTorrents > 0) {
 
-                        torrentViewerFragment.rawTorrentDataLines = inMsg.getBody().split("\n");
+                    torrentViewerFragment.rawTorrentDataLines = inMsg.getBody().split("\n");
 
-                    } else {
+                } else {
 
-                        torrentViewerFragment.nOfTorrents = 0;
-                        torrentViewerFragment.rawTorrentDataLines = null;
-
-                    }
-
-                    if (torrentViewerFragment.viewCreated)
-                        torrentViewerFragment.updateContent();
+                    torrentViewerFragment.nOfTorrents = 0;
+                    torrentViewerFragment.rawTorrentDataLines = null;
 
                 }
+
+                if (torrentViewerFragment.viewCreated)
+                    torrentViewerFragment.updateContent();
 
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
@@ -394,13 +393,13 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "HOME_DIRECTORY":
 
-                if (fileViewerFragment != null) {
+                if (fileViewerFragment == null)
+                    startFileManager();
 
-                    fileViewerFragment.currentDirName = inMsg.getBody().replace("\n", "");
-                    if (fileViewerFragment.viewCreated)
-                        fileViewerFragment.updateContent();
+                fileViewerFragment.currentDirName = inMsg.getBody().replace("\n", "");
+                if (fileViewerFragment.viewCreated)
+                    fileViewerFragment.updateContent();
 
-                }
 
                 // invia un instant message con la richiesta del contenuto della directory home ricevuta
                 sendCommandToDevice(new Message("__get_directory_content", inMsg.getBody(), thisDevice));
@@ -414,14 +413,10 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 if (fileViewerFragment != null) {
 
+
                     fileViewerFragment.rawDirData = inMsg.getBody();
                     if (fileViewerFragment.viewCreated)
                         fileViewerFragment.updateContent();
-
-                } else {
-
-                    startFileManager();
-
                 }
 
                 // valorizza il flag per eliminare il messaggio dalla coda
@@ -460,17 +455,34 @@ public class DeviceViewActivity extends AppCompatActivity {
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
 
+                break;
+
+            case "FILE_READY_FOR_DOWNLOAD":
+
+                String[] param = {"Users/lorenzofailla/Devices/" + thisDevice + "/IncomingFiles/"};
+                Intent intent = new Intent(this, DownloadFileFromDataSlots.class);
+                intent.putExtra("__file_to_download", param);
+
+                startService(intent);
+
+                // valorizza il flag per eliminare il messaggio dalla coda
+                deleteMsg = true;
+
+                break;
+
+            case "SSH_SHELL_READY":
+
+                // avvia il fragment
+                startSSHFragment();
+                deleteMsg=true;
+
+                break;
+
         }
 
         // se il flag 'deleteMsg' è stato impostato su true, elimina il messaggio dalla coda
         if (deleteMsg)
             deleteMessage(msgKey);
-
-    }
-
-    private void removeFragmentsLinks() {
-
-        if(fileViewerFragment !=null) fileViewerFragment =null;
 
     }
 
@@ -511,21 +523,10 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void startTorrentManager() {
 
         torrentViewerFragment = new TorrentViewerFragment();
-        torrentViewerFragment.localTorrentsListAdapterListener = torrentsListAdapterListener;
-        torrentViewerFragment.setTorrentsViewerListener(new TorrentViewerFragment.TorrentsViewerListener() {
-            @Override
-            public void onAddTorrentRequest() {
-
-                addTorrent();
-
-            }
-
-        });
+        torrentViewerFragment.parent = this;
 
         showFragment(torrentViewerFragment);
 
-        // invia un instant message con la richiesta della lista dei torrents
-        askForTorrentsList();
     }
 
     private void askForTorrentsList() {
@@ -559,7 +560,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        if (remoteDeviceZoneMinder){
+        if (remoteDeviceZoneMinder) {
 
             findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setVisibility(View.VISIBLE);
 
@@ -602,7 +603,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 case R.id.BTN___DEVICEVIEW___TORRENTMANAGER:
 
-                    startTorrentManager();
+                    // invia un instant message con la richiesta della lista dei torrents
+                    askForTorrentsList();
 
                     break;
 
@@ -617,13 +619,20 @@ public class DeviceViewActivity extends AppCompatActivity {
                     startWakeOnLan();
 
                     break;
+
+                case R.id.BTN___DEVICEVIEW___SSH:
+
+                    // invia al dispositivo remoto la richiesta di connessione a una shell SSH
+                    sendCommandToDevice(new Message("__initialize_ssh",null,thisDevice));
+
+                    break;
             }
 
         }
 
     };
 
-    private void startZoneMinder(){
+    private void startZoneMinder() {
 
         zmProgressDialog = new ProgressDialog(this);
         zmProgressDialog.setCancelable(true);
@@ -632,13 +641,13 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         zmProgressDialog.show();
 
-        sendCommandToDevice(new Message("__update_zoneminder_data","null",thisDevice));
+        sendCommandToDevice(new Message("__update_zoneminder_data", "null", thisDevice));
 
         handler.postDelayed(zoneMinderTimeOut, zmReplyTimeout);
 
     }
 
-    private void startWakeOnLan(){
+    private void startWakeOnLan() {
 
         wakeOnLanFragment = new WakeOnLanFragment();
         wakeOnLanFragment.parent = this;
@@ -743,7 +752,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void addTorrent() {
+    public void torrentAddRequest() {
 
         final EditText torrentURL = new EditText(this);
 
@@ -763,99 +772,96 @@ public class DeviceViewActivity extends AppCompatActivity {
                         dialog.dismiss();
                     }
                 })
+
                 .setTitle(R.string.ALERTDIALOG_TITLE_ADD_TORRENT)
                 .create()
                 .show();
 
     }
 
-    private TorrentsListAdapter.TorrentsListAdapterListener torrentsListAdapterListener = new TorrentsListAdapter.TorrentsListAdapterListener() {
-        @Override
-        public void onStartRequest(int torrentID) {
 
-            // invia il commando all'host remoto
-            sendCommandToDevice(new Message("__start_torrent", "" + torrentID, thisDevice));
+    public void torrentStartRequest(int torrentID) {
 
-        }
+        // invia il commando all'host remoto
+        sendCommandToDevice(new Message("__start_torrent", "" + torrentID, thisDevice));
 
-        @Override
-        public void onStopRequest(int torrentID) {
+    }
 
-            // invia il commando all'host remoto
-            sendCommandToDevice(new Message("__stop_torrent", "" + torrentID, thisDevice));
-        }
 
-        @Override
-        public void onRemoveRequest(final int torrentID) {
+    public void torrentStopRequest(int torrentID) {
 
-            removeTorrent(torrentID);
+        // invia il commando all'host remoto
+        sendCommandToDevice(new Message("__stop_torrent", "" + torrentID, thisDevice));
+    }
 
-        }
 
-    };
+    public void torrentRemoveRequest(final int torrentID) {
 
-    private void manageFileViewerFragmentRequest(FileInfo fileInfo) {
+        removeTorrent(torrentID);
 
-            if (fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_FILE) {
+    }
 
-                // attiva la procedura di upload del file da parte del dispositivo remoto sulla piattaforma Firebase Storage
-                sendCommandToDevice(new Message("__get_file", fileInfo.getFileRoorDir() + "/" + fileInfo.getFileName(), thisDevice));
+    public void manageFileViewerFragmentRequest(FileInfo fileInfo) {
 
-            } else {
+        if (fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_FILE) {
 
-                // è stata selezionata un'entità diversa da un file (directory, '.' o '..')
+            // attiva la procedura di upload del file da parte del dispositivo remoto sulla piattaforma Firebase Storage
+            sendCommandToDevice(new Message("__get_file", fileInfo.getFileRootDir() + "/" + fileInfo.getFileName(), thisDevice));
 
-                if (fileInfo.getFileName().equals(".")) {
-                    // è stato selezionato '.'
-                    // nessuna modifica a currentDirName
+        } else {
 
-                } else if (fileInfo.getFileName().equals("..") && !fileViewerFragment.currentDirName.equals("/")) {
-                    // è stato selezionato '..'
+            // è stata selezionata un'entità diversa da un file (directory, '.' o '..')
 
-                    // modifica currentDirName per salire al livello di directory superiore
+            if (fileInfo.getFileName().equals(".")) {
+                // è stato selezionato '.'
+                // nessuna modifica a currentDirName
 
-                    String[] directoryArray = fileViewerFragment.currentDirName.split("/");
+            } else if (fileInfo.getFileName().equals("..") && !fileViewerFragment.currentDirName.equals("/")) {
+                // è stato selezionato '..'
 
-                    fileViewerFragment.currentDirName = "/";
-                    for (int i = 0; i < directoryArray.length - 1; i++) {
+                // modifica currentDirName per salire al livello di directory superiore
 
-                        if (fileViewerFragment.currentDirName.equals("/")) {
+                String[] directoryArray = fileViewerFragment.currentDirName.split("/");
 
-                            fileViewerFragment.currentDirName += directoryArray[i];
+                fileViewerFragment.currentDirName = "/";
+                for (int i = 0; i < directoryArray.length - 1; i++) {
 
-                        } else {
-
-                            fileViewerFragment.currentDirName += "/" + directoryArray[i];
-                        }
-
-                    }
-
-                } else {
-
-                    // è stato selezionata una directory
-                    // modifica currentDirName per scendere al livello di directory selezionato
                     if (fileViewerFragment.currentDirName.equals("/")) {
-                        fileViewerFragment.currentDirName += fileInfo.getFileName();
+
+                        fileViewerFragment.currentDirName += directoryArray[i];
+
                     } else {
-                        fileViewerFragment.currentDirName += "/" + fileInfo.getFileName();
+
+                        fileViewerFragment.currentDirName += "/" + directoryArray[i];
                     }
 
                 }
 
-                fileViewerFragment.hideContent();
+            } else {
 
-                // invia il messaggio di richiesta dati della directory al dispositivo remoto
-                sendCommandToDevice(new Message("__get_directory_content", fileViewerFragment.currentDirName, thisDevice));
+                // è stato selezionata una directory
+                // modifica currentDirName per scendere al livello di directory selezionato
+                if (fileViewerFragment.currentDirName.equals("/")) {
+                    fileViewerFragment.currentDirName += fileInfo.getFileName();
+                } else {
+                    fileViewerFragment.currentDirName += "/" + fileInfo.getFileName();
+                }
 
             }
 
+            fileViewerFragment.hideContent();
+
+            // invia il messaggio di richiesta dati della directory al dispositivo remoto
+            sendCommandToDevice(new Message("__get_directory_content", fileViewerFragment.currentDirName, thisDevice));
+
         }
 
+    }
 
-    private void manageRemoteDeviceNotResponding(){
+    private void manageRemoteDeviceNotResponding() {
 
 
-        if (connectionProgressDialog.isShowing()){
+        if (connectionProgressDialog.isShowing()) {
 
             connectionProgressDialog.dismiss();
 
@@ -879,7 +885,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void manageZoneMinderTimeOut(){
+    private void manageZoneMinderTimeOut() {
 
         zmProgressDialog.cancel();
 
@@ -899,9 +905,29 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    public void uploadAsDataSlot(FileInfo fileInfo){
+    public void uploadAsDataSlot(FileInfo fileInfo) {
 
-        sendCommandToDevice(new Message("__upload_file", fileInfo.getFileName(), thisDevice));
+        sendCommandToDevice(new Message("__upload_file", fileInfo.getFileRootDir() + "/" + fileInfo.getFileName(), thisDevice));
+
+    }
+
+    /*
+    Metodi e funzioni relativi al fragment SSH
+
+     */
+
+    private void startSSHFragment(){
+
+        deviceSSHFragment = new DeviceSSHFragment();
+        deviceSSHFragment.parent = this;
+
+        showFragment(deviceSSHFragment);
+
+    }
+
+    private void sendSSHDisconnectionRequest(){
+
+        sendCommandToDevice(new Message("__disconnect_ssh",null,thisDevice));
 
     }
 

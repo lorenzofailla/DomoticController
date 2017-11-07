@@ -18,23 +18,14 @@ import java.util.List;
 
 public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
 
-    public TorrentsListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<TorrentInfo> objects) {
+    public TorrentsListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<TorrentInfo> objects, final DeviceViewActivity parentDeviceViewActivity) {
         super(context, resource, objects);
-    }
 
-    interface TorrentsListAdapterListener{
-
-        void onStartRequest(int torrentID);
-        void onStopRequest(int torrentID);
-        void onRemoveRequest(int torrentID);
+        parentDVA = parentDeviceViewActivity;
 
     }
 
-    TorrentsListAdapterListener torrentsListAdapterListener;
-
-    public void setTorrentsListAdapterListener(TorrentsListAdapterListener listener){
-        torrentsListAdapterListener=listener;
-    }
+    final DeviceViewActivity parentDVA;
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
@@ -60,12 +51,12 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
         if (torrentInfo.getStatus()== TorrentInfo.TorrentStatus.STOPPED){
 
             // torrent fermo, assegna l'immagine play
-            switchStatusBtn.setImageResource(R.drawable.ic_media_play_dark);
+            switchStatusBtn.setImageResource(R.drawable.play);
 
         } else {
 
             // torrent non fermato, assegna l'immagine pause
-            switchStatusBtn.setImageResource(R.drawable.ic_media_pause_dark);
+            switchStatusBtn.setImageResource(R.drawable.pause);
         }
 
 
@@ -76,11 +67,11 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
 
                 if (torrentInfo.getStatus()== TorrentInfo.TorrentStatus.STOPPED){
 
-                    if (torrentsListAdapterListener!=null) torrentsListAdapterListener.onStartRequest(torrentInfo.getID());
+                    parentDVA.torrentStartRequest(torrentInfo.getID());
 
                 } else{
 
-                    if (torrentsListAdapterListener!=null) torrentsListAdapterListener.onStopRequest(torrentInfo.getID());
+                    parentDVA.torrentStopRequest(torrentInfo.getID());
 
                 }
 
@@ -92,12 +83,11 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
             @Override
             public void onClick(View v) {
 
-                if (torrentsListAdapterListener!=null) torrentsListAdapterListener.onRemoveRequest(torrentInfo.getID());
+                parentDVA.torrentRemoveRequest(torrentInfo.getID());
 
             }
 
         });
-
 
         return convertView;
 

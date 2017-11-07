@@ -36,15 +36,15 @@
             android:name=".DownloadFileFromCloud"
             android:enabled="true"
             android:exported="true" />
-
         <service
-            android:name=".DomoticFCMService">
+            android:name=".DownloadFileFromDataSlots"
+            android:enabled="true"
+            android:exported="true" />
+        <service android:name=".DomoticFCMService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-
 
     </application>
 

@@ -33,7 +33,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        app:srcCompat="@android:drawable/ic_menu_delete" />
+        android:src="@drawable/delete" />
 
     <ImageButton
         android:id="@+id/BTN___TORRENTSLISTROW___SWITCHSTATUS"
@@ -42,7 +42,7 @@
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@+id/BTN___TORRENTSLISTROW___DELETETORRENT"
         android:layout_toStartOf="@+id/BTN___TORRENTSLISTROW___DELETETORRENT"
-        app:srcCompat="@drawable/mr_media_play_light" />
+        app:srcCompat="@drawable/play" />
 
     <TextView
         android:id="@+id/TXV___TORRENTSLISTROW___TORRENTHAVE"

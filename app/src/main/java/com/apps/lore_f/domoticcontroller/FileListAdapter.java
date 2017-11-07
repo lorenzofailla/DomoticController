@@ -64,9 +64,18 @@ public class FileListAdapter extends ArrayAdapter<FileInfo> {
                 }
             });
 
+
         }
 
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+                parentDVA.manageFileViewerFragmentRequest(fileInfo);
+
+            }
+
+        });
 
         return convertView;
 

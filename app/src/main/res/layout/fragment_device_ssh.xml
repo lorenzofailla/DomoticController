@@ -1,0 +1,100 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.apps.lore_f.domoticcontroller.DeviceSSHFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/TXV___DEVICESSH___SSH"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/TLO___DEVICESSH___KEYS"
+            android:layout_alignParentTop="true"
+            android:fontFamily="monospace"
+            android:scrollbars="vertical"
+            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+            android:textSize="10sp" />
+
+
+        <TableLayout
+            android:id="@+id/TLO___DEVICESSH___KEYS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true">
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"/>
+
+                <ImageButton
+                    android:id="@+id/BTN___DEVICESSH___KEYUP"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/up"/>
+
+                <ImageButton
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"/>
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/BTN___DEVICESSH___KEYLEFT"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/left"/>
+
+                <ImageButton
+                    android:id="@+id/BTN___DEVICESSH___KEYBOARD"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/keyboard"/>
+
+                <ImageButton
+                    android:id="@+id/BTN___DEVICESSH___KEYRIGHT"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/right"/>
+
+            </TableRow>
+
+            <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
+
+            <ImageButton
+                android:id="@+id/BTN___DEVICESSH___KEYDOWN"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/down"/>
+
+            <ImageButton
+                android:layout_width="50dp"
+                android:layout_height="50dp"/>
+
+        </TableRow>
+
+        </TableLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>

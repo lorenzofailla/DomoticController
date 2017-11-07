@@ -19,32 +19,17 @@ public class TorrentViewerFragment extends Fragment {
     public String[] rawTorrentDataLines;
     public int nOfTorrents;
     public TorrentsListAdapter torrentsListAdapter;
-    public TorrentsListAdapter.TorrentsListAdapterListener localTorrentsListAdapterListener;
 
     private List<TorrentInfo> torrents = new ArrayList<>();
     private ListView torrentsListView;
 
     public boolean viewCreated=false;
 
+    public DeviceViewActivity parent;
+
     public TorrentViewerFragment() {
         // Required empty public constructor
     }
-
-    interface TorrentsViewerListener{
-
-        void onAddTorrentRequest();
-
-    }
-
-    TorrentsViewerListener torrentsViewerListener;
-
-    public void setTorrentsViewerListener(TorrentsViewerListener listener){
-
-        torrentsViewerListener=listener;
-
-    }
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,8 +51,7 @@ public class TorrentViewerFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                // apre la finestra di dialogo per aggiungere un torrent
-                if(torrentsViewerListener!=null) torrentsViewerListener.onAddTorrentRequest();
+                parent.torrentAddRequest();
 
             }
         });
@@ -97,16 +81,17 @@ public class TorrentViewerFragment extends Fragment {
         if(rawTorrentDataLines!=null) {
             torrents = getTorrentsList(rawTorrentDataLines);
 
-            torrentsListAdapter = new TorrentsListAdapter(getContext(), R.layout.torrents_list_row, torrents);
-            if (localTorrentsListAdapterListener != null)
-                torrentsListAdapter.setTorrentsListAdapterListener(localTorrentsListAdapterListener);
+            torrentsListAdapter = new TorrentsListAdapter(getContext(), R.layout.torrents_list_row, torrents, parent);
 
             torrentsListView.setAdapter(torrentsListAdapter);
             torrentsListView.setVisibility(View.VISIBLE);
+
         } else {
 
             torrentsListView.setVisibility(View.INVISIBLE);
+
         }
+
     }
 
 
@@ -123,4 +108,5 @@ public class TorrentViewerFragment extends Fragment {
         return outputList;
 
     }
+
 }

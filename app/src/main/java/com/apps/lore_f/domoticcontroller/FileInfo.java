@@ -7,7 +7,7 @@ package com.apps.lore_f.domoticcontroller;
 public class FileInfo {
 
     private String fileName;
-    private String fileRoorDir;
+    private String fileRootDir;
     private long fileSize;
     private FileInfoType fileInfoType;
 
@@ -19,12 +19,12 @@ public class FileInfo {
         this.fileName = fileName;
     }
 
-    public String getFileRoorDir() {
-        return fileRoorDir;
+    public String getFileRootDir() {
+        return fileRootDir;
     }
 
-    public void setFileRoorDir(String fileRoorDir) {
-        this.fileRoorDir = fileRoorDir;
+    public void setFileRootDir(String fileRoorDir) {
+        this.fileRootDir = fileRoorDir;
     }
 
     public long getFileSize() {
@@ -55,7 +55,7 @@ public class FileInfo {
 
     public FileInfo(String rootDirectory, String rawFileData){
 
-                fileRoorDir = rootDirectory;
+                fileRootDir = rootDirectory;
 
         fileSize = 0L;
 

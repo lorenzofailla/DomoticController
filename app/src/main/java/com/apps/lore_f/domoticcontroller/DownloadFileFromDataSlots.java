@@ -33,10 +33,11 @@ import java.io.OutputStream;
 
 public class DownloadFileFromDataSlots extends Service {
 
-    private String[] resourceKey;
-    boolean loopFlag;
+    private static final int NOTIFICATION_ID=2;
 
-    NotificationManager notificationManager;
+    private String[] resourceKey;
+    private NotificationManager notificationManager;
+    private NotificationCompat.Builder notificationBuilder;
 
     // required empty constructor
     public DownloadFileFromDataSlots() {
@@ -68,14 +69,14 @@ public class DownloadFileFromDataSlots extends Service {
 
         super.onStartCommand(intent, flags, startId);
 
-        resourceKey=intent.getStringArrayExtra("__file_to_download");
+        resourceKey = intent.getStringArrayExtra("__file_to_download");
 
         // create the notification
-        NotificationCompat.Builder notificationBuilder =
+        notificationBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.cloud_download)
+                        .setSmallIcon(R.drawable.download)
                         .setContentTitle("Domotic")
-                        .setContentText("is downloading \"" + resourceKey + "\"");
+                        .setContentText("is downloading a file from remote host");
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, DeviceViewActivity.class), 0);
@@ -85,7 +86,7 @@ public class DownloadFileFromDataSlots extends Service {
         Notification notification = notificationBuilder.build();
 
         // start the service in foreground
-        startForeground(1, notification);
+        startForeground(NOTIFICATION_ID, notification);
 
         new DownloadTask().execute(resourceKey);
 
@@ -102,12 +103,12 @@ public class DownloadFileFromDataSlots extends Service {
 
     }
 
-    private class DownloadTask extends AsyncTask<String, Float, Void>{
+    private class DownloadTask extends AsyncTask<String, Float, Void> {
 
-        protected Void doInBackground(String... resourceReference){
+        protected Void doInBackground(String... resourceReference) {
 
             // ottiene un riferimento alla posizione di storage sul cloud
-            DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(resourceReference[0]);
+            final DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(resourceReference[0]);
 
             storageRef.addChildEventListener(new ChildEventListener() {
                 @Override
@@ -117,9 +118,13 @@ public class DownloadFileFromDataSlots extends Service {
                     int slots = Integer.parseInt(snapshot.child("slots").getValue().toString());
                     int bytesInLastSlot = Integer.parseInt(snapshot.child("bytesinlastslot").getValue().toString());
 
+                    // aggiorna la notifica
+                    notificationBuilder.setContentText(filename);
+                    notificationManager.notify(2, notificationBuilder.build());
+
                     // inizializza la directory locale per il download, se la directory non esiste la crea
                     File downloadDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Domotic");
-                    if (!downloadDirectory.exists()){
+                    if (!downloadDirectory.exists()) {
                         downloadDirectory.mkdir();
                     }
 
@@ -129,43 +134,49 @@ public class DownloadFileFromDataSlots extends Service {
                     // inizializza l'OutputStream
                     try {
 
-                    OutputStream outputStream = new FileOutputStream(fileToWrite);
-                    fileToWrite.createNewFile();
+                        OutputStream outputStream = new FileOutputStream(fileToWrite);
+                        fileToWrite.createNewFile();
 
-                    byte[] bytes = new byte[65536];
+                        for (int i = 1; i < slots + 1; i++) {
+                            byte[] bytes = new byte[65536];
+                            String data = snapshot.child("slotData").child("" + i).getValue().toString();
+                            bytes = Base64.decode(data, Base64.DEFAULT);
 
-                    for (int i = 1; i < slots + 1; i++) {
+                            if (i == slots) {
 
-                        String data = snapshot.child("" + i).getValue().toString();
-                        bytes = Base64.decode(data, Base64.DEFAULT);
+                                outputStream.write(bytes, 0, bytesInLastSlot);
 
-                        if (i == slots) {
+                            } else {
 
-                            outputStream.write(bytes,0,bytesInLastSlot);
-                            loopFlag=false;
+                                outputStream.write(bytes);
 
-                        } else {
+                            }
 
-                            outputStream.write(bytes);
+                            System.out.println("slot " + i + " decoded.");
 
                         }
 
-                        System.out.println("slot " + i + " decoded.");
+                        outputStream.flush();
+                        outputStream.close();
+
+                        storageRef.child(snapshot.getKey()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+
+                                stopForeground(true);
+
+                            }
+
+                        });
+
+                    } catch (IOException e) {
+
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
 
                     }
 
-                    outputStream.flush();
-                    outputStream.close();
-
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
-
-
-
-
-            }
 
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -188,22 +199,10 @@ public class DownloadFileFromDataSlots extends Service {
                 }
             });
 
-            while (loopFlag) {
-
-                try {
-
-                    Thread.sleep(1000);
-
-                } catch (InterruptedException e) {
-
-                    e.printStackTrace();
-
-                }
-
-            }
-
             return null;
+
         }
+
     }
 
 }
