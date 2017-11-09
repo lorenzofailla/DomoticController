@@ -12,6 +12,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,6 +26,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 
 public class DeviceViewActivity extends AppCompatActivity {
+
+    private static final String TAG="DeviceViewActivity";
 
     // Firebase Database
     private DatabaseReference incomingMessages;
@@ -928,6 +932,21 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void sendSSHDisconnectionRequest(){
 
         sendCommandToDevice(new Message("__disconnect_ssh",null,thisDevice));
+
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+
+        Log.i(TAG,"Key: " + keyCode + " Event: "+event.getUnicodeChar(event.getMetaState()));
+
+        if(deviceSSHFragment!=null){
+
+            deviceSSHFragment.addCharacterToBuffer(event.getUnicodeChar(event.getMetaState()));
+
+        }
+
+        return super.onKeyUp(keyCode, event);
 
     }
 

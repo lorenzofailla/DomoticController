@@ -3,19 +3,25 @@ package com.apps.lore_f.domoticcontroller;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.method.KeyListener;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.ChildEventListener;
@@ -25,6 +31,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import static android.content.ContentValues.TAG;
 
 public class DeviceSSHFragment extends Fragment {
@@ -32,9 +41,34 @@ public class DeviceSSHFragment extends Fragment {
     public boolean viewCreated = false;
     private View fragmentView;
 
+    private SSHView sshOutput;
+
     private DatabaseReference sshOutputNode;
 
     public DeviceViewActivity parent;
+
+    private Handler handler;
+
+    private long sshInputStreamCheckTimeout = 250L;
+
+    private ByteArrayOutputStream sshInputStream = new ByteArrayOutputStream();
+    private boolean sshInputStreamChanged = false;
+
+    private Runnable manageSSHInputStream = new Runnable() {
+        @Override
+        public void run() {
+
+            if(sshInputStreamChanged) {
+
+                sendSSHInputStream();
+
+            }
+
+            handler.postDelayed(this,sshInputStreamCheckTimeout);
+
+        }
+
+    };
 
     private ChildEventListener sshOutputChange = new ChildEventListener() {
         @Override
@@ -101,7 +135,7 @@ public class DeviceSSHFragment extends Fragment {
         // inizializza l'handler alla view, in questo modo i componenti possono essere ritrovati
         fragmentView = view;
 
-        TextView sshOutput = (TextView) view.findViewById(R.id.TXV___DEVICESSH___SSH);
+        sshOutput = (SSHView) view.findViewById(R.id.TXV___DEVICESSH___SSH);
         sshOutput.setMovementMethod(new ScrollingMovementMethod());
 
         // inizializzo la referenza al nodo del databas
@@ -109,8 +143,8 @@ public class DeviceSSHFragment extends Fragment {
         sshOutputNode.addChildEventListener(sshOutputChange);
 
         // assegna un OnClickListener ai pulsanti
-        ImageButton keyboardButton = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___KEYBOARD);
-        keyboardButton.setOnClickListener(new View.OnClickListener() {
+        ImageButton sendCommandButton = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___SENDCOMMAND);
+        sendCommandButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -143,6 +177,25 @@ public class DeviceSSHFragment extends Fragment {
             }
         });
 
+        // assegna un OnClickListener ai pulsanti
+        ImageButton showKeyBoardButton = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___KEYBOARD);
+        showKeyBoardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Toast.makeText(getContext(), "Showing keyboard", Toast.LENGTH_SHORT).show();
+                sshOutput.showKeyboard();
+
+            }
+
+        });
+
+        // inizializza l'handler
+        handler=new Handler();
+
+        // esegue il callback "manageSSHInputStream"
+        handler.postDelayed(manageSSHInputStream, 0L);
+
         // aggiorna il flag e effettua il trigger del metodo nel listener
         viewCreated = true;
 
@@ -162,29 +215,70 @@ public class DeviceSSHFragment extends Fragment {
         super.onDetach();
 
         // rimuove l'OnClickListener ai pulsanti
+        ImageButton sendCommandButton = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICESSH___KEYBOARD);
+        sendCommandButton.setOnClickListener(null);
+
+        // assegna un OnClickListener ai pulsanti
+        ImageButton showKeyBoardButton = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICESSH___KEYBOARD);
+        showKeyBoardButton.setOnClickListener(null);
 
         // rimuove il ChildEventListener ai nodi del database
         sshOutputNode.removeEventListener(sshOutputChange);
+
+        // rimuove l'esecuzione del callback "manageSSHInputStream"
+        handler.removeCallbacks(manageSSHInputStream);
 
     }
 
     public void updateView(@NonNull DataSnapshot dataSnapshot) {
 
-        TextView sshOutput = (TextView) fragmentView.findViewById(R.id.TXV___DEVICESSH___SSH);
-        sshOutput.setText(dataSnapshot.getValue().toString());
+        try {
+            TextView sshOutput = (TextView) fragmentView.findViewById(R.id.TXV___DEVICESSH___SSH);
+            sshOutput.setText(dataSnapshot.getValue().toString());
 
-        final int scrollAmount = sshOutput.getLayout().getLineTop(sshOutput.getLineCount()) - sshOutput.getHeight();
-        // if there is no need to scroll, scrollAmount will be <=0
-        if (scrollAmount > 0)
-            sshOutput.scrollTo(0, scrollAmount);
-        else
-            sshOutput.scrollTo(0, 0);
+            final int scrollAmount = sshOutput.getLayout().getLineTop(sshOutput.getLineCount()) - sshOutput.getHeight();
+            // if there is no need to scroll, scrollAmount will be <=0
+            if (scrollAmount > 0)
+                sshOutput.scrollTo(0, scrollAmount);
+            else
+                sshOutput.scrollTo(0, 0);
+
+        } catch (NullPointerException e) {
 
         }
+
+    }
+
 
     private void refreshAdapter() {
 
 
+    }
+
+    private void sendSSHInputStream(){
+
+        try {
+            parent.sendCommandToDevice(new Message("__ssh_input_command", sshInputStream.toString(), parent.thisDevice));
+            clearInputStream();
+            sshInputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public void addCharacterToBuffer(int unicodeChar){
+
+        sshInputStream.write(unicodeChar);
+        sshInputStreamChanged=true;
+
+    }
+
+    private void clearInputStream(){
+
+        sshInputStream=new ByteArrayOutputStream();
+        sshInputStreamChanged = false;
     }
 
 }

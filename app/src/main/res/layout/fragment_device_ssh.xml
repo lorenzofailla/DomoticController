@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
+        <com.apps.lore_f.domoticcontroller.SSHView
             android:id="@+id/TXV___DEVICESSH___SSH"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -88,8 +88,10 @@
                 android:src="@drawable/down"/>
 
             <ImageButton
+                android:id="@+id/BTN___DEVICESSH___SENDCOMMAND"
                 android:layout_width="50dp"
-                android:layout_height="50dp"/>
+                android:layout_height="50dp"
+                android:src="@drawable/text"/>
 
         </TableRow>
 
