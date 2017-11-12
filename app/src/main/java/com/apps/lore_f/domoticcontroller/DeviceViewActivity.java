@@ -24,10 +24,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class DeviceViewActivity extends AppCompatActivity {
 
-    private static final String TAG="DeviceViewActivity";
+    private static final String TAG = "DeviceViewActivity";
 
     // Firebase Database
     private DatabaseReference incomingMessages;
@@ -478,7 +480,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 // avvia il fragment
                 startSSHFragment();
-                deleteMsg=true;
+                deleteMsg = true;
 
                 break;
 
@@ -626,8 +628,41 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 case R.id.BTN___DEVICEVIEW___SSH:
 
-                    // invia al dispositivo remoto la richiesta di connessione a una shell SSH
-                    sendCommandToDevice(new Message("__initialize_ssh",null,thisDevice));
+                    // controlla se esiste un nodo nel database con la sessione ssh relativa al dispositivo corrente
+                    // se esiste apre subito il fragment
+                    // altrimenti invia al dispositivo remoto la richiesta di connessione a una shell SSH
+
+                    // ottiene un riferimento al nodo del database Firebase con le informazioni sulle shell aperte,
+                    // effettua una query per filtrare le shell aperte al dispositivo corrente
+                    DatabaseReference activeShells = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + remoteDeviceName + "/SSHShells");
+                    Query query = activeShells.orderByKey().equalTo(thisDevice);
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                            if (dataSnapshot != null) {
+                                //
+                                // non esistono shell aperte
+                                // invia al dispositivo remoto la richiesta di connessione a una shell SSH
+                                sendCommandToDevice(new Message("__initialize_ssh", null, thisDevice));
+
+                            } else {
+                                //
+                                // esiste una shell aperta
+                                // se il fragment per la gestione delle ssh è già stato attivato lo mostra, altrimenti lo crea
+                                startSSHFragment();
+
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+
+                    });
+
 
                     break;
             }
@@ -920,33 +955,45 @@ public class DeviceViewActivity extends AppCompatActivity {
 
      */
 
-    private void startSSHFragment(){
+    private void startSSHFragment() {
 
-        deviceSSHFragment = new DeviceSSHFragment();
+        if (deviceSSHFragment == null)
+            deviceSSHFragment = new DeviceSSHFragment();
+
         deviceSSHFragment.parent = this;
 
         showFragment(deviceSSHFragment);
 
     }
 
-    private void sendSSHDisconnectionRequest(){
+    private void sendSSHDisconnectionRequest() {
 
-        sendCommandToDevice(new Message("__disconnect_ssh",null,thisDevice));
+        sendCommandToDevice(new Message("__disconnect_ssh", null, thisDevice));
 
     }
 
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-        Log.i(TAG,"Key: " + keyCode + " Event: "+event.getUnicodeChar(event.getMetaState()));
+        Log.i(TAG, "Key: " + keyCode + " Event: " + event.getUnicodeChar(event.getMetaState()));
 
-        if(deviceSSHFragment!=null){
+        switch (keyCode) {
 
-            deviceSSHFragment.addCharacterToBuffer(event.getUnicodeChar(event.getMetaState()));
+            case 67: // backspace
+
+                if (deviceSSHFragment != null)
+                    deviceSSHFragment.sendBackSpace();
+
+                return super.onKeyDown(keyCode, event);
+
+            default:
+                if (deviceSSHFragment != null)
+                    deviceSSHFragment.addCharacterToBuffer(event.getUnicodeChar(event.getMetaState()));
+
+                return super.onKeyDown(keyCode, event);
 
         }
 
-        return super.onKeyUp(keyCode, event);
 
     }
 

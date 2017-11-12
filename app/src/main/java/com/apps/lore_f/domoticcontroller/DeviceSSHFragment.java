@@ -58,16 +58,49 @@ public class DeviceSSHFragment extends Fragment {
         @Override
         public void run() {
 
-            if(sshInputStreamChanged) {
+            if (sshInputStreamChanged) {
 
                 sendSSHInputStream();
 
             }
 
-            handler.postDelayed(this,sshInputStreamCheckTimeout);
+            handler.postDelayed(this, sshInputStreamCheckTimeout);
 
         }
 
+    };
+
+    private View.OnClickListener sshKeysListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            String result=null;
+
+            switch (v.getId()) {
+
+                case R.id.BTN___DEVICESSH___KEYUP:
+                    result="keyUp";
+                    break;
+
+                case R.id.BTN___DEVICESSH___KEYDOWN:
+                    result="keyDown";
+                    break;
+
+                case R.id.BTN___DEVICESSH___KEYRIGHT:
+                    result="keyRight";
+                    break;
+
+                case R.id.BTN___DEVICESSH___KEYLEFT:
+                    result="keyLeft";
+                    break;
+
+            }
+
+            if(result!=null){
+                parent.sendCommandToDevice(new Message("__ssh_special",result,parent.thisDevice));
+            }
+
+        }
     };
 
     private ChildEventListener sshOutputChange = new ChildEventListener() {
@@ -139,7 +172,7 @@ public class DeviceSSHFragment extends Fragment {
         sshOutput.setMovementMethod(new ScrollingMovementMethod());
 
         // inizializzo la referenza al nodo del databas
-        sshOutputNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + parent.thisDevice + "/SSHShell/");
+        sshOutputNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + parent.remoteDeviceName + "/SSHShells/"+parent.thisDevice);
         sshOutputNode.addChildEventListener(sshOutputChange);
 
         // assegna un OnClickListener ai pulsanti
@@ -157,7 +190,7 @@ public class DeviceSSHFragment extends Fragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
-                                parent.sendCommandToDevice(new Message("__ssh_input_command", sshCommandToSend.getText().toString()+"\n", parent.thisDevice));
+                                parent.sendCommandToDevice(new Message("__ssh_input_command", sshCommandToSend.getText().toString() + "\n", parent.thisDevice));
 
                             }
 
@@ -177,21 +210,33 @@ public class DeviceSSHFragment extends Fragment {
             }
         });
 
-        // assegna un OnClickListener ai pulsanti
+
         ImageButton showKeyBoardButton = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___KEYBOARD);
         showKeyBoardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Toast.makeText(getContext(), "Showing keyboard", Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Showing keyboard");
                 sshOutput.showKeyboard();
 
             }
 
         });
 
+        ImageButton sendKeyUp = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___KEYUP);
+        sendKeyUp.setOnClickListener(sshKeysListener);
+
+        ImageButton sendKeyDown = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___KEYDOWN);
+        sendKeyDown.setOnClickListener(sshKeysListener);
+
+        ImageButton sendKeyRight = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___KEYRIGHT);
+        sendKeyRight.setOnClickListener(sshKeysListener);
+
+        ImageButton sendKeyLeft = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___KEYLEFT);
+        sendKeyLeft.setOnClickListener(sshKeysListener);
+
         // inizializza l'handler
-        handler=new Handler();
+        handler = new Handler();
 
         // esegue il callback "manageSSHInputStream"
         handler.postDelayed(manageSSHInputStream, 0L);
@@ -218,15 +263,30 @@ public class DeviceSSHFragment extends Fragment {
         ImageButton sendCommandButton = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICESSH___KEYBOARD);
         sendCommandButton.setOnClickListener(null);
 
-        // assegna un OnClickListener ai pulsanti
         ImageButton showKeyBoardButton = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICESSH___KEYBOARD);
         showKeyBoardButton.setOnClickListener(null);
+
+        ImageButton sendKeyUp = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICESSH___KEYUP);
+        sendKeyUp.setOnClickListener(null);
+
+        ImageButton sendKeyDown = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICESSH___KEYDOWN);
+        sendKeyDown.setOnClickListener(null);
+
+        ImageButton sendKeyRight = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICESSH___KEYRIGHT);
+        sendKeyRight.setOnClickListener(null);
+
+        ImageButton sendKeyLeft = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICESSH___KEYLEFT);
+        sendKeyLeft.setOnClickListener(null);
+
 
         // rimuove il ChildEventListener ai nodi del database
         sshOutputNode.removeEventListener(sshOutputChange);
 
         // rimuove l'esecuzione del callback "manageSSHInputStream"
         handler.removeCallbacks(manageSSHInputStream);
+
+        // comunica al dispositivo remoto di disconnettere la sessione ssh
+        parent.sendCommandToDevice(new Message("__close_ssh", "null", parent.thisDevice));
 
     }
 
@@ -255,29 +315,36 @@ public class DeviceSSHFragment extends Fragment {
 
     }
 
-    private void sendSSHInputStream(){
+    private void sendSSHInputStream() {
 
         try {
+
+            sshInputStream.flush();
             parent.sendCommandToDevice(new Message("__ssh_input_command", sshInputStream.toString(), parent.thisDevice));
             clearInputStream();
-            sshInputStream.flush();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
     }
 
-    public void addCharacterToBuffer(int unicodeChar){
+    public void addCharacterToBuffer(int unicodeChar) {
 
         sshInputStream.write(unicodeChar);
-        sshInputStreamChanged=true;
+        sshInputStreamChanged = true;
 
     }
 
-    private void clearInputStream(){
+    public void sendBackSpace(){
 
-        sshInputStream=new ByteArrayOutputStream();
+        parent.sendCommandToDevice(new Message("__ssh_special","keyBackspace",parent.thisDevice));
+
+    }
+
+    private void clearInputStream() {
+
+        sshInputStream = new ByteArrayOutputStream();
         sshInputStreamChanged = false;
     }
 
