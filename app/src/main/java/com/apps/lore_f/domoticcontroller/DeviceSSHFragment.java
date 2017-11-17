@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 import static android.content.ContentValues.TAG;
 
@@ -74,30 +75,30 @@ public class DeviceSSHFragment extends Fragment {
         @Override
         public void onClick(View v) {
 
-            String result=null;
+            String result = null;
 
             switch (v.getId()) {
 
                 case R.id.BTN___DEVICESSH___KEYUP:
-                    result="keyUp";
+                    result = "keyUp";
                     break;
 
                 case R.id.BTN___DEVICESSH___KEYDOWN:
-                    result="keyDown";
+                    result = "keyDown";
                     break;
 
                 case R.id.BTN___DEVICESSH___KEYRIGHT:
-                    result="keyRight";
+                    result = "keyRight";
                     break;
 
                 case R.id.BTN___DEVICESSH___KEYLEFT:
-                    result="keyLeft";
+                    result = "keyLeft";
                     break;
 
             }
 
-            if(result!=null){
-                parent.sendCommandToDevice(new Message("__ssh_special",result,parent.thisDevice));
+            if (result != null) {
+                parent.sendCommandToDevice(new Message("__ssh_special", result, parent.thisDevice));
             }
 
         }
@@ -109,10 +110,14 @@ public class DeviceSSHFragment extends Fragment {
 
             if (dataSnapshot != null) {
 
-                Log.i(TAG, "onChildAdded :: datasnapshot lenght: " + dataSnapshot.getValue().toString().length());
+                Log.i(TAG, "onChildAdded :: datasnapshot lenght: " + dataSnapshot.getValue().toString());
 
                 if (dataSnapshot.getKey().equals("Output"))
                     updateView(dataSnapshot);
+
+                if (dataSnapshot.getKey().equals("Cursor")) {
+                    updateCursor(dataSnapshot);
+                }
 
             } else {
 
@@ -124,9 +129,21 @@ public class DeviceSSHFragment extends Fragment {
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-            if (dataSnapshot != null)
-                if (dataSnapshot.getKey().equals("Output"))
-                    updateView(dataSnapshot);
+            if (dataSnapshot != null) {
+
+                switch (dataSnapshot.getKey()) {
+
+                    case "Output":
+                        updateView(dataSnapshot);
+                        break;
+
+                    case "Cursor":
+                        updateCursor(dataSnapshot);
+                        break;
+
+                }
+
+            }
 
         }
 
@@ -172,7 +189,7 @@ public class DeviceSSHFragment extends Fragment {
         sshOutput.setMovementMethod(new ScrollingMovementMethod());
 
         // inizializzo la referenza al nodo del databas
-        sshOutputNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + parent.remoteDeviceName + "/SSHShells/"+parent.thisDevice);
+        sshOutputNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + parent.remoteDeviceName + "/SSHShells/" + parent.thisDevice);
         sshOutputNode.addChildEventListener(sshOutputChange);
 
         // assegna un OnClickListener ai pulsanti
@@ -252,7 +269,6 @@ public class DeviceSSHFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-
     }
 
     @Override
@@ -293,8 +309,8 @@ public class DeviceSSHFragment extends Fragment {
     public void updateView(@NonNull DataSnapshot dataSnapshot) {
 
         try {
-            TextView sshOutput = (TextView) fragmentView.findViewById(R.id.TXV___DEVICESSH___SSH);
-            sshOutput.setText(dataSnapshot.getValue().toString());
+
+            sshOutput.setFormattedText(dataSnapshot.getValue().toString());
 
             final int scrollAmount = sshOutput.getLayout().getLineTop(sshOutput.getLineCount()) - sshOutput.getHeight();
             // if there is no need to scroll, scrollAmount will be <=0
@@ -306,6 +322,13 @@ public class DeviceSSHFragment extends Fragment {
         } catch (NullPointerException e) {
 
         }
+
+    }
+
+    public void updateCursor(@NonNull DataSnapshot dataSnapshot) {
+
+        CursorData cursorData = dataSnapshot.getValue(CursorData.class);
+        sshOutput.setCursor(cursorData.col, cursorData.row);
 
     }
 
@@ -336,9 +359,9 @@ public class DeviceSSHFragment extends Fragment {
 
     }
 
-    public void sendBackSpace(){
+    public void sendBackSpace() {
 
-        parent.sendCommandToDevice(new Message("__ssh_special","keyBackspace",parent.thisDevice));
+        parent.sendCommandToDevice(new Message("__ssh_special", "keyBackspace", parent.thisDevice));
 
     }
 

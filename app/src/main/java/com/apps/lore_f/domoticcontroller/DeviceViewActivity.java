@@ -373,9 +373,15 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "TORRENTS_LIST":
 
-                if (torrentViewerFragment == null)
-                    startTorrentManager();
+                if (torrentViewerFragment == null) {
+                    //
+                    // non ci sono istanze attive del fragment, per cui ne viene creata una
+                    torrentViewerFragment = new TorrentViewerFragment();
+                    torrentViewerFragment.parent = this;
 
+                }
+
+                // imposta i parametri di visualizzazione del fragment
                 torrentViewerFragment.nOfTorrents = inMsg.getBody().split("\n").length - 2;
 
                 if (torrentViewerFragment.nOfTorrents > 0) {
@@ -391,6 +397,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 if (torrentViewerFragment.viewCreated)
                     torrentViewerFragment.updateContent();
+
+                // mostra il fragment
+                showFragment(torrentViewerFragment);
 
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
@@ -526,14 +535,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    private void startTorrentManager() {
-
-        torrentViewerFragment = new TorrentViewerFragment();
-        torrentViewerFragment.parent = this;
-
-        showFragment(torrentViewerFragment);
-
-    }
 
     private void askForTorrentsList() {
 

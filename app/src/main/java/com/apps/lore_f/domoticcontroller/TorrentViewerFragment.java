@@ -57,6 +57,7 @@ public class TorrentViewerFragment extends Fragment {
         });
 
         viewCreated=true;
+        updateContent();
         return view;
 
     }
