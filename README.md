@@ -1,2 +1,2 @@
 # DomoticController - Android Controller for Domotic remote devices
-DomoticController is and ANDROID app to remotely connect any device running Domotic.
+DomoticController is an ANDROID app to remotely connect and manage any device running [Domotic](https://github.com/lorenzofailla/Domotic).
