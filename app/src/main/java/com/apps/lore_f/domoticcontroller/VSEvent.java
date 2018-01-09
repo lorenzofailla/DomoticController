@@ -4,7 +4,7 @@ package com.apps.lore_f.domoticcontroller;
  * Created by lore_f on 08/10/2017.
  */
 
-public class ZMEvent {
+public class VSEvent {
 
     private String Id;
     private String Name;
@@ -14,7 +14,7 @@ public class ZMEvent {
     private String EndTime;
 
     // empty constructor
-    public ZMEvent() {
+    public VSEvent() {
     }
 
     public String getId() {

@@ -56,7 +56,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private DeviceInfoFragment deviceInfoFragment;
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
-    private ZoneMinderControlFragment zoneMinderControlFragment;
+    private VSControlFragment vsControlFragment;
     private WakeOnLanFragment wakeOnLanFragment;
     private DeviceSSHFragment deviceSSHFragment;
 
@@ -459,11 +459,11 @@ public class DeviceViewActivity extends AppCompatActivity {
                     handler.removeCallbacks(zoneMinderTimeOut);
                     zmProgressDialog.dismiss();
 
-                    zoneMinderControlFragment = new ZoneMinderControlFragment();
-                    zoneMinderControlFragment.zoneminderDBNode = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + remoteDeviceName + "/ZoneMinder");
-                    zoneMinderControlFragment.parent = this;
+                    vsControlFragment = new VSControlFragment();
+                    vsControlFragment.zoneminderDBNode = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + remoteDeviceName + "/ZoneMinder");
+                    vsControlFragment.parent = this;
 
-                    showFragment(zoneMinderControlFragment);
+                    showFragment(vsControlFragment);
 
                 }
 

@@ -20,16 +20,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class ZoneMinderEventViewerFragment extends Fragment {
+public class VSEventViewerFragment extends Fragment {
 
     public boolean viewCreated=false;
 
     private View fragmentview;
 
     private LinearLayoutManager linearLayoutManager;
-    private FirebaseRecyclerAdapter<ZMEvent, EventsHolder> firebaseAdapter;
+    private FirebaseRecyclerAdapter<VSEvent, EventsHolder> firebaseAdapter;
 
-    public ZoneMinderControlFragment parent;
+    public VSControlFragment parent;
 
     private RecyclerView eventsRecyclerView;
 
@@ -69,7 +69,7 @@ public class ZoneMinderEventViewerFragment extends Fragment {
         }
     };
 
-    public ZoneMinderEventViewerFragment() {
+    public VSEventViewerFragment() {
         // Required empty public constructor
     }
 
@@ -117,14 +117,14 @@ public class ZoneMinderEventViewerFragment extends Fragment {
         linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setStackFromEnd(false);
 
-        firebaseAdapter = new FirebaseRecyclerAdapter<ZMEvent, EventsHolder>(
-                ZMEvent.class,
+        firebaseAdapter = new FirebaseRecyclerAdapter<VSEvent, EventsHolder>(
+                VSEvent.class,
                 R.layout.row_holder_zmevent_element,
                 EventsHolder.class,
                 eventsNode) {
 
             @Override
-            protected void populateViewHolder(EventsHolder holder, final ZMEvent event, int position) {
+            protected void populateViewHolder(EventsHolder holder, final VSEvent event, int position) {
 
                 holder.eventDateTextView.setText(event.getStartTime());
                 holder.eventMonitorNameTextView.setText("");

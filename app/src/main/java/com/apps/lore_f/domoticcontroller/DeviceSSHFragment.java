@@ -104,64 +104,6 @@ public class DeviceSSHFragment extends Fragment {
         }
     };
 
-    private ChildEventListener sshOutputChange = new ChildEventListener() {
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-            if (dataSnapshot != null) {
-
-                Log.i(TAG, "onChildAdded :: datasnapshot lenght: " + dataSnapshot.getValue().toString());
-
-                if (dataSnapshot.getKey().equals("Output"))
-                    updateView(dataSnapshot);
-
-                if (dataSnapshot.getKey().equals("Cursor")) {
-                    updateCursor(dataSnapshot);
-                }
-
-            } else {
-
-                Log.i(TAG, "onChildAdded :: cannot show datasnapshot :(");
-            }
-
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            if (dataSnapshot != null) {
-
-                switch (dataSnapshot.getKey()) {
-
-                    case "Output":
-                        updateView(dataSnapshot);
-                        break;
-
-                    case "Cursor":
-                        updateCursor(dataSnapshot);
-                        break;
-
-                }
-
-            }
-
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
 
 
     public DeviceSSHFragment() {
@@ -188,9 +130,6 @@ public class DeviceSSHFragment extends Fragment {
         sshOutput = (SSHView) view.findViewById(R.id.TXV___DEVICESSH___SSH);
         sshOutput.setMovementMethod(new ScrollingMovementMethod());
 
-        // inizializzo la referenza al nodo del databas
-        sshOutputNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + parent.remoteDeviceName + "/SSHShells/" + parent.thisDevice);
-        sshOutputNode.addChildEventListener(sshOutputChange);
 
         // assegna un OnClickListener ai pulsanti
         ImageButton sendCommandButton = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___SENDCOMMAND);
@@ -295,9 +234,6 @@ public class DeviceSSHFragment extends Fragment {
         sendKeyLeft.setOnClickListener(null);
 
 
-        // rimuove il ChildEventListener ai nodi del database
-        sshOutputNode.removeEventListener(sshOutputChange);
-
         // rimuove l'esecuzione del callback "manageSSHInputStream"
         handler.removeCallbacks(manageSSHInputStream);
 
@@ -306,35 +242,8 @@ public class DeviceSSHFragment extends Fragment {
 
     }
 
-    public void updateView(@NonNull DataSnapshot dataSnapshot) {
-
-        try {
-
-            sshOutput.setFormattedText(dataSnapshot.getValue().toString());
-
-            final int scrollAmount = sshOutput.getLayout().getLineTop(sshOutput.getLineCount()) - sshOutput.getHeight();
-            // if there is no need to scroll, scrollAmount will be <=0
-            if (scrollAmount > 0)
-                sshOutput.scrollTo(0, scrollAmount);
-            else
-                sshOutput.scrollTo(0, 0);
-
-        } catch (NullPointerException e) {
-
-        }
-
-    }
-
-    public void updateCursor(@NonNull DataSnapshot dataSnapshot) {
-
-        CursorData cursorData = dataSnapshot.getValue(CursorData.class);
-        sshOutput.setCursor(cursorData.col, cursorData.row);
-
-    }
-
 
     private void refreshAdapter() {
-
 
     }
 

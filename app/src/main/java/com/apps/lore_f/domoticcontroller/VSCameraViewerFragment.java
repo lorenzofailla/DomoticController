@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,17 +18,14 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static android.content.ContentValues.TAG;
-
-public class ZoneMinderCameraViewerFragment extends Fragment {
+public class VSCameraViewerFragment extends Fragment {
 
     public boolean viewCreated=false;
-    public ZoneMinderControlFragment parent;
+    public VSControlFragment parent;
     public String zmMonitorId;
     public String zmMonitorName;
 
@@ -64,7 +60,7 @@ public class ZoneMinderCameraViewerFragment extends Fragment {
         }
     };
 
-    public ZoneMinderCameraViewerFragment() {
+    public VSCameraViewerFragment() {
         // Required empty public constructor
     }
 

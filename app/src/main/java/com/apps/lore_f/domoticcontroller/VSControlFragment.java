@@ -5,33 +5,27 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ListView;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public class ZoneMinderControlFragment extends Fragment {
+public class VSControlFragment extends Fragment {
 
     public boolean viewCreated=false;
 
     private View fragmentView;
-    private ZoneMinderControlFragment me = this;
+    private VSControlFragment me = this;
 
     public DatabaseReference zoneminderDBNode;
     public DeviceViewActivity parent;
 
-    public ZoneMinderControlFragment() {
+    public VSControlFragment() {
         // Required empty public constructor
     }
 
@@ -83,7 +77,7 @@ public class ZoneMinderControlFragment extends Fragment {
 
                 case R.id.BTN___ZMMGM___CAMERAMANAGER:
 
-                    ZoneMinderCameraListFragment zoneMinderCameraListFragment = new ZoneMinderCameraListFragment();
+                    VSCameraListFragment zoneMinderCameraListFragment = new VSCameraListFragment();
                     zoneMinderCameraListFragment.camerasNode=zoneminderDBNode.child("Monitors");
                     zoneMinderCameraListFragment.parent = me;
 
@@ -93,9 +87,9 @@ public class ZoneMinderControlFragment extends Fragment {
 
                 case R.id.BTN___ZMMGM___LOGS:
 
-                    ZoneMinderEventViewerFragment zoneMinderEventViewerFragment = new ZoneMinderEventViewerFragment();
-                    zoneMinderEventViewerFragment.parent=me;
-                    showFragment(zoneMinderEventViewerFragment);
+                    VSEventViewerFragment vsEventViewerFragment = new VSEventViewerFragment();
+                    vsEventViewerFragment.parent=me;
+                    showFragment(vsEventViewerFragment);
 
                     break;
 
