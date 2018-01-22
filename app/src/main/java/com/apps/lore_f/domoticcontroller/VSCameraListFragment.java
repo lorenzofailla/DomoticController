@@ -36,8 +36,6 @@ public class VSCameraListFragment extends Fragment {
     private FirebaseRecyclerAdapter<VSCameraDevice, CamerasHolder> firebaseAdapter;
     private RecyclerView camerasRecyclerView;
 
-
-
     private ValueEventListener valueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {

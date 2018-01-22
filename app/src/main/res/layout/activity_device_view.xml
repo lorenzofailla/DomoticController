@@ -42,7 +42,7 @@
             android:src="@drawable/torrent" />
 
        <ImageButton
-           android:id="@+id/BTN___DEVICEVIEW___ZONEMINDER"
+           android:id="@+id/BTN___DEVICEVIEW___VIDEOSURVEILLANCE"
            android:layout_width="45dp"
            android:layout_height="45dp"
            android:src="@drawable/videocam" />

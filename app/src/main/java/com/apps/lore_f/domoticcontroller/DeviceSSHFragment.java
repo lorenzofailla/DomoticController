@@ -128,8 +128,6 @@ public class DeviceSSHFragment extends Fragment {
         fragmentView = view;
 
         sshOutput = (SSHView) view.findViewById(R.id.TXV___DEVICESSH___SSH);
-        sshOutput.setMovementMethod(new ScrollingMovementMethod());
-
 
         // assegna un OnClickListener ai pulsanti
         ImageButton sendCommandButton = (ImageButton) view.findViewById(R.id.BTN___DEVICESSH___SENDCOMMAND);

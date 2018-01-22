@@ -22,7 +22,7 @@ public class VSControlFragment extends Fragment {
     private View fragmentView;
     private VSControlFragment me = this;
 
-    public DatabaseReference zoneminderDBNode;
+    public DatabaseReference vsDBNode;
     public DeviceViewActivity parent;
 
     public VSControlFragment() {
@@ -77,11 +77,11 @@ public class VSControlFragment extends Fragment {
 
                 case R.id.BTN___ZMMGM___CAMERAMANAGER:
 
-                    VSCameraListFragment zoneMinderCameraListFragment = new VSCameraListFragment();
-                    zoneMinderCameraListFragment.camerasNode=zoneminderDBNode.child("Monitors");
-                    zoneMinderCameraListFragment.parent = me;
+                    VSCameraListFragment vsCameraListFragment = new VSCameraListFragment();
+                    vsCameraListFragment.camerasNode= vsDBNode.child("Threads");
+                    vsCameraListFragment.parent = me;
 
-                    showFragment(zoneMinderCameraListFragment);
+                    showFragment(vsCameraListFragment);
 
                     break;
 
