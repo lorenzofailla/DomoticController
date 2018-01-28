@@ -20,7 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class VSEventViewerFragment extends Fragment {
+public class VideoSurveillanceEventsListFragment extends Fragment {
 
     public boolean viewCreated=false;
 
@@ -29,7 +29,7 @@ public class VSEventViewerFragment extends Fragment {
     private LinearLayoutManager linearLayoutManager;
     private FirebaseRecyclerAdapter<VSEvent, EventsHolder> firebaseAdapter;
 
-    public VSControlFragment parent;
+    public VideoSurveillanceActivity parent;
 
     private RecyclerView eventsRecyclerView;
 
@@ -69,7 +69,7 @@ public class VSEventViewerFragment extends Fragment {
         }
     };
 
-    public VSEventViewerFragment() {
+    public VideoSurveillanceEventsListFragment() {
         // Required empty public constructor
     }
 

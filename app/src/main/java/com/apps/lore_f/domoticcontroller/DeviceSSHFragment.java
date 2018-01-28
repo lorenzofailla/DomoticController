@@ -128,7 +128,7 @@ public class DeviceSSHFragment extends Fragment {
         fragmentView = view;
 
         sshOutput = (SSHView) view.findViewById(R.id.TXV___DEVICESSH___SSH);
-        sshOutput.setMovementMethod(new ScrollingMovementMethod());
+        //sshOutput.setMovementMethod(new ScrollingMovementMethod());
 
 
         // assegna un OnClickListener ai pulsanti

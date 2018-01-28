@@ -1,6 +1,5 @@
 package com.apps.lore_f.domoticcontroller;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,17 +29,31 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     private Query onlineDevices;
 
+    private String userName;
+
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
 
+            Intent intent;
             switch (view.getId()){
 
                 case R.id.BTN___DEVICE_SELECTION___CLOUDSTORAGE:
 
                     // avvia l'activity per la gestione del cloud storage
-                    Intent intent = new Intent (getApplicationContext(), CloudStorageActivity.class);
+                    intent = new Intent (getApplicationContext(), CloudStorageActivity.class);
                     startActivity(intent);
+
+                    break;
+
+                case R.id.BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE:
+
+                    // avvia l'activity per la gestione della videosorveglianza
+                    intent = new Intent (getApplicationContext(), VideoSurveillanceActivity.class);
+                    intent.putExtra("__USER", )
+                    startActivity(intent);
+
+                    break;
 
             }
 
@@ -50,22 +63,24 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     public static class DevicesHolder extends RecyclerView.ViewHolder {
 
-        public TextView deviceNameTXV;
-        public ImageButton connectToDeviceBTN;
+        public TextView deviceNameTxv;
+        public ImageButton connectToDeviceBtn;
 
-        public ImageView torrentIMG;
-        public ImageView directoryNaviIMG;
-        public ImageView zoneMinderMgmIMG;
+        public ImageView torrentImg;
+        public ImageView directoryNaviImg;
+        public ImageView videoSurveillanceImg;
+        public ImageView wakeOnLanImg;
 
 
         public DevicesHolder(View v) {
             super(v);
-            deviceNameTXV = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___DEVICENAME);
+            deviceNameTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___DEVICENAME);
 
-            connectToDeviceBTN = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___CONNECT);
-            torrentIMG = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
-            directoryNaviIMG = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
-            zoneMinderMgmIMG = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___ZONEMINDER);
+            connectToDeviceBtn = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___CONNECT);
+            torrentImg = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
+            directoryNaviImg = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
+            videoSurveillanceImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___VIDEOSURVEILLANCE);
+            wakeOnLanImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___WAKEONLAN);
 
         }
 
@@ -104,6 +119,10 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         devicesRecyclerView = (RecyclerView) findViewById(R.id.RWV___DEVICE_SELECTION___DEVICES);
 
+        /* imposta il nome utente */
+        userName=
+
+
     }
 
     @Override
@@ -113,9 +132,10 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         // assegno OnClickListener
         findViewById(R.id.BTN___DEVICE_SELECTION___CLOUDSTORAGE).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE).setOnClickListener(onClickListener);
 
         // cerca i dispositivi online nel database
-        DatabaseReference userNode = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla");
+        DatabaseReference userNode = FirebaseDatabase.getInstance().getReference(String.format("/Users/%s", userName));
 
         onlineDevices = userNode.child("Devices").orderByChild("online").equalTo(true);
         onlineDevices.addValueEventListener(valueEventListener);
@@ -127,8 +147,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         super.onPause();
 
-        // rimuovo OnClickListener
+        // rimuove OnClickListener
         findViewById(R.id.BTN___DEVICE_SELECTION___CLOUDSTORAGE).setOnClickListener(null);
+        findViewById(R.id.BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE).setOnClickListener(null);
 
         onlineDevices.removeEventListener(valueEventListener);
 
@@ -148,29 +169,35 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             @Override
             protected void populateViewHolder(DevicesHolder holder, final DeviceToConnect device, int position) {
 
-                holder.deviceNameTXV.setText(device.getDeviceName());
+                holder.deviceNameTxv.setText(device.getDeviceName());
 
                 // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
                 //
                 if(device.getHasTorrentManagement()){
                     //
-                    holder.torrentIMG.setVisibility(View.VISIBLE);
+                    holder.torrentImg.setVisibility(View.VISIBLE);
 
                 }
 
                 if(device.getHasDirectoryNavigation()){
                     //
-                    holder.directoryNaviIMG.setVisibility(View.VISIBLE);
+                    holder.directoryNaviImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if(device.getHasZoneMinderManagement()){
+                if(device.getHasVideoSurveillanceManagement()){
                     //
-                    holder.zoneMinderMgmIMG.setVisibility(View.VISIBLE);
+                    holder.videoSurveillanceImg.setVisibility(View.VISIBLE);
 
                 }
 
-                holder.connectToDeviceBTN.setOnClickListener(new View.OnClickListener() {
+                if(device.getHasWakeOnLan()){
+                    //
+                    holder.wakeOnLanImg.setVisibility(View.VISIBLE);
+
+                }
+
+                holder.connectToDeviceBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
@@ -178,7 +205,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                                 device.getDeviceName(),
                                 device.getHasTorrentManagement(),
                                 device.getHasDirectoryNavigation(),
-                                device.getHasZoneMinderManagement()
+                                device.getHasWakeOnLan()
                         );
 
                     }
@@ -211,13 +238,13 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     }
 
-    private void connectToDevice(String deviceName, boolean torrent, boolean dirNavi, boolean zm){
+    private void connectToDevice(String deviceName, boolean torrent, boolean dirNavi, boolean wakeOnLan){
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
         intent.putExtra("__DEVICE_TO_CONNECT", deviceName);
         intent.putExtra("__HAS_TORRENT_MANAGEMENT", torrent);
         intent.putExtra("__HAS_DIRECTORY_NAVIGATION", dirNavi);
-        intent.putExtra("__HAS_ZONEMINDER_MANAGEMENT", zm);
+        intent.putExtra("__HAS_WAKEONLAN", wakeOnLan);
 
         startActivity(intent);
 

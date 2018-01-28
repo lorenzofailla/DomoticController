@@ -34,7 +34,7 @@
 
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/IMG___ROWDEVICE___DEVICE_TYPE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -57,7 +57,15 @@
             android:visibility="gone" />
 
         <ImageView
-            android:id="@+id/IMG___ROWDEVICE___ZONEMINDER"
+            android:id="@+id/IMG___ROWDEVICE___WAKEONLAN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/alarm"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/IMG___ROWDEVICE___VIDEOSURVEILLANCE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"

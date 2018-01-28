@@ -11,7 +11,8 @@ public class DeviceToConnect {
     private boolean isUnix;
     private boolean hasDirectoryNavigation;
     private boolean hasTorrentManagement;
-    private boolean hasZoneMinderManagement;
+    private boolean hasVideoSurveillanceManagement;
+    private boolean hasWakeOnLan;
 
     // empty constructor
     public DeviceToConnect() {
@@ -30,7 +31,9 @@ public class DeviceToConnect {
         return hasDirectoryNavigation;
     }
 
-    public boolean getHasZoneMinderManagement() {return hasZoneMinderManagement; }
+    public boolean getHasWakeOnLan() { return hasWakeOnLan; }
+
+    public boolean getHasVideoSurveillanceManagement() {return hasVideoSurveillanceManagement; }
 
 }
 

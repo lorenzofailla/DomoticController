@@ -25,7 +25,7 @@ import java.io.IOException;
 public class VSCameraViewerFragment extends Fragment {
 
     public boolean viewCreated=false;
-    public VSControlFragment parent;
+    public VideoSurveillanceActivity parent;
     public String zmMonitorId;
     public String zmMonitorName;
 
