@@ -41,6 +41,12 @@
             android:layout_height="50dp"
             android:src="@drawable/cloud" />
 
+        <ImageButton
+            android:id="@+id/BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/videocam" />
+
     </LinearLayout>
 
 </RelativeLayout>

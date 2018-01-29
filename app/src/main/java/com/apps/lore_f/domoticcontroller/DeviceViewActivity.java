@@ -37,7 +37,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     public String remoteDeviceName;
     private boolean remoteDeviceTorrent;
     private boolean remoteDeviceDirNavi;
-    private boolean remoteDeviceVideoSurveillance;
+    private boolean remoteDeviceWakeOnLan;
 
     public String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
@@ -47,7 +47,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private Handler handler;
 
     private ProgressDialog connectionProgressDialog;
-    private ProgressDialog vsProgressDialog;
+    private ProgressDialog zmProgressDialog;
 
     private long lastOnlineReply;
     private static final String LAST_ONLINE_REPLY = "lastOnlineReply";
@@ -56,7 +56,6 @@ public class DeviceViewActivity extends AppCompatActivity {
     private DeviceInfoFragment deviceInfoFragment;
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
-    private VSControlFragment vsControlFragment;
     private WakeOnLanFragment wakeOnLanFragment;
     private DeviceSSHFragment deviceSSHFragment;
 
@@ -136,16 +135,24 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
 
         @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {}
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
 
         @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
 
         @Override
-        public void onCancelled(DatabaseError databaseError) {}
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
 
     };
 
@@ -163,7 +170,8 @@ public class DeviceViewActivity extends AppCompatActivity {
             remoteDeviceName = extras.getString("__DEVICE_TO_CONNECT");
             remoteDeviceTorrent = extras.getBoolean("__HAS_TORRENT_MANAGEMENT");
             remoteDeviceDirNavi = extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
-            remoteDeviceVideoSurveillance = extras.getBoolean("__HAS_ZONEMINDER_MANAGEMENT");
+            remoteDeviceWakeOnLan=extras.getBoolean("__HAS_WAKEONLAN");
+
 
         } else {
 
@@ -229,7 +237,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICEVIEW___VIDEOSURVEILLANCE).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___SSH).setOnClickListener(onClickListener);
 
@@ -274,7 +281,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
-        findViewById(R.id.BTN___DEVICEVIEW___VIDEOSURVEILLANCE).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___SSH).setOnClickListener(null);
 
@@ -444,26 +450,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 break;
 
-            case "ZONEMINDER_DATA_UPDATED":
-
-                if (vsProgressDialog.isShowing()) {
-
-                    handler.removeCallbacks(zoneMinderTimeOut);
-                    vsProgressDialog.dismiss();
-
-                    vsControlFragment = new VSControlFragment();
-                    vsControlFragment.vsDBNode = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + remoteDeviceName + "/ZoneMinder");
-                    vsControlFragment.parent = this;
-
-                    showFragment(vsControlFragment);
-
-                }
-
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
-
-                break;
-
             case "FILE_READY_FOR_DOWNLOAD":
 
                 String[] param = {"Users/lorenzofailla/Devices/" + thisDevice + "/IncomingFiles/"};
@@ -537,8 +523,14 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void releaseControls() {
 
+        /*
+        Mostra o nasconde i diversi pulsanti in funzione delle capacità del dispositivio
+         */
+
+        // pulsante per le informazioni del dispositivo è sempre visibile
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setVisibility(View.VISIBLE);
 
+        // gestione torrent
         if (remoteDeviceTorrent) {
             //
             findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.VISIBLE);
@@ -548,6 +540,8 @@ public class DeviceViewActivity extends AppCompatActivity {
             findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.GONE);
 
         }
+
+        // gestione file manager
 
         if (remoteDeviceDirNavi) {
             //
@@ -559,13 +553,14 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        if (remoteDeviceVideoSurveillance) {
-
-            findViewById(R.id.BTN___DEVICEVIEW___VIDEOSURVEILLANCE).setVisibility(View.VISIBLE);
+        // wakeonlan
+        if(remoteDeviceWakeOnLan) {
+            //
+            findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setVisibility(View.VISIBLE);
 
         } else {
             //
-            findViewById(R.id.BTN___DEVICEVIEW___VIDEOSURVEILLANCE).setVisibility(View.GONE);
+            findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setVisibility(View.GONE);
 
         }
 
@@ -573,11 +568,15 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void hideControls() {
 
+        /*
+        Nasconde la pulsantiera
+         */
+
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setVisibility(View.GONE);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.GONE);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.GONE);
-        findViewById(R.id.BTN___DEVICEVIEW___VIDEOSURVEILLANCE).setVisibility(View.GONE);
-
+        findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setVisibility(View.GONE);
+        findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setVisibility(View.GONE);
     }
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -607,9 +606,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     break;
 
-                case R.id.BTN___DEVICEVIEW___VIDEOSURVEILLANCE:
+                case R.id.BTN___DEVICEVIEW___ZONEMINDER:
 
-                    startVideoSurveillance();
+                    startZoneMinder();
 
                     break;
 
@@ -664,26 +663,18 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
-    private void startVideoSurveillance() {
+    private void startZoneMinder() {
 
-        /*
-        vsProgressDialog = new ProgressDialog(this);
-        vsProgressDialog.setCancelable(true);
-        vsProgressDialog.setTitle(R.string.VSMGM_PD_TITLE_CONNECTING);
-        vsProgressDialog.setIndeterminate(true);
+        zmProgressDialog = new ProgressDialog(this);
+        zmProgressDialog.setCancelable(true);
+        zmProgressDialog.setTitle(R.string.ZMMGM_PD_TITLE_CONNECTING);
+        zmProgressDialog.setIndeterminate(true);
 
-        vsProgressDialog.show();
+        zmProgressDialog.show();
 
         sendCommandToDevice(new Message("__update_zoneminder_data", "null", thisDevice));
 
         handler.postDelayed(zoneMinderTimeOut, zmReplyTimeout);
-        */
-
-        vsControlFragment = new VSControlFragment();
-        vsControlFragment.vsDBNode = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + remoteDeviceName + "/Motion");
-        vsControlFragment.parent = this;
-
-        showFragment(vsControlFragment);
 
     }
 
@@ -927,7 +918,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void manageZoneMinderTimeOut() {
 
-        vsProgressDialog.cancel();
+        zmProgressDialog.cancel();
 
         // costruisce un AlertDialog e lo mostra a schermo
         new AlertDialog.Builder(this)

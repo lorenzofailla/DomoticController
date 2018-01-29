@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,35 +19,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import static android.content.ContentValues.TAG;
+public class VideoSurveillanceCameraListFragment extends Fragment {
 
-public class VSCameraListFragment extends Fragment {
-
-    public VSControlFragment parent;
     public boolean viewCreated=false;
 
-    private View fragmentview;
-
-    public DatabaseReference camerasNode;
+    public DatabaseReference camerasNode=null;
     private Query availableCameras;
-
     private LinearLayoutManager linearLayoutManager;
     private FirebaseRecyclerAdapter<VSCameraDevice, CamerasHolder> firebaseAdapter;
     private RecyclerView camerasRecyclerView;
 
     private ValueEventListener valueEventListener = new ValueEventListener() {
+
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-
-            try {
-
-                Log.i(TAG, dataSnapshot.getValue().toString());
-
-            } catch (NullPointerException e) {
-
-                Log.i(TAG, "Cannot show datasnapshot");
-
-            }
 
             // aggiorna l'adapter
             if(viewCreated)
@@ -57,9 +41,7 @@ public class VSCameraListFragment extends Fragment {
         }
 
         @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
+        public void onCancelled(DatabaseError databaseError) {}
 
 
     };
@@ -68,7 +50,6 @@ public class VSCameraListFragment extends Fragment {
 
         public TextView cameraNameTXV;
         public ImageView cameraConnectBTN;
-
 
         public CamerasHolder(View v) {
             super(v);
@@ -80,7 +61,7 @@ public class VSCameraListFragment extends Fragment {
 
     }
 
-    public VSCameraListFragment() {
+    public VideoSurveillanceCameraListFragment() {
         // Required empty public constructor
     }
 
@@ -94,9 +75,7 @@ public class VSCameraListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_zoneminder_cameralist, container, false);
-
-        fragmentview=view;
+        View view = inflater.inflate(R.layout.fragment_videosurveillance_cameralist, container, false);
 
         camerasRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS);
         availableCameras = camerasNode.orderByChild("Available").equalTo(true);
@@ -140,14 +119,8 @@ public class VSCameraListFragment extends Fragment {
                     @Override
                     public void onClick(View view) {
 
-                        VSCameraViewerFragment vsCameraViewerFragment = new VSCameraViewerFragment();
-                        vsCameraViewerFragment.parent = parent;
-                        vsCameraViewerFragment.zmMonitorId = camera.getId();
-                        vsCameraViewerFragment.zmMonitorName = camera.getName();
-
-                        parent.showFragment(vsCameraViewerFragment);
-
                     }
+
                 });
 
             }
@@ -175,6 +148,5 @@ public class VSCameraListFragment extends Fragment {
         camerasRecyclerView.setAdapter(firebaseAdapter);
 
     }
-
 
 }
