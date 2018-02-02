@@ -7,7 +7,10 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,6 +43,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private boolean remoteDeviceWakeOnLan;
 
     public String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
+    private String groupName = "lorenzofailla";// TODO: 13-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutBase = 2 * 60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long zmReplyTimeout = 30000L; // ms
@@ -58,6 +62,47 @@ public class DeviceViewActivity extends AppCompatActivity {
     private FileViewerFragment fileViewerFragment;
     private WakeOnLanFragment wakeOnLanFragment;
     private DeviceSSHFragment deviceSSHFragment;
+
+    private CollectionPagerAdapter collectionPagerAdapter;
+    private ViewPager viewPager;
+
+    public class CollectionPagerAdapter extends FragmentStatePagerAdapter {
+
+        public CollectionPagerAdapter(FragmentManager fm) {
+            super(fm);
+
+        }
+
+
+        private String[] pageTitle = {
+                "Device basic info"
+        };
+
+        private int pagesCount = 1;
+
+        @Override
+        public Fragment getItem(int i) {
+
+            switch (i) {
+                case 0:
+
+
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return pagesCount;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return pageTitle[position];
+        }
+
+    }
 
     // Runnable per chiudere l'Activity in caso il dispositivo non risponda alle chiamate entro il timeout
     private Runnable watchDog = new Runnable() {
@@ -170,7 +215,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             remoteDeviceName = extras.getString("__DEVICE_TO_CONNECT");
             remoteDeviceTorrent = extras.getBoolean("__HAS_TORRENT_MANAGEMENT");
             remoteDeviceDirNavi = extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
-            remoteDeviceWakeOnLan=extras.getBoolean("__HAS_WAKEONLAN");
+            remoteDeviceWakeOnLan = extras.getBoolean("__HAS_WAKEONLAN");
 
 
         } else {
@@ -233,6 +278,12 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onResume();
 
+        collectionPagerAdapter =
+                new CollectionPagerAdapter(
+                        getSupportFragmentManager());
+        viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
+        viewPager.setAdapter(collectionPagerAdapter);
+
         // assegna gli OnClickListener ai pulsanti
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
@@ -241,7 +292,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___SSH).setOnClickListener(onClickListener);
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso
-        incomingMessages = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + thisDevice + "/IncomingCommands");
+        incomingMessages = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices/" + thisDevice + "/IncomingCommands");
 
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessages.addChildEventListener(newCommandsToProcess);
@@ -452,7 +503,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "FILE_READY_FOR_DOWNLOAD":
 
-                String[] param = {"Users/lorenzofailla/Devices/" + thisDevice + "/IncomingFiles/"};
+                String[] param = {"Groups/" + groupName + "/Devices/" + thisDevice + "/IncomingFiles/"};
                 Intent intent = new Intent(this, DownloadFileFromDataSlots.class);
                 intent.putExtra("__file_to_download", param);
 
@@ -482,7 +533,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     public void sendCommandToDevice(Message command) {
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo remoto selezionato
-        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices");
+        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/"+groupName+"/Devices");
 
         // aggiunge il messaggio al nodo
         deviceIncomingCommands
@@ -496,7 +547,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void deleteMessage(String id) {
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo locale
-        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices");
+        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/"+groupName+"/Devices");
 
         // rimuove il messaggio al nodo
         deviceIncomingCommands.child(thisDevice).child("IncomingCommands").child(id).removeValue();
@@ -554,13 +605,13 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
         // wakeonlan
-        if(remoteDeviceWakeOnLan) {
+        if (remoteDeviceWakeOnLan) {
             //
             findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setVisibility(View.VISIBLE);
 
         } else {
             //
-            findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setVisibility(View.GONE);
+            findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setVisibility(View.GONE);
 
         }
 
@@ -575,7 +626,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setVisibility(View.GONE);
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.GONE);
         findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.GONE);
-        findViewById(R.id.BTN___DEVICEVIEW___ZONEMINDER).setVisibility(View.GONE);
         findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setVisibility(View.GONE);
     }
 
@@ -606,12 +656,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     break;
 
-                case R.id.BTN___DEVICEVIEW___ZONEMINDER:
-
-                    startZoneMinder();
-
-                    break;
-
                 case R.id.BTN___DEVICEVIEW___WAKEONLAN:
 
                     startWakeOnLan();
@@ -626,7 +670,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     // ottiene un riferimento al nodo del database Firebase con le informazioni sulle shell aperte,
                     // effettua una query per filtrare le shell aperte al dispositivo corrente
-                    DatabaseReference activeShells = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/" + remoteDeviceName + "/SSHShells");
+                    DatabaseReference activeShells = FirebaseDatabase.getInstance().getReference("/Groups/"+groupName+"/Devices/" + remoteDeviceName + "/SSHShells");
                     Query query = activeShells.orderByKey().equalTo(thisDevice);
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -662,21 +706,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
     };
-
-    private void startZoneMinder() {
-
-        zmProgressDialog = new ProgressDialog(this);
-        zmProgressDialog.setCancelable(true);
-        zmProgressDialog.setTitle(R.string.ZMMGM_PD_TITLE_CONNECTING);
-        zmProgressDialog.setIndeterminate(true);
-
-        zmProgressDialog.show();
-
-        sendCommandToDevice(new Message("__update_zoneminder_data", "null", thisDevice));
-
-        handler.postDelayed(zoneMinderTimeOut, zmReplyTimeout);
-
-    }
 
     private void startWakeOnLan() {
 
@@ -985,7 +1014,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                 return super.onKeyDown(keyCode, event);
 
         }
-
 
     }
 

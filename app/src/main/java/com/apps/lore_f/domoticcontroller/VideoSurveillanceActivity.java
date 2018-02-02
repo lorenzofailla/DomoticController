@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -24,7 +25,7 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private CollectionPagerAdapter collectionPagerAdapter;
 
-    private String userName;
+    private String groupName;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,7 +35,7 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
 
-            userName = extras.getString("__USER");
+            groupName = extras.getString("__GROUP");
 
         } else {
 
@@ -48,7 +49,7 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
 
     }
 
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
 
         collectionPagerAdapter =
@@ -59,7 +60,7 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
 
     }
 
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
     }
 
@@ -76,24 +77,23 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
             // VideoSurveillanceCameraListFragment
 
             videoSurveillanceCameraListFragment = new VideoSurveillanceCameraListFragment();
-            videoSurveillanceCameraListFragment.camerasNode =
+            videoSurveillanceCameraListFragment.camerasNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Videosurveillance/Cameras", groupName));
 
-                    videoSurveillanceEventsListFragment = new VideoSurveillanceEventsListFragment();
+            videoSurveillanceEventsListFragment = new VideoSurveillanceEventsListFragment();
         }
 
 
-
-        private String[] pageTitle={
+        private String[] pageTitle = {
                 "Camera list",
                 "Events list"
         };
 
-        private int pagesCount=2;
+        private int pagesCount = 2;
 
         @Override
         public Fragment getItem(int i) {
 
-            switch(i){
+            switch (i) {
                 case 0:
                     return videoSurveillanceCameraListFragment;
 

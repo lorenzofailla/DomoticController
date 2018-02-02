@@ -10,13 +10,17 @@
         android:id="@+id/TXV___ZMEVENTVIEWERFRAGMENT___HEADER"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ZoneMinder Event Viewer"/>
+        android:text="ZoneMinder Event Viewer"
+        android:paddingHorizontal="3dp"
+        android:paddingVertical="3dp"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/RWV___ZMEVENTVIEWERFRAGMENT___EVENTS"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/TXV___ZMEVENTVIEWERFRAGMENT___HEADER" />
+        android:layout_below="@+id/TXV___ZMEVENTVIEWERFRAGMENT___HEADER"
+        android:paddingHorizontal="3dp"
+        android:paddingVertical="3dp"/>
 
 </RelativeLayout>

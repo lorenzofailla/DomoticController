@@ -10,13 +10,17 @@
         android:id="@+id/TXV___CAMERALISTFRAGMENT___INFO"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ZoneMinder Camera List"/>
+        android:paddingHorizontal="3dp"
+        android:paddingVertical="3dp"
+        android:text="@string/FGM_VIDEOSURVEILLANCE_CAMERALIST_SELECT_AVAILABLE_CAMERA" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
+        android:paddingHorizontal="3dp"
+        android:paddingVertical="3dp"
         android:layout_below="@+id/TXV___CAMERALISTFRAGMENT___INFO" />
 
 </RelativeLayout>

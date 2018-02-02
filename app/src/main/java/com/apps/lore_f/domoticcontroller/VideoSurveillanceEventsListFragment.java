@@ -83,12 +83,12 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_zoneminder_eventviewer, container, false);
+        View view = inflater.inflate(R.layout.fragment_videosurveillance_eventslist, container, false);
 
         eventsRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___ZMEVENTVIEWERFRAGMENT___EVENTS);
 
-        eventsNode = FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+parent.parent.remoteDeviceName+"/ZoneMinder/Events");
-        eventsNode.addValueEventListener(valueEventListener);
+        eventsNode = FirebaseDatabase.getInstance().getReference();
+        //eventsNode.addValueEventListener(valueEventListener);
         fragmentview=view;
 
         viewCreated=true;

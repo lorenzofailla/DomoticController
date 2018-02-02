@@ -128,7 +128,7 @@ public class VSCameraViewerFragment extends Fragment {
         view.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOT).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(onClickListener);
 
-        shotNode= FirebaseDatabase.getInstance().getReference("/Users/lorenzofailla/Devices/"+parent.parent.remoteDeviceName+"/ZoneMinder/Monitors/"+zmMonitorId+"/Shots");
+        shotNode= FirebaseDatabase.getInstance().getReference();
         shotNode.addChildEventListener(childEventListener);
 
         fragmentview=view;
@@ -162,25 +162,9 @@ public class VSCameraViewerFragment extends Fragment {
 
     public void requestSingleShot(){
 
-        parent.parent.sendCommandToDevice(
-                new Message(
-                        "__request_single_shot",
-                        zmMonitorId,
-                        parent.parent.thisDevice
-                )
-        );
-
     }
 
     public void requestShotSeries(){
-
-        parent.parent.sendCommandToDevice(
-                new Message(
-                        "__request_shot_series",
-                        zmMonitorId,
-                        parent.parent.thisDevice
-                )
-        );
 
     }
 
@@ -236,7 +220,7 @@ public class VSCameraViewerFragment extends Fragment {
             fragmentview.findViewById(R.id.TXV___ZMCAMERAVIEW___CAMERANAME).setVisibility(View.VISIBLE);
         }
 
-        parent.manageFullScreenMode(fullScreenMode);
+        //parent.manageFullScreenMode(fullScreenMode);
 
 
     }

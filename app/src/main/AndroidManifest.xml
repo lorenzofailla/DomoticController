@@ -31,6 +31,7 @@
         <activity android:name=".DeviceSelectionActivity" />
         <activity android:name=".DeviceViewActivity" />
         <activity android:name=".CloudStorageActivity" />
+        <activity android:name=".VideoSurveillanceActivity" />
 
         <service
             android:name=".DownloadFileFromCloud"

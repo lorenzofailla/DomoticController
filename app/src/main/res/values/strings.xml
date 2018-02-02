@@ -69,4 +69,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <!-- fragment_videosurveillance_cameralist.xml -->
+    <string name="FGM_VIDEOSURVEILLANCE_CAMERALIST_SELECT_AVAILABLE_CAMERA">Select an available camera:</string>
+
+    <!-- fragment_videosurveillance_eventslist.xml -->
+    <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_SELECT_EVENT">Select an event:</string>
+
+
 </resources>

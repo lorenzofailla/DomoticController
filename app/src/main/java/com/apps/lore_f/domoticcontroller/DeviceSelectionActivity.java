@@ -19,6 +19,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.function.ToDoubleBiFunction;
+
 public class DeviceSelectionActivity extends AppCompatActivity {
 
     private final static String TAG = "DeviceSelectionActivity";
@@ -29,7 +31,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     private Query onlineDevices;
 
-    private String userName;
+    private String groupName;
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -50,7 +52,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                     // avvia l'activity per la gestione della videosorveglianza
                     intent = new Intent (getApplicationContext(), VideoSurveillanceActivity.class);
-                    intent.putExtra("__USER", )
+                    intent.putExtra("__GROUP", groupName);
                     startActivity(intent);
 
                     break;
@@ -120,8 +122,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         devicesRecyclerView = (RecyclerView) findViewById(R.id.RWV___DEVICE_SELECTION___DEVICES);
 
         /* imposta il nome utente */
-        userName=
-
+        groupName="lorenzofailla";
+        // TODO: 29-Jan-18 recuperare valore dalle impostazioni
 
     }
 
@@ -135,7 +137,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE).setOnClickListener(onClickListener);
 
         // cerca i dispositivi online nel database
-        DatabaseReference userNode = FirebaseDatabase.getInstance().getReference(String.format("/Users/%s", userName));
+        DatabaseReference userNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s", groupName));
 
         onlineDevices = userNode.child("Devices").orderByChild("online").equalTo(true);
         onlineDevices.addValueEventListener(valueEventListener);
