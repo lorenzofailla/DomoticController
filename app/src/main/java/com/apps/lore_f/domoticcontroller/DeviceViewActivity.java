@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,9 +29,22 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DeviceViewActivity extends AppCompatActivity {
 
     private static final String TAG = "DeviceViewActivity";
+
+    private enum FragmentType {
+        DEVICE_INFO,
+        DIRECTORY_NAVIGATOR,
+        TORRENT_MANAGER,
+        WOL_MANAGER,
+        SSH_MANAGER,
+        VIDEOSURVEILLANCE_MANAGER
+
+    }
 
     // Firebase Database
     private DatabaseReference incomingMessages;
@@ -56,45 +68,78 @@ public class DeviceViewActivity extends AppCompatActivity {
     private long lastOnlineReply;
     private static final String LAST_ONLINE_REPLY = "lastOnlineReply";
 
-    // Fragments
+
+    private CollectionPagerAdapter collectionPagerAdapter;
+    private ViewPager viewPager;
+
+    /* Fragments */
     private DeviceInfoFragment deviceInfoFragment;
     private TorrentViewerFragment torrentViewerFragment;
     private FileViewerFragment fileViewerFragment;
     private WakeOnLanFragment wakeOnLanFragment;
     private DeviceSSHFragment deviceSSHFragment;
 
-    private CollectionPagerAdapter collectionPagerAdapter;
-    private ViewPager viewPager;
-
     public class CollectionPagerAdapter extends FragmentStatePagerAdapter {
+
+        private Fragment[] fragments;
+        private String[] pageTitle;
+        private FragmentType[] fragmentTypes;
+        private int pagesCount = 2;
+
 
         public CollectionPagerAdapter(FragmentManager fm) {
             super(fm);
 
         }
 
+        public CollectionPagerAdapter(
+                FragmentManager fm,
+                Fragment[] fragments,
+                String[] titles,
+                FragmentType[] types
+        ) {
+            super(fm);
 
-        private String[] pageTitle = {
-                "Device basic info"
-        };
+            this.fragments = fragments;
+            this.pageTitle = titles;
+            this.fragmentTypes = types;
 
-        private int pagesCount = 1;
+        }
 
         @Override
         public Fragment getItem(int i) {
 
-            switch (i) {
-                case 0:
+            switch (fragmentTypes[i]) {
 
+                case DEVICE_INFO:
+                    requestDeviceInfo();
+                    break;
 
-                default:
-                    return null;
+                case DIRECTORY_NAVIGATOR:
+
+                    if (fileViewerFragment.currentDirName == "") {
+                        // invia al dispositivo remoto la richiesta di conoscere la directory corrente
+                        sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
+                    }
+
+                    break;
+
+                case TORRENT_MANAGER:
+                    requestTorrentsList();
+                    break;
+
+                case WOL_MANAGER:
+                    /* no action */
+                    break;
+
             }
+            return fragments[i];
+
         }
 
         @Override
         public int getCount() {
-            return pagesCount;
+            return fragments.length;
         }
 
         @Override
@@ -181,22 +226,18 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
         }
 
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
-
         }
 
         @Override
         public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-
         }
 
     };
@@ -217,6 +258,32 @@ public class DeviceViewActivity extends AppCompatActivity {
             remoteDeviceDirNavi = extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
             remoteDeviceWakeOnLan = extras.getBoolean("__HAS_WAKEONLAN");
 
+            /* inizializza i fragment */
+            //
+            // DeviceInfoFragment
+            deviceInfoFragment = new DeviceInfoFragment();
+            deviceInfoFragment.parent = this;
+
+            //
+            // FileViewerFragment
+            if (remoteDeviceDirNavi) {
+                fileViewerFragment = new FileViewerFragment();
+                fileViewerFragment.parent = this;
+            }
+
+            //
+            // TorrentViewerFragment
+            if (remoteDeviceTorrent) {
+                torrentViewerFragment = new TorrentViewerFragment();
+                torrentViewerFragment.parent = this;
+            }
+
+            //
+            // WakeOnLanFragment
+            if(remoteDeviceWakeOnLan) {
+                wakeOnLanFragment = new WakeOnLanFragment();
+                wakeOnLanFragment.parent = this;
+            }
 
         } else {
 
@@ -245,13 +312,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    private void showDeviceInfo() {
-
-        // mostra il Fragment 'deviceInfoFragment'
-        deviceInfoFragment = new DeviceInfoFragment();
-        deviceInfoFragment.parent = this;
-
-        showFragment(deviceInfoFragment);
+    private void requestDeviceInfo() {
 
         // invia al dispositivo remoto il comando per avere l'uptime
         sendCommandToDevice(
@@ -280,7 +341,12 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         collectionPagerAdapter =
                 new CollectionPagerAdapter(
-                        getSupportFragmentManager());
+                        getSupportFragmentManager(),
+                        getAvailableFragments(),
+                        getAvailableFragmentTitles(),
+                        getAvailableFragmentTypes()
+                );
+
         viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
         viewPager.setAdapter(collectionPagerAdapter);
 
@@ -413,7 +479,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             case "TORRENT_ADDED":
 
                 // invia un instant message con la richiesta della lista dei torrents
-                askForTorrentsList();
+                requestTorrentsList();
 
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
@@ -423,11 +489,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             case "TORRENTS_LIST":
 
                 if (torrentViewerFragment == null) {
-                    //
-                    // non ci sono istanze attive del fragment, per cui ne viene creata una
-                    torrentViewerFragment = new TorrentViewerFragment();
-                    torrentViewerFragment.parent = this;
-
+                    break;
                 }
 
                 // imposta i parametri di visualizzazione del fragment
@@ -447,9 +509,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                 if (torrentViewerFragment.viewCreated)
                     torrentViewerFragment.updateContent();
 
-                // mostra il fragment
-                showFragment(torrentViewerFragment);
-
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
 
@@ -457,13 +516,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "HOME_DIRECTORY":
 
-                if (fileViewerFragment == null)
-                    startFileManager();
-
                 fileViewerFragment.currentDirName = inMsg.getBody().replace("\n", "");
                 if (fileViewerFragment.viewCreated)
                     fileViewerFragment.updateContent();
-
 
                 // invia un instant message con la richiesta del contenuto della directory home ricevuta
                 sendCommandToDevice(new Message("__get_directory_content", inMsg.getBody(), thisDevice));
@@ -476,7 +531,6 @@ public class DeviceViewActivity extends AppCompatActivity {
             case "DIRECTORY_CONTENT":
 
                 if (fileViewerFragment != null) {
-
 
                     fileViewerFragment.rawDirData = inMsg.getBody();
                     if (fileViewerFragment.viewCreated)
@@ -533,7 +587,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     public void sendCommandToDevice(Message command) {
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo remoto selezionato
-        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/"+groupName+"/Devices");
+        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices");
 
         // aggiunge il messaggio al nodo
         deviceIncomingCommands
@@ -547,25 +601,28 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void deleteMessage(String id) {
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo locale
-        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/"+groupName+"/Devices");
+        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices");
 
         // rimuove il messaggio al nodo
         deviceIncomingCommands.child(thisDevice).child("IncomingCommands").child(id).removeValue();
 
     }
 
+
     private void showFragment(Fragment fragment) {
 
         /* mostra il fragment passato in argomento */
+        /*
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.VIE___DEVICEVIEW___SUBVIEW, fragment);
 
         fragmentTransaction.commit();
+        */
     }
 
 
-    private void askForTorrentsList() {
+    private void requestTorrentsList() {
 
         // invia un instant message con la richiesta della lista dei torrents
         sendCommandToDevice(new Message("__listTorrents", "null", thisDevice));
@@ -635,33 +692,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             switch (v.getId()) {
 
-                case R.id.BTN___DEVICEVIEW___DEVICEINFO:
-
-                    showDeviceInfo();
-
-                    break;
-
-
-                case R.id.BTN___DEVICEVIEW___FILEMANAGER:
-
-                    // invia al dispositivo remoto la richiesta di conoscere la directory corrente
-                    sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
-
-                    break;
-
-                case R.id.BTN___DEVICEVIEW___TORRENTMANAGER:
-
-                    // invia un instant message con la richiesta della lista dei torrents
-                    askForTorrentsList();
-
-                    break;
-
-                case R.id.BTN___DEVICEVIEW___WAKEONLAN:
-
-                    startWakeOnLan();
-
-                    break;
-
                 case R.id.BTN___DEVICEVIEW___SSH:
 
                     // controlla se esiste un nodo nel database con la sessione ssh relativa al dispositivo corrente
@@ -670,7 +700,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     // ottiene un riferimento al nodo del database Firebase con le informazioni sulle shell aperte,
                     // effettua una query per filtrare le shell aperte al dispositivo corrente
-                    DatabaseReference activeShells = FirebaseDatabase.getInstance().getReference("/Groups/"+groupName+"/Devices/" + remoteDeviceName + "/SSHShells");
+                    DatabaseReference activeShells = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices/" + remoteDeviceName + "/SSHShells");
                     Query query = activeShells.orderByKey().equalTo(thisDevice);
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -707,14 +737,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
-    private void startWakeOnLan() {
-
-        wakeOnLanFragment = new WakeOnLanFragment();
-        wakeOnLanFragment.parent = this;
-
-        showFragment(wakeOnLanFragment);
-
-    }
 
     public void rebootHost() {
 
@@ -727,7 +749,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 // invia un instant message con il comando di reboot
                 sendCommandToDevice(new Message("__reboot", "null", thisDevice));
-                showDeviceInfo();
 
             }
 
@@ -778,15 +799,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void startFileManager() {
-
-        fileViewerFragment = new FileViewerFragment();
-        fileViewerFragment.parent = this;
-
-        // mostra il Fragment
-        showFragment(fileViewerFragment);
-
-    }
 
     private void removeTorrent(final int id) {
 
@@ -920,7 +932,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void manageRemoteDeviceNotResponding() {
 
-
         if (connectionProgressDialog.isShowing()) {
 
             connectionProgressDialog.dismiss();
@@ -1015,6 +1026,64 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    private Fragment[] getAvailableFragments() {
+
+        List<Fragment> result = new ArrayList<>();
+
+        if (deviceInfoFragment != null)
+            result.add(deviceInfoFragment);
+
+        if (fileViewerFragment != null)
+            result.add(fileViewerFragment);
+
+        if (torrentViewerFragment != null)
+            result.add(torrentViewerFragment);
+
+        if(wakeOnLanFragment != null)
+            result.add(wakeOnLanFragment);
+
+        return result.toArray(new Fragment[0]);
+
+    }
+
+    private String[] getAvailableFragmentTitles() {
+
+        List<String> result = new ArrayList<String>();
+
+        if (deviceInfoFragment != null)
+            result.add("Remote device info");
+
+        if (fileViewerFragment != null)
+            result.add("File manager");
+
+        if (torrentViewerFragment != null)
+            result.add("Torrent manager");
+
+        if(wakeOnLanFragment != null)
+            result.add("Wake-on-lan");
+
+        return result.toArray(new String[0]);
+
+    }
+
+    private FragmentType[] getAvailableFragmentTypes() {
+        List<FragmentType> result = new ArrayList<FragmentType>();
+
+        if (deviceInfoFragment != null)
+            result.add(FragmentType.DEVICE_INFO);
+
+        if (fileViewerFragment != null)
+            result.add(FragmentType.DIRECTORY_NAVIGATOR);
+
+        if (torrentViewerFragment != null)
+            result.add(FragmentType.TORRENT_MANAGER);
+
+        if(wakeOnLanFragment != null)
+            result.add(FragmentType.WOL_MANAGER);
+
+        return result.toArray(new FragmentType[0]);
     }
 
 }
