@@ -15,14 +15,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "410796746391-5v3ubkfmm2r2v0d9vq7k02j5q2pqj8s9.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.apps.lore_f.domoticcontroller",
-            "certificate_hash": "afe1c1bc1a8968362bb0b27eadd1578a17851b7f"
-          }
-        },
-        {
           "client_id": "410796746391-mku70if55as3nkh82ttcv3t4r4s4uefm.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "410796746391-mku70if55as3nkh82ttcv3t4r4s4uefm.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

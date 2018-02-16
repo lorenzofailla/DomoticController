@@ -106,8 +106,11 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
+
         @Override
         public Fragment getItem(int i) {
+
+            Log.i(TAG, String.format("getItem(%d)",i));
 
             switch (fragmentTypes[i]) {
 
