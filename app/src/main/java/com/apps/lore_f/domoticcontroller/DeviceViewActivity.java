@@ -79,13 +79,31 @@ public class DeviceViewActivity extends AppCompatActivity {
     private WakeOnLanFragment wakeOnLanFragment;
     private DeviceSSHFragment deviceSSHFragment;
 
-    public class CollectionPagerAdapter extends FragmentStatePagerAdapter {
+    private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+
+            Log.i(TAG,String.format("ViewPager.OnPageChangeListener.onPageSelected(%d)", position));
+            collectionPagerAdapter.initializeFragmentAction(position);
+
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+    };
+
+    public class CollectionPagerAdapter extends FragmentPagerAdapter {
 
         private Fragment[] fragments;
         private String[] pageTitle;
         private FragmentType[] fragmentTypes;
-        private int pagesCount = 2;
-
 
         public CollectionPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -111,8 +129,26 @@ public class DeviceViewActivity extends AppCompatActivity {
         public Fragment getItem(int i) {
 
             Log.i(TAG, String.format("getItem(%d)",i));
+            initializeFragmentAction(i);
+            return fragments[i];
 
-            switch (fragmentTypes[i]) {
+        }
+
+        @Override
+        public int getCount() {
+            return fragments.length;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+
+            return pageTitle[position];
+
+        }
+
+        public void initializeFragmentAction(int fragmentPosition){
+
+            switch (fragmentTypes[fragmentPosition]) {
 
                 case DEVICE_INFO:
                     requestDeviceInfo();
@@ -120,7 +156,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 case DIRECTORY_NAVIGATOR:
 
-                    if (fileViewerFragment.currentDirName == "") {
+                    if (fileViewerFragment.currentDirName==null) {
                         // invia al dispositivo remoto la richiesta di conoscere la directory corrente
                         sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
                     }
@@ -136,18 +172,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                     break;
 
             }
-            return fragments[i];
 
-        }
-
-        @Override
-        public int getCount() {
-            return fragments.length;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return pageTitle[position];
         }
 
     }
@@ -303,6 +328,15 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
+        // crea il CollectionPagerAdapter con le pagine video
+        collectionPagerAdapter =
+                new CollectionPagerAdapter(
+                        getSupportFragmentManager(),
+                        getAvailableFragments(),
+                        getAvailableFragmentTitles(),
+                        getAvailableFragmentTypes()
+                );
+
     }
 
     @Override
@@ -342,16 +376,12 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onResume();
 
-        collectionPagerAdapter =
-                new CollectionPagerAdapter(
-                        getSupportFragmentManager(),
-                        getAvailableFragments(),
-                        getAvailableFragmentTitles(),
-                        getAvailableFragmentTypes()
-                );
+
 
         viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
         viewPager.setAdapter(collectionPagerAdapter);
+        viewPager.addOnPageChangeListener(onPageChangeListener);
+        viewPager.setCurrentItem(0);
 
         // assegna gli OnClickListener ai pulsanti
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
@@ -403,6 +433,10 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICEVIEW___SSH).setOnClickListener(null);
+
+        // rimuove l'OnPageChangeListener al ViewPager
+        if(viewPager!=null)
+            viewPager.removeOnPageChangeListener(onPageChangeListener);
 
         // rimuove gli eventuali task ritardati sull'handler
         handler.removeCallbacks(sendWelcomeMessage);
@@ -1049,6 +1083,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         return result.toArray(new Fragment[0]);
 
+
     }
 
     private String[] getAvailableFragmentTitles() {
@@ -1072,6 +1107,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     private FragmentType[] getAvailableFragmentTypes() {
+
         List<FragmentType> result = new ArrayList<FragmentType>();
 
         if (deviceInfoFragment != null)
@@ -1088,5 +1124,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         return result.toArray(new FragmentType[0]);
     }
+
+
 
 }

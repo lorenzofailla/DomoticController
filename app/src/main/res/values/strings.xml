@@ -55,6 +55,10 @@
     <string name="DEVICEVIEW_LABEL_DEVICE_OPERATIONS">Device Operations:</string>
     <string name="DEVICEVIEW_REFRESHING_DEVICE_CONNECTION">Connecting to device...</string>
 
+    <!-- ***   - Torrents management fragment -->
+    <string name="TORRENTSMANAGER_LABEL_AVAILABLETORRENTS">Available Torrents:</string>
+    <string name="TORRENTSMANAGER_LABEL_NOTORRENTS">No available Torrent.</string>
+
     <string name="CLOUDSTORAGE_LABEL_REQUESTOR">Uploaded by: </string>
     <string name="CLOUDSTORAGE_LABEL_SIZE">Size: </string>
     <string name="CLOUDSTORAGE_LABEL_NOFDOWNLOADS">N. of downloads: </string>

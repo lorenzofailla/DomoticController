@@ -101,7 +101,7 @@ public class WakeOnLanFragment extends Fragment {
 
         wolDevicesRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___WOLDEVICESFRAGMENT___DEVICES);
 
-        wolDevicesNode = FirebaseDatabase.getInstance().getReference("Users/lorenzofailla/Devices/" + parent.remoteDeviceName + "/WOLDevices");
+        wolDevicesNode = FirebaseDatabase.getInstance().getReference("Groups/lorenzofailla/Devices/" + parent.remoteDeviceName + "/WOLDevices");
         wolDevicesNode.addValueEventListener(valueEventListener);
 
         // aggiorna il flag e effettua il trigger del metodo nel listener

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class TorrentViewerFragment extends Fragment {
 
     private List<TorrentInfo> torrents = new ArrayList<>();
     private ListView torrentsListView;
+    private TextView mainInfoTextView;
 
     public boolean viewCreated=false;
 
@@ -45,6 +47,7 @@ public class TorrentViewerFragment extends Fragment {
 
         // inizializza l'handler ai controlli
         torrentsListView = (ListView) view.findViewById(R.id.LVW___TORRENTSLIST___MAIN);
+        mainInfoTextView = (TextView) view.findViewById(R.id.TXV___TORRENTSVIEWER_INFO);
 
         ImageButton addTorrentButton = (ImageButton) view.findViewById(R.id.BTN___TORRENTSVIEWER_ADDTORRENT);
         addTorrentButton.setOnClickListener(new View.OnClickListener() {
@@ -79,6 +82,9 @@ public class TorrentViewerFragment extends Fragment {
 
     public void updateContent(){
 
+        if(!viewCreated)
+            return;
+
         if(rawTorrentDataLines!=null) {
             torrents = getTorrentsList(rawTorrentDataLines);
 
@@ -87,9 +93,16 @@ public class TorrentViewerFragment extends Fragment {
             torrentsListView.setAdapter(torrentsListAdapter);
             torrentsListView.setVisibility(View.VISIBLE);
 
+            // aggiorna l'intestazione
+            mainInfoTextView.setText(String.format("%s: %d",getString(R.string.TORRENTSMANAGER_LABEL_AVAILABLETORRENTS), torrents.size()));
+
         } else {
 
             torrentsListView.setVisibility(View.INVISIBLE);
+
+            // aggiorna l'intestazione
+            mainInfoTextView.setText(R.string.TORRENTSMANAGER_LABEL_NOTORRENTS);
+
 
         }
 
