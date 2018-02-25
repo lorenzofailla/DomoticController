@@ -36,6 +36,11 @@
     <string name="ALERTDIALOG_TITLE_CONFIRM_DELETE_FROM_CLOUD">Confirm removal.</string>
     <string name="ALERTDIALOG_TITLE_REMOTE_DEVICE_NOT_RESPONDING">Remote device is off-line</string>
     <string name="ALERTDIALOG_TITLE_ZM_NOT_RESPONDING">ZoneMinder reply timeout</string>
+    <string name="ALERTDIALOG_TITLE_PERMISSION_NOT_GRANTED">Permission not granted</string>
+
+    <!-- ***   - Permission requests -->
+    <string name="PERMISSION_REQUEST_RATIONALE_1">Permission request rationale 1\nnewline</string>
+    <string name="PERMISSION_REQUEST_RATIONALE_2">Permission request rationale 2\nnewline</string>
 
     <!-- ***   - SSH Shell fragment -->
     <string name="ALERTDIALOG_TITLE_ENTER_SSH_COMMAND">SSH Shell command</string>
