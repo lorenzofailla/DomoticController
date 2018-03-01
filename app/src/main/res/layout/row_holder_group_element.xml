@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+    <ImageButton
+        android:id="@+id/BTN___ROWGROUP___CONNECT"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentLeft="true"
+        android:layout_weight="1"
+        android:src="@drawable/connect" />
+
+    <TextView
+        android:id="@+id/TXV___ROWGROUP___GROUPNAME"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/BTN___ROWGROUP___CONNECT"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+
+    <TextView
+        android:id="@+id/TXV___ROWGROUP___GROUPDESCRIPTION"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/BTN___ROWGROUP___CONNECT"
+        android:layout_below="@id/TXV___ROWGROUP___GROUPNAME"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        />
+
+</RelativeLayout>

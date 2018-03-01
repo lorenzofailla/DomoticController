@@ -2,6 +2,11 @@
 
     <string name="app_name">Rasberry-Pi Remote Control</string>
 
+    <!-- *** App data ***-->
+    <string name="data_file_key">com.apps.lore_f.domoticcontroller.DATA_FILE_KEY</string>
+    <string name="data_group_name">___group_name</string>
+
+
     <string name="EMPTY"></string>
     <string name="GENERIC_PLACEHOLDER_WAITING">[waiting data...]</string>
 
@@ -38,7 +43,15 @@
     <string name="ALERTDIALOG_TITLE_ZM_NOT_RESPONDING">ZoneMinder reply timeout</string>
     <string name="ALERTDIALOG_TITLE_PERMISSION_NOT_GRANTED">Permission not granted</string>
 
+    <!-- ***   - Group selection -->
+    <string name="GROUP_SELECTION_HEADER">Let\'s select a group!</string>
+    <string name="GROUP_SELECTION_EXPLANATION">Select a group to work with.\nYour usedID \'!!!username!!!\' is enabled for %d groups.</string>
+    <string name="GROUP_SELECTION_EXPLANATION_NOGROUP">:(\nYour userID \'!!!username!!!\' is not associated to any group.\nAsk your group administrator to enable your usedID \'!!!username!!!\' to the desired group.</string>
+
     <!-- ***   - Permission requests -->
+    <string name="PERMISSIONS_REQUEST_HEADER">Need some permissions...</string>
+    <string name="PERMISSIONS_REQUEST_BODY">I need some permissions in order to work properly.\nYou cannot continue if the required permissions are not granted.</string>
+
     <string name="PERMISSION_REQUEST_RATIONALE_1">Permission request rationale 1\nnewline</string>
     <string name="PERMISSION_REQUEST_RATIONALE_2">Permission request rationale 2\nnewline</string>
 

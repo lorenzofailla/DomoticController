@@ -187,7 +187,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 }
 
-                if(device.getHasVideoSurveillanceManagement()){
+                if(device.getHasVideoSurveillance()){
                     //
                     holder.videoSurveillanceImg.setVisibility(View.VISIBLE);
 
@@ -207,7 +207,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                                 device.getDeviceName(),
                                 device.getHasTorrentManagement(),
                                 device.getHasDirectoryNavigation(),
-                                device.getHasWakeOnLan()
+                                device.getHasWakeOnLan(),
+                                device.getHasVideoSurveillance()
                         );
 
                     }
@@ -240,13 +241,19 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     }
 
-    private void connectToDevice(String deviceName, boolean torrent, boolean dirNavi, boolean wakeOnLan){
+    private void connectToDevice(
+            String deviceName,
+            boolean torrent,
+            boolean dirNavi,
+            boolean wakeOnLan,
+            boolean videoSurveillance){
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
         intent.putExtra("__DEVICE_TO_CONNECT", deviceName);
         intent.putExtra("__HAS_TORRENT_MANAGEMENT", torrent);
         intent.putExtra("__HAS_DIRECTORY_NAVIGATION", dirNavi);
         intent.putExtra("__HAS_WAKEONLAN", wakeOnLan);
+        intent.putExtra("__HAS_VIDEOSURVEILLANCE", videoSurveillance);
 
         startActivity(intent);
 

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.apps.lore_f.domoticcontroller.GroupSelection">
+
+    <TextView
+        android:id="@+id/TXV___GROUPSSELECTION___HEADER"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:text="@string/GROUP_SELECTION_HEADER"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="4dp" />
+
+    <TextView
+        android:id="@+id/TXV___GROUPSSELECTION___EXPLANATION"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:text="@string/GROUP_SELECTION_EXPLANATION"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:layout_below="@+id/TXV___GROUPSSELECTION___HEADER"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/RWV___GROUPSSELECTION___GROUPS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:padding="3dp"
+        android:layout_below="@+id/TXV___GROUPSSELECTION___EXPLANATION"/>
+
+</RelativeLayout>

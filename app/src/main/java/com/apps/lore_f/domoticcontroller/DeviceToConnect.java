@@ -11,7 +11,7 @@ public class DeviceToConnect {
     private boolean isUnix;
     private boolean hasDirectoryNavigation;
     private boolean hasTorrentManagement;
-    private boolean hasVideoSurveillanceManagement;
+    private boolean hasVideoSurveillance;
     private boolean hasWakeOnLan;
 
     // empty constructor
@@ -31,9 +31,13 @@ public class DeviceToConnect {
         return hasDirectoryNavigation;
     }
 
-    public boolean getHasWakeOnLan() { return hasWakeOnLan; }
+    public boolean getHasWakeOnLan() {
+        return hasWakeOnLan;
+    }
 
-    public boolean getHasVideoSurveillanceManagement() {return hasVideoSurveillanceManagement; }
+    public boolean getHasVideoSurveillance() {
+        return hasVideoSurveillance;
+    }
 
 }
 

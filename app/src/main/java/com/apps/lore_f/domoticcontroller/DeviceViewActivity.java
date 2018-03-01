@@ -2,8 +2,10 @@ package com.apps.lore_f.domoticcontroller;
 
 import android.app.Notification;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -42,7 +44,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         TORRENT_MANAGER,
         WOL_MANAGER,
         SSH_MANAGER,
-        VIDEOSURVEILLANCE_MANAGER
+        VIDEOSURVEILLANCE_CAMERA_LIST
 
     }
 
@@ -53,9 +55,10 @@ public class DeviceViewActivity extends AppCompatActivity {
     private boolean remoteDeviceTorrent;
     private boolean remoteDeviceDirNavi;
     private boolean remoteDeviceWakeOnLan;
+    private boolean remoteDeviceVideoSurveillance;
 
     public String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
-    private String groupName = "lorenzofailla";// TODO: 13-Sep-17 deve diventare un parametro di configurazione
+    private String groupName;
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutBase = 2 * 60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long zmReplyTimeout = 30000L; // ms
@@ -78,6 +81,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private FileViewerFragment fileViewerFragment;
     private WakeOnLanFragment wakeOnLanFragment;
     private DeviceSSHFragment deviceSSHFragment;
+    private VideoSurveillanceCameraListFragment cameraListFragment;
 
     private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -281,16 +285,48 @@ public class DeviceViewActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
 
+            // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
+            Context context = getApplicationContext();
+            SharedPreferences sharedPref = context.getSharedPreferences(
+                    getString(R.string.data_file_key), Context.MODE_PRIVATE);
+
+            groupName=sharedPref.getString(getString(R.string.data_group_name),null);
+
+            if(groupName==null){
+
+            /*
+            questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
+             */
+
+                // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
+                startActivity(new Intent(this, GroupSelection.class));
+
+                // termina l'Activity corrente
+                finish();
+                return;
+
+            }
+
             remoteDeviceName = extras.getString("__DEVICE_TO_CONNECT");
             remoteDeviceTorrent = extras.getBoolean("__HAS_TORRENT_MANAGEMENT");
             remoteDeviceDirNavi = extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
             remoteDeviceWakeOnLan = extras.getBoolean("__HAS_WAKEONLAN");
+            remoteDeviceVideoSurveillance = extras.getBoolean("__HAS_VIDEOSURVEILLANCE");
 
             /* inizializza i fragment */
             //
             // DeviceInfoFragment
             deviceInfoFragment = new DeviceInfoFragment();
             deviceInfoFragment.parent = this;
+
+            //
+            // VideoSurveillanceCameraListFragment
+            if(remoteDeviceVideoSurveillance){
+                cameraListFragment = new VideoSurveillanceCameraListFragment();
+                cameraListFragment.deviceName = remoteDeviceName;
+                cameraListFragment.camerasNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras",groupName));
+
+            }
 
             //
             // FileViewerFragment
@@ -1072,6 +1108,9 @@ public class DeviceViewActivity extends AppCompatActivity {
         if (deviceInfoFragment != null)
             result.add(deviceInfoFragment);
 
+        if(cameraListFragment!=null)
+            result.add(cameraListFragment);
+
         if (fileViewerFragment != null)
             result.add(fileViewerFragment);
 
@@ -1093,6 +1132,9 @@ public class DeviceViewActivity extends AppCompatActivity {
         if (deviceInfoFragment != null)
             result.add("Remote device info");
 
+        if(cameraListFragment!=null)
+            result.add("Videosurveillance camera list");
+
         if (fileViewerFragment != null)
             result.add("File manager");
 
@@ -1112,6 +1154,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         if (deviceInfoFragment != null)
             result.add(FragmentType.DEVICE_INFO);
+
+        if(cameraListFragment!=null)
+            result.add(FragmentType.VIDEOSURVEILLANCE_CAMERA_LIST);
 
         if (fileViewerFragment != null)
             result.add(FragmentType.DIRECTORY_NAVIGATOR);

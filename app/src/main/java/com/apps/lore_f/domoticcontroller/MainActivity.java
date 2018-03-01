@@ -1,7 +1,9 @@
 package com.apps.lore_f.domoticcontroller;
 
+import android.content.Context;
 import android.content.Intent;
 
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -67,26 +69,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .addApi(AppIndex.API)
                 .build();
 
-        // inizializza il FirebaseAuth
-        firebaseAuth = FirebaseAuth.getInstance();
-        // ottiene l'user corrente
-        firebaseUser = firebaseAuth.getCurrentUser();
 
-        if (firebaseUser == null) {
-            // autenticazione non effettuata
-
-            // lancia la SignInActivity e termina l'attività corrente
-            startActivity(new Intent(this, GoogleSignInActivity.class));
-            finish();
-            return;
-
-        }
-
-        // sottoscrive l'app ai topic per ricevere le notifiche
-        FirebaseMessaging.getInstance().subscribeToTopic("lorenzofailla-home");
-
-        // lancia DeviceSelectionActivity per selezionare il dispositivo a cui connettersi
-        startActivity(new Intent(this, DeviceSelectionActivity.class));
 
     }
 
@@ -139,6 +122,48 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onResume() {
 
         super.onResume();
+
+        // inizializza il FirebaseAuth
+        firebaseAuth = FirebaseAuth.getInstance();
+        // ottiene l'user corrente
+        firebaseUser = firebaseAuth.getCurrentUser();
+
+        if (firebaseUser == null) {
+            // autenticazione non effettuata
+
+            // lancia la SignInActivity e termina l'attività corrente
+            startActivity(new Intent(this, GoogleSignInActivity.class));
+            finish();
+            return;
+
+        }
+
+        // autenticazione effettuata
+
+        // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
+        Context context = getApplicationContext();
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                getString(R.string.data_file_key), Context.MODE_PRIVATE);
+
+        String groupName=sharedPref.getString(getString(R.string.data_group_name),null);
+
+        if(groupName==null){
+
+            // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
+            startActivity(new Intent(this, GroupSelection.class));
+
+
+        } else {
+            // nome del gruppo impostato,
+            //
+            // lancia l'Activity DeviceSelectionActivity per selezionare il dispositivo a cui connettersi
+            startActivity(new Intent(this, DeviceSelectionActivity.class));
+
+        }
+
+        // termina l'Activity corrente
+        finish();
+        return;
 
     }
 

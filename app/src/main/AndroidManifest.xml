@@ -47,6 +47,7 @@
             </intent-filter>
         </service>
 
+        <activity android:name=".GroupSelection"></activity>
     </application>
 
 </manifest>

@@ -6,23 +6,24 @@ package com.apps.lore_f.domoticcontroller;
 
 public class VSCameraDevice {
 
-    private String Id;
-    private String Name;
-    private boolean Available;
+    private Long ThreadID;
+    private String OwnerDevice;
+    private String MoDetStatus;
 
     // empty constructor
     public VSCameraDevice() {
     }
 
-    public String getId() {
-        return Id;
+    public Long getThreadID() {
+        return ThreadID;
     }
 
-    public String getName() {
-        return Name;
+    public String getOwnerDevice() {
+        return OwnerDevice;
     }
 
-    public boolean isAvailable() {
-        return Available;
+    public String getMoDetStatus() {
+        return MoDetStatus;
     }
+
 }

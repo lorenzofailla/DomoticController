@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +22,10 @@ import com.google.firebase.database.ValueEventListener;
 
 public class VideoSurveillanceCameraListFragment extends Fragment {
 
-    public boolean viewCreated=false;
+    public boolean viewCreated = false;
 
-    public DatabaseReference camerasNode=null;
+    public DatabaseReference camerasNode = null;
+    public String deviceName;
     private Query availableCameras;
     private LinearLayoutManager linearLayoutManager;
     private FirebaseRecyclerAdapter<VSCameraDevice, CamerasHolder> firebaseAdapter;
@@ -35,13 +37,15 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
         public void onDataChange(DataSnapshot dataSnapshot) {
 
             // aggiorna l'adapter
-            if(viewCreated)
+            if (viewCreated)
                 refreshAdapter();
+
 
         }
 
         @Override
-        public void onCancelled(DatabaseError databaseError) {}
+        public void onCancelled(DatabaseError databaseError) {
+        }
 
 
     };
@@ -78,10 +82,19 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_videosurveillance_cameralist, container, false);
 
         camerasRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS);
-        availableCameras = camerasNode.orderByChild("Available").equalTo(true);
+
+        if (deviceName != null) {
+
+            availableCameras = camerasNode.orderByChild("OwnerDevice").equalTo(deviceName);
+
+        } else {
+
+            availableCameras = camerasNode.orderByChild("OwnerDevice");
+        }
+
         availableCameras.addValueEventListener(valueEventListener);
 
-        viewCreated=true;
+        viewCreated = true;
         return view;
 
     }
@@ -100,7 +113,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
 
     }
 
-    private void refreshAdapter(){
+    private void refreshAdapter() {
 
         linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setStackFromEnd(false);
@@ -114,7 +127,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
             @Override
             protected void populateViewHolder(CamerasHolder holder, final VSCameraDevice camera, int position) {
 
-                holder.cameraNameTXV.setText(camera.getName());
+                holder.cameraNameTXV.setText(camera.getThreadID().toString());
                 holder.cameraConnectBTN.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

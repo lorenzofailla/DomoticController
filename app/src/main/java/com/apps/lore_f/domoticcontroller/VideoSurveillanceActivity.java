@@ -2,6 +2,8 @@ package com.apps.lore_f.domoticcontroller;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -31,14 +33,23 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /* recupera gli extra dall'intent */
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
+        // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
+        Context context = getApplicationContext();
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                getString(R.string.data_file_key), Context.MODE_PRIVATE);
 
-            groupName = extras.getString("__GROUP");
+        groupName=sharedPref.getString(getString(R.string.data_group_name),null);
 
-        } else {
+        if(groupName==null){
 
+            /*
+            questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
+             */
+
+            // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
+            startActivity(new Intent(this, GroupSelection.class));
+
+            // termina l'Activity corrente
             finish();
             return;
 
@@ -77,7 +88,8 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
             // VideoSurveillanceCameraListFragment
 
             videoSurveillanceCameraListFragment = new VideoSurveillanceCameraListFragment();
-            videoSurveillanceCameraListFragment.camerasNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Videosurveillance/Cameras", groupName));
+            videoSurveillanceCameraListFragment.camerasNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/VideoSurveillance/AvailableCameras", groupName));
+            videoSurveillanceCameraListFragment.deviceName=null;
 
             videoSurveillanceEventsListFragment = new VideoSurveillanceEventsListFragment();
         }
