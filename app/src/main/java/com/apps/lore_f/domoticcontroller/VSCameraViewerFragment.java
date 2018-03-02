@@ -26,8 +26,11 @@ public class VSCameraViewerFragment extends Fragment {
 
     public boolean viewCreated=false;
     public VideoSurveillanceActivity parent;
-    public String zmMonitorId;
-    public String zmMonitorName;
+
+    private String cameraID;
+    public void setCameraID(String value){
+        this.cameraID=value;
+    }
 
     private DatabaseReference shotNode;
 
@@ -70,6 +73,8 @@ public class VSCameraViewerFragment extends Fragment {
 
     }
 
+
+
     private ChildEventListener childEventListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -86,7 +91,6 @@ public class VSCameraViewerFragment extends Fragment {
             } else {
 
                 //shotView.setImageDrawable(R.drawable.broken);
-
 
             }
 
