@@ -13,11 +13,12 @@ public class DeviceToConnect {
     private boolean hasTorrentManagement;
     private boolean hasVideoSurveillance;
     private boolean hasWakeOnLan;
+    private String cameraNames;
+    private String cameraIDs;
 
     // empty constructor
     public DeviceToConnect() {
     }
-
 
     public String getDeviceName() {
         return deviceName;
@@ -38,6 +39,10 @@ public class DeviceToConnect {
     public boolean getHasVideoSurveillance() {
         return hasVideoSurveillance;
     }
+
+    public String getCameraNames() { return cameraNames; }
+
+    public String getCameraIDs() { return cameraIDs; }
 
 }
 

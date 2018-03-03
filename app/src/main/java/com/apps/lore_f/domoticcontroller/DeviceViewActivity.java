@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -44,7 +45,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         TORRENT_MANAGER,
         WOL_MANAGER,
         SSH_MANAGER,
-        VIDEOSURVEILLANCE_CAMERA_LIST
+        CAMERA_VIEWER
 
     }
 
@@ -57,11 +58,11 @@ public class DeviceViewActivity extends AppCompatActivity {
     private boolean remoteDeviceWakeOnLan;
     private boolean remoteDeviceVideoSurveillance;
 
-    public String thisDevice = "lorenzofailla-g3"; // TODO: 13-Sep-17 deve diventare un parametro di configurazione
+
+    public String thisDevice = "lorenzofailla-g3";
     private String groupName;
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutBase = 2 * 60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
-    private long zmReplyTimeout = 30000L; // ms
 
     private Handler handler;
 
@@ -70,7 +71,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private long lastOnlineReply;
     private static final String LAST_ONLINE_REPLY = "lastOnlineReply";
-
 
     private CollectionPagerAdapter collectionPagerAdapter;
     private ViewPager viewPager;
@@ -81,7 +81,11 @@ public class DeviceViewActivity extends AppCompatActivity {
     private FileViewerFragment fileViewerFragment;
     private WakeOnLanFragment wakeOnLanFragment;
     private DeviceSSHFragment deviceSSHFragment;
-    private VideoSurveillanceCameraListFragment cameraListFragment;
+    private VSCameraViewerFragment[] cameraViewFragment;
+    private String[] cameraNames;
+    private String[] cameraIDs;
+    private int nOfAvailableCameras;
+    private int homeFragment;
 
     private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -218,17 +222,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
-    private Runnable zoneMinderTimeOut = new Runnable() {
-        @Override
-        public void run() {
-
-            manageZoneMinderTimeOut();
-
-        }
-
-    };
-
-    // Listener per nuovi record nel nodo dei messaggi in ingresso.
+    /*
+    Listener per nuovi record nel nodo dei messaggi in ingresso.
+     */
     private ChildEventListener newCommandsToProcess = new ChildEventListener() {
 
         @Override
@@ -282,7 +278,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         // recupera l'extra dall'intent,
         // ottiene il nome del dispositivo remoto e altri parametri
 
-        Bundle extras = getIntent().getExtras();
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
         if (extras != null) {
 
             // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
@@ -308,12 +305,37 @@ public class DeviceViewActivity extends AppCompatActivity {
             }
 
             remoteDeviceName = extras.getString("__DEVICE_TO_CONNECT");
-            remoteDeviceTorrent = extras.getBoolean("__HAS_TORRENT_MANAGEMENT");
-            remoteDeviceDirNavi = extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
-            remoteDeviceWakeOnLan = extras.getBoolean("__HAS_WAKEONLAN");
-            remoteDeviceVideoSurveillance = extras.getBoolean("__HAS_VIDEOSURVEILLANCE");
+
+            remoteDeviceTorrent = intent.hasExtra("__HAS_TORRENT_MANAGEMENT") && extras.getBoolean("__HAS_TORRENT_MANAGEMENT");
+            remoteDeviceDirNavi = intent.hasExtra("__HAS_DIRECTORY_NAVIGATION") && extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
+            remoteDeviceWakeOnLan = intent.hasExtra("__HAS_WAKEONLAN") &&extras.getBoolean("__HAS_WAKEONLAN");
+            remoteDeviceVideoSurveillance = intent.hasExtra("__HAS_VIDEOSURVEILLANCE") && extras.getBoolean("__HAS_VIDEOSURVEILLANCE");
+
+            if(remoteDeviceVideoSurveillance && intent.hasExtra("__CAMERA_NAMES") && intent.hasExtra("__CAMERA_IDS")) {
+
+                try {
+
+                    cameraNames = extras.getString("__CAMERA_NAMES").split(";");
+                    cameraIDs = extras.getString("__CAMERA_IDS").split(";");
+
+                    nOfAvailableCameras = cameraIDs.length;
+
+                } catch (NullPointerException e) {
+
+                    remoteDeviceVideoSurveillance=false;
+                    nOfAvailableCameras =0;
+
+                }
+
+            } else {
+
+                remoteDeviceVideoSurveillance=false;
+                nOfAvailableCameras =0;
+
+            }
 
             /* inizializza i fragment */
+
             //
             // DeviceInfoFragment
             deviceInfoFragment = new DeviceInfoFragment();
@@ -322,9 +344,22 @@ public class DeviceViewActivity extends AppCompatActivity {
             //
             // VideoSurveillanceCameraListFragment
             if(remoteDeviceVideoSurveillance){
-                cameraListFragment = new VideoSurveillanceCameraListFragment();
-                cameraListFragment.deviceName = remoteDeviceName;
-                cameraListFragment.camerasNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras",groupName));
+
+                // crea una query per calcolare il numero di videocamere disponibili
+                // inizializza l'array
+                cameraViewFragment = new VSCameraViewerFragment[nOfAvailableCameras];
+
+                for(int i=0; i<nOfAvailableCameras; i++){
+
+                    VSCameraViewerFragment temp;
+                    temp= new VSCameraViewerFragment();
+                    temp.setCameraID(cameraIDs[i]);
+                    temp.setCameraName(cameraNames[i]);
+                    temp.setParent(this);
+
+                    cameraViewFragment[i] = temp;
+
+                }
 
             }
 
@@ -412,12 +447,10 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onResume();
 
-
-
         viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
         viewPager.setAdapter(collectionPagerAdapter);
         viewPager.addOnPageChangeListener(onPageChangeListener);
-        viewPager.setCurrentItem(0);
+        viewPager.setCurrentItem(homeFragment);
 
         // assegna gli OnClickListener ai pulsanti
         findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
@@ -1102,26 +1135,40 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     private Fragment[] getAvailableFragments() {
-
+        /*
+        Restituisce un array di Fragment, contenente le varie pagine video
+         */
         List<Fragment> result = new ArrayList<>();
 
-        if (deviceInfoFragment != null)
-            result.add(deviceInfoFragment);
+        int count=0;
 
-        if(cameraListFragment!=null)
-            result.add(cameraListFragment);
-
-        if (fileViewerFragment != null)
-            result.add(fileViewerFragment);
-
-        if (torrentViewerFragment != null)
-            result.add(torrentViewerFragment);
-
-        if(wakeOnLanFragment != null)
+        if(wakeOnLanFragment != null) {
             result.add(wakeOnLanFragment);
+            count++;
+        }
+
+        if (torrentViewerFragment != null) {
+            result.add(torrentViewerFragment);
+            count++;
+        }
+
+        if (fileViewerFragment != null) {
+            result.add(fileViewerFragment);
+            count++;
+        }
+
+        if (deviceInfoFragment != null) {
+            result.add(deviceInfoFragment);
+            homeFragment=count;
+            count++;
+        }
+
+        for(int i=0; i<nOfAvailableCameras; i++) {
+            result.add(cameraViewFragment[i]);
+            count++;
+        }
 
         return result.toArray(new Fragment[0]);
-
 
     }
 
@@ -1129,20 +1176,26 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         List<String> result = new ArrayList<String>();
 
-        if (deviceInfoFragment != null)
+        if(wakeOnLanFragment != null) {
+            result.add("Wake-on-lan");
+        }
+
+        if (torrentViewerFragment != null) {
+            result.add("Torrent manager");
+        }
+
+        if (fileViewerFragment != null) {
+            result.add("File manager");
+        }
+
+        if (deviceInfoFragment != null) {
             result.add("Remote device info");
 
-        if(cameraListFragment!=null)
-            result.add("Videosurveillance camera list");
+        }
 
-        if (fileViewerFragment != null)
-            result.add("File manager");
-
-        if (torrentViewerFragment != null)
-            result.add("Torrent manager");
-
-        if(wakeOnLanFragment != null)
-            result.add("Wake-on-lan");
+        for(int i=0; i<nOfAvailableCameras; i++) {
+            result.add(String.format("Videosurveillance camera: %s", cameraIDs[i]));
+        }
 
         return result.toArray(new String[0]);
 
@@ -1152,20 +1205,26 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         List<FragmentType> result = new ArrayList<FragmentType>();
 
-        if (deviceInfoFragment != null)
+        if(wakeOnLanFragment != null) {
+            result.add(FragmentType.WOL_MANAGER);
+        }
+
+        if (torrentViewerFragment != null) {
+            result.add(FragmentType.TORRENT_MANAGER);
+        }
+
+        if (fileViewerFragment != null) {
+            result.add(FragmentType.DIRECTORY_NAVIGATOR);
+        }
+
+        if (deviceInfoFragment != null) {
             result.add(FragmentType.DEVICE_INFO);
 
-        if(cameraListFragment!=null)
-            result.add(FragmentType.VIDEOSURVEILLANCE_CAMERA_LIST);
+        }
 
-        if (fileViewerFragment != null)
-            result.add(FragmentType.DIRECTORY_NAVIGATOR);
-
-        if (torrentViewerFragment != null)
-            result.add(FragmentType.TORRENT_MANAGER);
-
-        if(wakeOnLanFragment != null)
-            result.add(FragmentType.WOL_MANAGER);
+        for(int i=0; i<nOfAvailableCameras; i++) {
+            result.add(FragmentType.CAMERA_VIEWER);
+        }
 
         return result.toArray(new FragmentType[0]);
     }

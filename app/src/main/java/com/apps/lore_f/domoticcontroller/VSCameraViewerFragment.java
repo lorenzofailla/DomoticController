@@ -1,6 +1,5 @@
 package com.apps.lore_f.domoticcontroller;
 
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,11 +24,17 @@ import java.io.IOException;
 public class VSCameraViewerFragment extends Fragment {
 
     public boolean viewCreated=false;
-    public VideoSurveillanceActivity parent;
+    private DeviceViewActivity parent;
+    public void setParent(DeviceViewActivity value) {this.parent=value;}
 
     private String cameraID;
     public void setCameraID(String value){
         this.cameraID=value;
+    }
+
+    private String cameraName;
+    public void setCameraName(String value){
+        this.cameraName=value;
     }
 
     private DatabaseReference shotNode;
@@ -72,8 +77,6 @@ public class VSCameraViewerFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
     }
-
-
 
     private ChildEventListener childEventListener = new ChildEventListener() {
         @Override
@@ -123,17 +126,17 @@ public class VSCameraViewerFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_zoneminder_cameraviewer, container, false);
 
-        TextView cameraNameTXVview =  (TextView) view.findViewById(R.id.TXV___ZMCAMERAVIEW___CAMERANAME);
-        cameraNameTXVview.setText(zmMonitorName);
+        TextView cameraNameTXVview =  view.findViewById(R.id.TXV___ZMCAMERAVIEW___CAMERANAME);
+        cameraNameTXVview.setText(cameraName);
 
-        shotView = (ImageView) view.findViewById(R.id.IVW___ZMCAMERAVIEW___SHOTVIEW);
+        shotView = view.findViewById(R.id.IVW___ZMCAMERAVIEW___SHOTVIEW);
         shotView.setOnClickListener(onClickListener);
 
         view.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOT).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(onClickListener);
 
         shotNode= FirebaseDatabase.getInstance().getReference();
-        shotNode.addChildEventListener(childEventListener);
+        //shotNode.addChildEventListener(childEventListener);
 
         fragmentview=view;
 
@@ -223,9 +226,6 @@ public class VSCameraViewerFragment extends Fragment {
             fragmentview.findViewById(R.id.LLO_ZMCAMERAVIEW___BUTTONSTRIP).setVisibility(View.VISIBLE);
             fragmentview.findViewById(R.id.TXV___ZMCAMERAVIEW___CAMERANAME).setVisibility(View.VISIBLE);
         }
-
-        //parent.manageFullScreenMode(fullScreenMode);
-
 
     }
 

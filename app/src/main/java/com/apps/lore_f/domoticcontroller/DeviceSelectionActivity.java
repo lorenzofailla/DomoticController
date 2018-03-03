@@ -208,7 +208,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                                 device.getHasTorrentManagement(),
                                 device.getHasDirectoryNavigation(),
                                 device.getHasWakeOnLan(),
-                                device.getHasVideoSurveillance()
+                                device.getHasVideoSurveillance(),
+                                device.getCameraNames(),
+                                device.getCameraIDs()
                         );
 
                     }
@@ -246,7 +248,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             boolean torrent,
             boolean dirNavi,
             boolean wakeOnLan,
-            boolean videoSurveillance){
+            boolean videoSurveillance,
+            String cameraNames,
+            String cameraIDs){
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
         intent.putExtra("__DEVICE_TO_CONNECT", deviceName);
@@ -254,6 +258,10 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         intent.putExtra("__HAS_DIRECTORY_NAVIGATION", dirNavi);
         intent.putExtra("__HAS_WAKEONLAN", wakeOnLan);
         intent.putExtra("__HAS_VIDEOSURVEILLANCE", videoSurveillance);
+        intent.putExtra("__CAMERA_NAMES", cameraNames);
+        intent.putExtra("__CAMERA_IDS", cameraIDs);
+
+
 
         startActivity(intent);
 
