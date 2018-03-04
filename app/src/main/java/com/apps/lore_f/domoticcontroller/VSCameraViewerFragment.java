@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.renderscript.Sampler;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -17,24 +18,31 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 public class VSCameraViewerFragment extends Fragment {
 
-    public boolean viewCreated=false;
+    public boolean viewCreated = false;
     private DeviceViewActivity parent;
-    public void setParent(DeviceViewActivity value) {this.parent=value;}
+
+    public void setParent(DeviceViewActivity value) {
+        this.parent = value;
+    }
 
     private String cameraID;
-    public void setCameraID(String value){
-        this.cameraID=value;
+
+    public void setCameraID(String value) {
+        this.cameraID = value;
     }
 
     private String cameraName;
-    public void setCameraName(String value){
-        this.cameraName=value;
+
+    public void setCameraName(String value) {
+        this.cameraName = value;
     }
 
     private DatabaseReference shotNode;
@@ -44,24 +52,24 @@ public class VSCameraViewerFragment extends Fragment {
 
     private View fragmentview;
 
-    private boolean fullScreenMode=false;
+    private boolean fullScreenMode = false;
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
 
-            switch (view.getId()){
+            switch (view.getId()) {
 
-                case R.id.BTN___ZMCAMERAVIEW___REQUESTSHOT:
+                case R.id.BTN___VSCAMERAVIEW___REQUESTSHOT:
                     requestSingleShot();
                     break;
 
-                case R.id.BTN___ZMCAMERAVIEW___REQUESTSHOTSERIES:
+                case R.id.BTN___VSCAMERAVIEW___REQUESTSHOTSERIES:
                     requestShotSeries();
                     break;
 
-                case R.id.IVW___ZMCAMERAVIEW___SHOTVIEW:
-                    fullScreenMode=!fullScreenMode;
+                case R.id.IVW___VSCAMERAVIEW___SHOTVIEW:
+                    fullScreenMode = !fullScreenMode;
                     manageFullScreenMode();
             }
 
@@ -78,39 +86,34 @@ public class VSCameraViewerFragment extends Fragment {
 
     }
 
-    private ChildEventListener childEventListener = new ChildEventListener() {
+    private ValueEventListener valueEventListener = new ValueEventListener() {
+
         @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        public void onDataChange(DataSnapshot dataSnapshot) {
 
-            byte[] shotImageData = getByteArray(dataSnapshot);
+            if (dataSnapshot != null) {
 
-            if (shotImageData!=null) {
-                shotImage = BitmapFactory.decodeByteArray(shotImageData, 0, shotImageData.length);
+                VSShotPicture shotData = dataSnapshot.getValue(VSShotPicture.class);
 
-                // adatta le dimensioni dell'immagine a quelle disponibili su schermo
-                shotView.setImageBitmap(shotImage);
+                if(shotData!=null) {
+                    byte[] shotImageData = Base64.decode(shotData.getImgData(), Base64.DEFAULT);
 
+                    shotImage = BitmapFactory.decodeByteArray(shotImageData, 0, shotImageData.length);
+
+                    // adatta le dimensioni dell'immagine a quelle disponibili su schermo
+                    shotView.setImageBitmap(shotImage);
+
+                } else {
+
+                    shotView.setImageResource(R.drawable.broken);
+
+                }
 
             } else {
 
-                //shotView.setImageDrawable(R.drawable.broken);
+                shotView.setImageResource(R.drawable.broken);
 
             }
-
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
         }
 
@@ -126,23 +129,23 @@ public class VSCameraViewerFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_zoneminder_cameraviewer, container, false);
 
-        TextView cameraNameTXVview =  view.findViewById(R.id.TXV___ZMCAMERAVIEW___CAMERANAME);
+        TextView cameraNameTXVview = view.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME);
         cameraNameTXVview.setText(cameraName);
 
-        shotView = view.findViewById(R.id.IVW___ZMCAMERAVIEW___SHOTVIEW);
+        shotView = view.findViewById(R.id.IVW___VSCAMERAVIEW___SHOTVIEW);
         shotView.setOnClickListener(onClickListener);
 
-        view.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOT).setOnClickListener(onClickListener);
-        view.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(onClickListener);
+        view.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOT).setOnClickListener(onClickListener);
+        view.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(onClickListener);
 
-        shotNode= FirebaseDatabase.getInstance().getReference();
-        //shotNode.addChildEventListener(childEventListener);
+        shotNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LastShotData", parent.groupName,parent.remoteDeviceName,cameraID));
+        shotNode.addValueEventListener(valueEventListener);
 
-        fragmentview=view;
+        fragmentview = view;
 
         manageFullScreenMode();
 
-        viewCreated=true;
+        viewCreated = true;
         return view;
 
     }
@@ -157,25 +160,28 @@ public class VSCameraViewerFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
 
-        fragmentview.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOT).setOnClickListener(null);
-        fragmentview.findViewById(R.id.BTN___ZMCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(null);
+        fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOT).setOnClickListener(null);
+        fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(null);
 
         shotView.setOnClickListener(null);
-        shotNode.removeEventListener(childEventListener);
+        shotNode.removeEventListener(valueEventListener);
 
         // elimina i dati
         shotNode.removeValue();
     }
 
-    public void requestSingleShot(){
+    public void requestSingleShot() {
+        parent.sendCommandToDevice(
+                new Message("__request_shot",cameraID,parent.thisDevice)
+        );
 
     }
 
-    public void requestShotSeries(){
+    public void requestShotSeries() {
 
     }
 
-    private byte[] getByteArray(DataSnapshot dataSn){
+    private byte[] getByteArray(DataSnapshot dataSn) {
 
         int slots = Integer.parseInt(dataSn.child("slots").getValue().toString());
         int bytesInLastSlot = Integer.parseInt(dataSn.child("bytesinlastslot").getValue().toString());
@@ -192,7 +198,7 @@ public class VSCameraViewerFragment extends Fragment {
 
                 if (i == slots) {
 
-                    outputStream.write(bytes,0,bytesInLastSlot);
+                    outputStream.write(bytes, 0, bytesInLastSlot);
 
                 } else {
 
@@ -214,17 +220,17 @@ public class VSCameraViewerFragment extends Fragment {
 
     }
 
-    private void manageFullScreenMode(){
+    private void manageFullScreenMode() {
 
-        if(fullScreenMode){
+        if (fullScreenMode) {
 
-            fragmentview.findViewById(R.id.LLO_ZMCAMERAVIEW___BUTTONSTRIP).setVisibility(View.GONE);
-            fragmentview.findViewById(R.id.TXV___ZMCAMERAVIEW___CAMERANAME).setVisibility(View.GONE);
+            fragmentview.findViewById(R.id.LLO_VSCAMERAVIEW___BUTTONSTRIP).setVisibility(View.GONE);
+            fragmentview.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME).setVisibility(View.GONE);
 
         } else {
 
-            fragmentview.findViewById(R.id.LLO_ZMCAMERAVIEW___BUTTONSTRIP).setVisibility(View.VISIBLE);
-            fragmentview.findViewById(R.id.TXV___ZMCAMERAVIEW___CAMERANAME).setVisibility(View.VISIBLE);
+            fragmentview.findViewById(R.id.LLO_VSCAMERAVIEW___BUTTONSTRIP).setVisibility(View.VISIBLE);
+            fragmentview.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME).setVisibility(View.VISIBLE);
         }
 
     }

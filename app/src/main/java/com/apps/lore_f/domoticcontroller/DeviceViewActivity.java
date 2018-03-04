@@ -60,7 +60,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
 
     public String thisDevice = "lorenzofailla-g3";
-    private String groupName;
+    public String groupName;
     private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
     private long replyTimeoutBase = 2 * 60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
 
@@ -677,7 +677,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             case "SSH_SHELL_READY":
 
                 // avvia il fragment
-                startSSHFragment();
+                //startSSHFragment();
                 deleteMsg = true;
 
                 break;
@@ -713,20 +713,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         deviceIncomingCommands.child(thisDevice).child("IncomingCommands").child(id).removeValue();
 
     }
-
-
-    private void showFragment(Fragment fragment) {
-
-        /* mostra il fragment passato in argomento */
-        /*
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.VIE___DEVICEVIEW___SUBVIEW, fragment);
-
-        fragmentTransaction.commit();
-        */
-    }
-
 
     private void requestTorrentsList() {
 
@@ -822,7 +808,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                                 //
                                 // esiste una shell aperta
                                 // se il fragment per la gestione delle ssh è già stato attivato lo mostra, altrimenti lo crea
-                                startSSHFragment();
+                                //startSSHFragment();
 
                             }
 
@@ -1092,18 +1078,6 @@ public class DeviceViewActivity extends AppCompatActivity {
     Metodi e funzioni relativi al fragment SSH
 
      */
-
-    private void startSSHFragment() {
-
-        if (deviceSSHFragment == null)
-            deviceSSHFragment = new DeviceSSHFragment();
-
-        deviceSSHFragment.parent = this;
-
-        showFragment(deviceSSHFragment);
-
-    }
-
     private void sendSSHDisconnectionRequest() {
 
         sendCommandToDevice(new Message("__disconnect_ssh", null, thisDevice));

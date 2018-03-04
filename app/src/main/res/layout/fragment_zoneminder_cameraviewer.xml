@@ -10,28 +10,28 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="ZoneMinder Camera Viewer"
-        android:id="@+id/TXV___ZMCAMERAVIEW___CAMERANAME" />
+        android:id="@+id/TXV___VSCAMERAVIEW___CAMERANAME" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/TXV___ZMCAMERAVIEW___CAMERANAME">
+        android:layout_below="@+id/TXV___VSCAMERAVIEW___CAMERANAME">
 
         <LinearLayout
-            android:id="@+id/LLO_ZMCAMERAVIEW___BUTTONSTRIP"
+            android:id="@+id/LLO_VSCAMERAVIEW___BUTTONSTRIP"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="visible">
 
             <ImageButton
-                android:id="@+id/BTN___ZMCAMERAVIEW___REQUESTSHOT"
+                android:id="@+id/BTN___VSCAMERAVIEW___REQUESTSHOT"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:src="@drawable/shot" />
 
             <ImageButton
-                android:id="@+id/BTN___ZMCAMERAVIEW___REQUESTSHOTSERIES"
+                android:id="@+id/BTN___VSCAMERAVIEW___REQUESTSHOTSERIES"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:src="@drawable/shotseries" />
@@ -45,7 +45,7 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/IVW___ZMCAMERAVIEW___SHOTVIEW"
+            android:id="@+id/IVW___VSCAMERAVIEW___SHOTVIEW"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitStart"
