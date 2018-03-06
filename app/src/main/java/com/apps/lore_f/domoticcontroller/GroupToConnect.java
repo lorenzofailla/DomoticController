@@ -18,4 +18,5 @@ public class GroupToConnect {
     public String getGroupDescription() {
         return groupDescription;
     }
+
 }

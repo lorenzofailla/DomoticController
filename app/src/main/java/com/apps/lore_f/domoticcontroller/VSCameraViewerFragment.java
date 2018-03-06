@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.renderscript.Sampler;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -13,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,7 +20,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.zip.DataFormatException;
 
 public class VSCameraViewerFragment extends Fragment {
 
@@ -96,12 +94,20 @@ public class VSCameraViewerFragment extends Fragment {
                 VSShotPicture shotData = dataSnapshot.getValue(VSShotPicture.class);
 
                 if(shotData!=null) {
-                    byte[] shotImageData = Base64.decode(shotData.getImgData(), Base64.DEFAULT);
+                    byte[] shotImageData = new byte[0];
+                    try {
+                        shotImageData = decompress(Base64.decode(shotData.getImgData(), Base64.DEFAULT));
+                        shotImage = BitmapFactory.decodeByteArray(shotImageData, 0, shotImageData.length);
 
-                    shotImage = BitmapFactory.decodeByteArray(shotImageData, 0, shotImageData.length);
+                        // adatta le dimensioni dell'immagine a quelle disponibili su schermo
+                        shotView.setImageBitmap(shotImage);
 
-                    // adatta le dimensioni dell'immagine a quelle disponibili su schermo
-                    shotView.setImageBitmap(shotImage);
+                    } catch (IOException | DataFormatException e) {
+
+                        shotView.setImageResource(R.drawable.broken);
+
+                    }
+
 
                 } else {
 
@@ -178,7 +184,9 @@ public class VSCameraViewerFragment extends Fragment {
     }
 
     public void requestShotSeries() {
-
+        parent.sendCommandToDevice(
+                new Message("__request_shots",cameraID,parent.thisDevice)
+        );
     }
 
     private byte[] getByteArray(DataSnapshot dataSn) {
