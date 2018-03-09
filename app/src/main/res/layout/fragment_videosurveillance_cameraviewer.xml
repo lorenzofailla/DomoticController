@@ -25,6 +25,12 @@
             android:visibility="visible">
 
             <ImageButton
+                android:id="@+id/BTN___VSCAMERAVIEW___SWITCHSTATUS"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/broken" />
+
+            <ImageButton
                 android:id="@+id/BTN___VSCAMERAVIEW___REQUESTSHOT"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -40,7 +46,9 @@
                 android:id="@+id/BTN___ZMCAMERAVIEW___REQUESTVIODESTREAM"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/videocam" />
+              android:src="@drawable/videocam" />
+
+
 
         </LinearLayout>
 

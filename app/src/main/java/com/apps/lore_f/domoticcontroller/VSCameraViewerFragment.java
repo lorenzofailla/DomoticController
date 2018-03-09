@@ -9,6 +9,7 @@ import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,7 +23,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
+import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
+
 public class VSCameraViewerFragment extends Fragment {
+
+    private final static String STATUS_RUNNING = "ACTIVE";
+    private final static String STATUS_PAUSED = "PAUSE";
+
 
     public boolean viewCreated = false;
     private DeviceViewActivity parent;
@@ -43,7 +50,10 @@ public class VSCameraViewerFragment extends Fragment {
         this.cameraName = value;
     }
 
+    private String cameraStatus;
+
     private DatabaseReference shotNode;
+    private DatabaseReference statusNode;
 
     private ImageView shotView;
     private Bitmap shotImage;
@@ -69,6 +79,11 @@ public class VSCameraViewerFragment extends Fragment {
                 case R.id.IVW___VSCAMERAVIEW___SHOTVIEW:
                     fullScreenMode = !fullScreenMode;
                     manageFullScreenMode();
+                    break;
+
+                case R.id.BTN___VSCAMERAVIEW___SWITCHSTATUS:
+                    switchStatus();
+                    break;
             }
 
         }
@@ -127,13 +142,29 @@ public class VSCameraViewerFragment extends Fragment {
         public void onCancelled(DatabaseError databaseError) {
 
         }
+
+    };
+
+    private ValueEventListener deviceStatus = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+
+            cameraStatus=dataSnapshot.getValue().toString();
+            updateCameraStatus();
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
     };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_zoneminder_cameraviewer, container, false);
+        View view = inflater.inflate(R.layout.fragment_videosurveillance_cameraviewer, container, false);
 
         TextView cameraNameTXVview = view.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME);
         cameraNameTXVview.setText(cameraName);
@@ -143,9 +174,13 @@ public class VSCameraViewerFragment extends Fragment {
 
         view.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOT).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(onClickListener);
+        view.findViewById(R.id.BTN___VSCAMERAVIEW___SWITCHSTATUS).setOnClickListener(onClickListener);
 
         shotNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LastShotData", parent.groupName,parent.remoteDeviceName,cameraID));
         shotNode.addValueEventListener(valueEventListener);
+
+        statusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/MoDetStatus", parent.groupName,parent.remoteDeviceName,cameraID));
+        statusNode.addValueEventListener(deviceStatus);
 
         fragmentview = view;
 
@@ -168,12 +203,13 @@ public class VSCameraViewerFragment extends Fragment {
 
         fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOT).setOnClickListener(null);
         fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(null);
+        fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___SWITCHSTATUS).setOnClickListener(null);
 
         shotView.setOnClickListener(null);
-        shotNode.removeEventListener(valueEventListener);
 
-        // elimina i dati
-        shotNode.removeValue();
+        shotNode.removeEventListener(valueEventListener);
+        statusNode.removeEventListener(deviceStatus);
+
     }
 
     public void requestSingleShot() {
@@ -239,6 +275,70 @@ public class VSCameraViewerFragment extends Fragment {
 
             fragmentview.findViewById(R.id.LLO_VSCAMERAVIEW___BUTTONSTRIP).setVisibility(View.VISIBLE);
             fragmentview.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME).setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    private void updateCameraStatus(){
+
+        if(fragmentview==null)
+            return;
+
+        int resourceToShow;
+
+        switch(cameraStatus){
+
+            case STATUS_PAUSED:
+                resourceToShow = R.drawable.run;
+                break;
+
+            case STATUS_RUNNING:
+                resourceToShow = R.drawable.pause;
+                break;
+
+            default:
+                resourceToShow = R.drawable.broken;
+                break;
+        }
+
+        ImageButton statusSwitch = fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___SWITCHSTATUS);
+        statusSwitch.setImageResource(resourceToShow);
+
+    }
+
+    private void switchStatus(){
+
+        if(parent==null)
+            return;
+
+        String commandHeader;
+
+        switch(cameraStatus){
+
+            case STATUS_PAUSED:
+                commandHeader="__start_modet";
+                break;
+
+            case STATUS_RUNNING:
+                commandHeader="__stop_modet";
+                break;
+
+            default:
+                commandHeader="";
+                break;
+        }
+
+        if(!commandHeader.equals("")){
+
+            parent.sendCommandToDevice(
+                    new Message(
+                            commandHeader,
+                            this.cameraID,
+                            parent.thisDevice
+                    )
+
+            );
+
         }
 
     }

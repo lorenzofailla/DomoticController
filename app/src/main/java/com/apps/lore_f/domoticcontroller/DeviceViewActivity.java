@@ -96,7 +96,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void onPageSelected(int position) {
 
-            Log.i(TAG,String.format("ViewPager.OnPageChangeListener.onPageSelected(%d)", position));
+            Log.i(TAG, String.format("ViewPager.OnPageChangeListener.onPageSelected(%d)", position));
             collectionPagerAdapter.initializeFragmentAction(position);
 
         }
@@ -136,7 +136,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int i) {
 
-            Log.i(TAG, String.format("getItem(%d)",i));
+            Log.i(TAG, String.format("getItem(%d)", i));
             initializeFragmentAction(i);
             return fragments[i];
 
@@ -154,7 +154,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        public void initializeFragmentAction(int fragmentPosition){
+        public void initializeFragmentAction(int fragmentPosition) {
 
             switch (fragmentTypes[fragmentPosition]) {
 
@@ -164,7 +164,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 case DIRECTORY_NAVIGATOR:
 
-                    if (fileViewerFragment.currentDirName==null) {
+                    if (fileViewerFragment.currentDirName == null) {
                         // invia al dispositivo remoto la richiesta di conoscere la directory corrente
                         sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
                     }
@@ -287,9 +287,9 @@ public class DeviceViewActivity extends AppCompatActivity {
             SharedPreferences sharedPref = context.getSharedPreferences(
                     getString(R.string.data_file_key), Context.MODE_PRIVATE);
 
-            groupName=sharedPref.getString(getString(R.string.data_group_name),null);
+            groupName = sharedPref.getString(getString(R.string.data_group_name), null);
 
-            if(groupName==null){
+            if (groupName == null) {
 
             /*
             questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
@@ -308,10 +308,10 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             remoteDeviceTorrent = intent.hasExtra("__HAS_TORRENT_MANAGEMENT") && extras.getBoolean("__HAS_TORRENT_MANAGEMENT");
             remoteDeviceDirNavi = intent.hasExtra("__HAS_DIRECTORY_NAVIGATION") && extras.getBoolean("__HAS_DIRECTORY_NAVIGATION");
-            remoteDeviceWakeOnLan = intent.hasExtra("__HAS_WAKEONLAN") &&extras.getBoolean("__HAS_WAKEONLAN");
+            remoteDeviceWakeOnLan = intent.hasExtra("__HAS_WAKEONLAN") && extras.getBoolean("__HAS_WAKEONLAN");
             remoteDeviceVideoSurveillance = intent.hasExtra("__HAS_VIDEOSURVEILLANCE") && extras.getBoolean("__HAS_VIDEOSURVEILLANCE");
 
-            if(remoteDeviceVideoSurveillance && intent.hasExtra("__CAMERA_NAMES") && intent.hasExtra("__CAMERA_IDS")) {
+            if (remoteDeviceVideoSurveillance && intent.hasExtra("__CAMERA_NAMES") && intent.hasExtra("__CAMERA_IDS")) {
 
                 try {
 
@@ -322,66 +322,16 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 } catch (NullPointerException e) {
 
-                    remoteDeviceVideoSurveillance=false;
-                    nOfAvailableCameras =0;
+                    remoteDeviceVideoSurveillance = false;
+                    nOfAvailableCameras = 0;
 
                 }
 
             } else {
 
-                remoteDeviceVideoSurveillance=false;
-                nOfAvailableCameras =0;
+                remoteDeviceVideoSurveillance = false;
+                nOfAvailableCameras = 0;
 
-            }
-
-            /* inizializza i fragment */
-
-            //
-            // DeviceInfoFragment
-            deviceInfoFragment = new DeviceInfoFragment();
-            deviceInfoFragment.parent = this;
-
-            //
-            // VideoSurveillanceCameraListFragment
-            if(remoteDeviceVideoSurveillance){
-
-                // crea una query per calcolare il numero di videocamere disponibili
-                // inizializza l'array
-                cameraViewFragment = new VSCameraViewerFragment[nOfAvailableCameras];
-
-                for(int i=0; i<nOfAvailableCameras; i++){
-
-                    VSCameraViewerFragment temp;
-                    temp= new VSCameraViewerFragment();
-                    temp.setCameraID(cameraIDs[i]);
-                    temp.setCameraName(cameraNames[i]);
-                    temp.setParent(this);
-
-                    cameraViewFragment[i] = temp;
-
-                }
-
-            }
-
-            //
-            // FileViewerFragment
-            if (remoteDeviceDirNavi) {
-                fileViewerFragment = new FileViewerFragment();
-                fileViewerFragment.parent = this;
-            }
-
-            //
-            // TorrentViewerFragment
-            if (remoteDeviceTorrent) {
-                torrentViewerFragment = new TorrentViewerFragment();
-                torrentViewerFragment.parent = this;
-            }
-
-            //
-            // WakeOnLanFragment
-            if(remoteDeviceWakeOnLan) {
-                wakeOnLanFragment = new WakeOnLanFragment();
-                wakeOnLanFragment.parent = this;
             }
 
         } else {
@@ -398,15 +348,6 @@ public class DeviceViewActivity extends AppCompatActivity {
             lastOnlineReply = savedInstanceState.getLong(LAST_ONLINE_REPLY);
 
         }
-
-        // crea il CollectionPagerAdapter con le pagine video
-        collectionPagerAdapter =
-                new CollectionPagerAdapter(
-                        getSupportFragmentManager(),
-                        getAvailableFragments(),
-                        getAvailableFragmentTitles(),
-                        getAvailableFragmentTypes()
-                );
 
     }
 
@@ -446,6 +387,8 @@ public class DeviceViewActivity extends AppCompatActivity {
     protected void onResume() {
 
         super.onResume();
+
+        initFragments();
 
         viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
         viewPager.setAdapter(collectionPagerAdapter);
@@ -504,7 +447,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICEVIEW___SSH).setOnClickListener(null);
 
         // rimuove l'OnPageChangeListener al ViewPager
-        if(viewPager!=null)
+        if (viewPager != null)
             viewPager.removeOnPageChangeListener(onPageChangeListener);
 
         // rimuove gli eventuali task ritardati sull'handler
@@ -1114,9 +1057,9 @@ public class DeviceViewActivity extends AppCompatActivity {
          */
         List<Fragment> result = new ArrayList<>();
 
-        int count=0;
+        int count = 0;
 
-        if(wakeOnLanFragment != null) {
+        if (wakeOnLanFragment != null) {
             result.add(wakeOnLanFragment);
             count++;
         }
@@ -1133,11 +1076,11 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         if (deviceInfoFragment != null) {
             result.add(deviceInfoFragment);
-            homeFragment=count;
+            homeFragment = count;
             count++;
         }
 
-        for(int i=0; i<nOfAvailableCameras; i++) {
+        for (int i = 0; i < nOfAvailableCameras; i++) {
             result.add(cameraViewFragment[i]);
             count++;
         }
@@ -1150,7 +1093,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         List<String> result = new ArrayList<String>();
 
-        if(wakeOnLanFragment != null) {
+        if (wakeOnLanFragment != null) {
             result.add("Wake-on-lan");
         }
 
@@ -1167,7 +1110,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        for(int i=0; i<nOfAvailableCameras; i++) {
+        for (int i = 0; i < nOfAvailableCameras; i++) {
             result.add(String.format("Videosurveillance camera: %s", cameraIDs[i]));
         }
 
@@ -1179,7 +1122,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         List<FragmentType> result = new ArrayList<FragmentType>();
 
-        if(wakeOnLanFragment != null) {
+        if (wakeOnLanFragment != null) {
             result.add(FragmentType.WOL_MANAGER);
         }
 
@@ -1196,13 +1139,72 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        for(int i=0; i<nOfAvailableCameras; i++) {
+        for (int i = 0; i < nOfAvailableCameras; i++) {
             result.add(FragmentType.CAMERA_VIEWER);
         }
 
         return result.toArray(new FragmentType[0]);
     }
 
+    private void initFragments() {
+                    /* inizializza i fragment */
 
+        //
+        // DeviceInfoFragment
+        deviceInfoFragment = new DeviceInfoFragment();
+        deviceInfoFragment.parent = this;
+
+        //
+        // VideoSurveillanceCameraListFragment
+        if (remoteDeviceVideoSurveillance) {
+
+            // crea una query per calcolare il numero di videocamere disponibili
+            // inizializza l'array
+            cameraViewFragment = new VSCameraViewerFragment[nOfAvailableCameras];
+
+            for (int i = 0; i < nOfAvailableCameras; i++) {
+
+                VSCameraViewerFragment temp;
+                temp = new VSCameraViewerFragment();
+                temp.setCameraID(cameraIDs[i]);
+                temp.setCameraName(cameraNames[i]);
+                temp.setParent(this);
+
+                cameraViewFragment[i] = temp;
+
+            }
+
+        }
+
+        //
+        // FileViewerFragment
+        if (remoteDeviceDirNavi) {
+            fileViewerFragment = new FileViewerFragment();
+            fileViewerFragment.parent = this;
+        }
+
+        //
+        // TorrentViewerFragment
+        if (remoteDeviceTorrent) {
+            torrentViewerFragment = new TorrentViewerFragment();
+            torrentViewerFragment.parent = this;
+        }
+
+        //
+        // WakeOnLanFragment
+        if (remoteDeviceWakeOnLan) {
+            wakeOnLanFragment = new WakeOnLanFragment();
+            wakeOnLanFragment.parent = this;
+        }
+
+        // crea il CollectionPagerAdapter con le pagine video
+        collectionPagerAdapter =
+                new CollectionPagerAdapter(
+                        getSupportFragmentManager(),
+                        getAvailableFragments(),
+                        getAvailableFragmentTitles(),
+                        getAvailableFragmentTypes()
+                );
+    }
 
 }

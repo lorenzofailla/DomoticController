@@ -1,15 +1,18 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import android.util.Log;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,6 +22,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.zip.DataFormatException;
+
+import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
 public class VideoSurveillanceCameraListFragment extends Fragment {
 
@@ -53,13 +62,15 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
     public static class CamerasHolder extends RecyclerView.ViewHolder {
 
         public TextView cameraNameTXV;
-        public ImageView cameraConnectBTN;
+        public ImageView cameraStatusIVW;
+        public ImageView imagePreviewIWV;
 
         public CamerasHolder(View v) {
             super(v);
 
-            cameraNameTXV = (TextView) itemView.findViewById(R.id.TXV___ZMCAMERADEVICE___DEVICENAME);
-            cameraConnectBTN = (ImageView) itemView.findViewById(R.id.BTN___ZMCAMERADEVICE___CONNECT);
+            cameraNameTXV = itemView.findViewById(R.id.TXV___VSCAMERADEVICE___DEVICENAME);
+            cameraStatusIVW = itemView.findViewById(R.id.IVW___VSCAMERADEVICE___STATUS);
+            imagePreviewIWV = itemView.findViewById(R.id.IVW___VSCAMERADEVICE___PREVIEW);
 
         }
 
@@ -120,21 +131,78 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
 
         firebaseAdapter = new FirebaseRecyclerAdapter<VSCameraDevice, CamerasHolder>(
                 VSCameraDevice.class,
-                R.layout.row_holder_zmcamera_element,
+                R.layout.row_holder_vscamera_element,
                 CamerasHolder.class,
                 availableCameras) {
 
             @Override
             protected void populateViewHolder(CamerasHolder holder, final VSCameraDevice camera, int position) {
 
-                holder.cameraNameTXV.setText(camera.getThreadID().toString());
-                holder.cameraConnectBTN.setOnClickListener(new View.OnClickListener() {
+                holder.cameraNameTXV.setText(camera.getThreadID());
+                holder.imagePreviewIWV.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
                     }
 
                 });
+
+                /*
+                Aggiorna l'immagine imagePreviewIWV con i dati dell'ultimo frame acquisito
+                 */
+
+                HashMap<String,Object> lastShotData = camera.getLastShotData();
+                if(lastShotData!=null) {
+                    String imgRawData=lastShotData.get("ImgData").toString();
+
+                    if (imgRawData != null){
+
+                        try {
+                            byte[] imageData = decompress(Base64.decode(imgRawData, Base64.DEFAULT));
+                            Bitmap shotImage = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+
+                            // adatta le dimensioni dell'immagine a quelle disponibili su schermo
+                            holder.imagePreviewIWV.setImageBitmap(shotImage);
+
+                        } catch (IOException | DataFormatException e){
+
+                            holder.imagePreviewIWV.setImageResource(R.drawable.broken);
+
+                        }
+
+                    } else {
+
+                        holder.imagePreviewIWV.setImageResource(R.drawable.ic_image_black_24dp);
+
+                    }
+
+                } else {
+
+                    holder.imagePreviewIWV.setImageResource(R.drawable.ic_image_black_24dp);
+
+                }
+
+                /*
+                Aggoprma l'immagine
+                 */
+                String cameraStatus=camera.getMoDetStatus();
+                int resId;
+                switch (cameraStatus){
+                    case "PAUSE":
+                        resId=R.drawable.pause;
+                        break;
+
+                    case "RUNNING":
+                        resId=R.drawable.run;
+                        break;
+
+                    default:
+                        resId=R.drawable.broken;
+                        break;
+
+                }
+
+                holder.cameraStatusIVW.setImageResource(resId);
 
             }
 
