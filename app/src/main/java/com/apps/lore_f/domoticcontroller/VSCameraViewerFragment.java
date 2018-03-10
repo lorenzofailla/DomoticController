@@ -30,7 +30,6 @@ public class VSCameraViewerFragment extends Fragment {
     private final static String STATUS_RUNNING = "ACTIVE";
     private final static String STATUS_PAUSED = "PAUSE";
 
-
     public boolean viewCreated = false;
     private DeviceViewActivity parent;
 
@@ -83,6 +82,10 @@ public class VSCameraViewerFragment extends Fragment {
 
                 case R.id.BTN___VSCAMERAVIEW___SWITCHSTATUS:
                     switchStatus();
+                    break;
+
+                case R.id.BTN___VSCAMERAVIEW___REQUESTMOTIONEVENT:
+                    requestMotionEvent();
                     break;
             }
 
@@ -175,6 +178,7 @@ public class VSCameraViewerFragment extends Fragment {
         view.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOT).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___VSCAMERAVIEW___SWITCHSTATUS).setOnClickListener(onClickListener);
+        view.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTMOTIONEVENT).setOnClickListener(onClickListener);
 
         shotNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LastShotData", parent.groupName,parent.remoteDeviceName,cameraID));
         shotNode.addValueEventListener(valueEventListener);
@@ -204,6 +208,7 @@ public class VSCameraViewerFragment extends Fragment {
         fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOT).setOnClickListener(null);
         fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOTSERIES).setOnClickListener(null);
         fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___SWITCHSTATUS).setOnClickListener(null);
+        fragmentview.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTMOTIONEVENT).setOnClickListener(null);
 
         shotView.setOnClickListener(null);
 
@@ -342,5 +347,20 @@ public class VSCameraViewerFragment extends Fragment {
         }
 
     }
+
+    private void requestMotionEvent(){
+
+        parent.sendCommandToDevice(
+                new Message(
+                        "__request_motion_event",
+                        this.cameraID,
+                        parent.thisDevice
+                )
+
+        );
+
+
+    }
+
 
 }

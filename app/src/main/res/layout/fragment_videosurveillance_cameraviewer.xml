@@ -43,7 +43,7 @@
                 android:src="@drawable/shotseries" />
 
             <ImageButton
-                android:id="@+id/BTN___ZMCAMERAVIEW___REQUESTVIODESTREAM"
+                android:id="@+id/BTN___VSCAMERAVIEW___REQUESTMOTIONEVENT"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
               android:src="@drawable/videocam" />
