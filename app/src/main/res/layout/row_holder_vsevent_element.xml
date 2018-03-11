@@ -3,42 +3,39 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="wrap_content">
 
-    <ImageButton
-        android:id="@+id/BTN___ZMEVENTROW___VIEWEVENT"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:src="@drawable/connect"
-        android:contentDescription="" />
 
     <ImageView
-        android:id="@+id/IVW___ZMEVENTROW___EVENTTYPE"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_centerVertical="true"
+        android:layout_width="96dp"
+        android:layout_height="72dp"
+        android:id="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
+        android:src="@drawable/dummy_movie"
+        />
 
-        android:layout_toEndOf="@+id/BTN___ZMEVENTROW___VIEWEVENT"
-        android:layout_toRightOf="@+id/BTN___ZMEVENTROW___VIEWEVENT"
-        android:src="@drawable/run" />
+    <ImageButton
+        android:id="@+id/BTN___VSEVENTROW___REQUESTEVENT"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_toRightOf="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
+        android:src="@drawable/connect"
+        android:contentDescription="" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/IVW___ZMEVENTROW___EVENTTYPE"
-        android:layout_toRightOf="@+id/IVW___ZMEVENTROW___EVENTTYPE"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/BTN___VSEVENTROW___REQUESTEVENT"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/TXV___ZMEVENTROW___EVENTDATETIME"
+            android:id="@+id/TXV___VSEVENTROW___EVENTDATETIME"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/GENERIC_PLACEHOLDER_WAITING"
             android:textAppearance="@style/TextAppearance.AppCompat" />
 
         <TextView
-            android:id="@+id/TXV___ZMEVENTROW___EVENTMONITORNAME"
+            android:id="@+id/TXV___VSEVENTROW___EVENTMONITORNAME"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/GENERIC_PLACEHOLDER_WAITING"

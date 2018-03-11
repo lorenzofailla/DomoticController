@@ -29,7 +29,10 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     private LinearLayoutManager linearLayoutManager;
     private FirebaseRecyclerAdapter<VSEvent, EventsHolder> firebaseAdapter;
 
-    public VideoSurveillanceActivity parent;
+    private DeviceViewActivity parent;
+    public void setParent(DeviceViewActivity value){
+        this.parent=value;
+    }
 
     private RecyclerView eventsRecyclerView;
 
@@ -45,13 +48,12 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         public EventsHolder (View v){
             super(v);
 
-            eventTypeImage = (ImageView) v.findViewById(R.id.IVW___ZMEVENTROW___EVENTTYPE);
-            eventDateTextView = (TextView) v.findViewById(R.id.TXV___ZMEVENTROW___EVENTDATETIME);
-            eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___ZMEVENTROW___EVENTMONITORNAME);
-            ViewEventButton = (ImageButton) v.findViewById(R.id.BTN___ZMEVENTROW___VIEWEVENT);
+            eventTypeImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTTYPE);
+            eventDateTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDATETIME);
+            eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTMONITORNAME);
+            ViewEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___REQUESTEVENT);
 
         }
-
 
     }
 
@@ -119,7 +121,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         firebaseAdapter = new FirebaseRecyclerAdapter<VSEvent, EventsHolder>(
                 VSEvent.class,
-                R.layout.row_holder_zmevent_element,
+                R.layout.row_holder_vsevent_element,
                 EventsHolder.class,
                 eventsNode) {
 
