@@ -16,7 +16,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_toRightOf="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
-        android:src="@drawable/connect"
+        android:src="@drawable/cloud_download"
         android:contentDescription="" />
 
     <LinearLayout

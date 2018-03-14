@@ -6,39 +6,38 @@ package com.apps.lore_f.domoticcontroller;
 
 public class VSEvent {
 
-    private String Id;
-    private String Name;
-    private String Cause;
-    private String MonitorId;
-    private String StartTime;
-    private String EndTime;
+    private String CameraFullID;
+    private String Date;
+    private String Time;
+    private String Device;
+    private String ThreadID;
+    private String VideoLink;
 
     // empty constructor
     public VSEvent() {
     }
 
-    public String getId() {
-        return Id;
+    public String getCameraFullID() {
+        return CameraFullID;
     }
 
-    public String getName() {
-        return Name;
+    public String getDate() {
+        return Date;
     }
 
-    public String getCause() {
-        return Cause;
+    public String getTime() {
+        return Time;
     }
 
-    public String getMonitorId() {
-        return MonitorId;
+    public String getDevice() {
+        return Device;
     }
 
-    public String getStartTime() {
-        return StartTime;
+    public String getThreadID() {
+        return ThreadID;
     }
 
-    public String getEndTime() {
-        return EndTime;
+    public String getVideoLink() {
+        return VideoLink;
     }
-
 }

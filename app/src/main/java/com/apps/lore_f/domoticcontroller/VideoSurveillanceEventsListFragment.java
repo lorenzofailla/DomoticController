@@ -40,7 +40,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     public static class EventsHolder extends RecyclerView.ViewHolder{
 
-        public ImageView eventTypeImage;
         public TextView eventDateTextView;
         public TextView eventMonitorNameTextView;
         public ImageButton ViewEventButton;
@@ -48,7 +47,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         public EventsHolder (View v){
             super(v);
 
-            eventTypeImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTTYPE);
             eventDateTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDATETIME);
             eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTMONITORNAME);
             ViewEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___REQUESTEVENT);
@@ -89,8 +87,9 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         eventsRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___ZMEVENTVIEWERFRAGMENT___EVENTS);
 
-        eventsNode = FirebaseDatabase.getInstance().getReference();
-        //eventsNode.addValueEventListener(valueEventListener);
+        eventsNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/Events",parent.groupName));
+        eventsNode.addValueEventListener(valueEventListener);
+
         fragmentview=view;
 
         viewCreated=true;
@@ -128,14 +127,10 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             @Override
             protected void populateViewHolder(EventsHolder holder, final VSEvent event, int position) {
 
-                holder.eventDateTextView.setText(event.getStartTime());
-                holder.eventMonitorNameTextView.setText("");
+                holder.eventDateTextView.setText(String.format("%s %s",event.getDate(), event.getTime()));
+                holder.eventMonitorNameTextView.setText(event.getDevice());
 
-                if(event.getCause().equals("Motion")){
-                    holder.eventTypeImage.setImageResource(R.drawable.run);
-                } else {
-                    holder.eventTypeImage.setImageResource(R.drawable.manual);
-                }
+
 
             }
 
@@ -162,6 +157,5 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         eventsRecyclerView.setAdapter(firebaseAdapter);
 
     }
-
 
 }
