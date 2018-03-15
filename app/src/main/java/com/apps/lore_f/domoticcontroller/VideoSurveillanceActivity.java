@@ -28,6 +28,9 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
     private CollectionPagerAdapter collectionPagerAdapter;
 
     private String groupName;
+    public String getGroupName(){
+        return groupName;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -92,6 +95,8 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
             videoSurveillanceCameraListFragment.deviceName=null;
 
             videoSurveillanceEventsListFragment = new VideoSurveillanceEventsListFragment();
+            videoSurveillanceEventsListFragment.setEventsNode(FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/Events",groupName)));
+
         }
 
 

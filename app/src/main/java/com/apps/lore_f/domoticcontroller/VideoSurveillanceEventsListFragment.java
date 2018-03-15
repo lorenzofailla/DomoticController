@@ -3,6 +3,7 @@ package com.apps.lore_f.domoticcontroller;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,15 +11,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.io.File;
 
 public class VideoSurveillanceEventsListFragment extends Fragment {
 
@@ -29,14 +30,14 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     private LinearLayoutManager linearLayoutManager;
     private FirebaseRecyclerAdapter<VSEvent, EventsHolder> firebaseAdapter;
 
-    private DeviceViewActivity parent;
-    public void setParent(DeviceViewActivity value){
-        this.parent=value;
-    }
-
     private RecyclerView eventsRecyclerView;
 
+    private File downloadDirectoryRoot;
+
     private DatabaseReference eventsNode;
+    public void setEventsNode(DatabaseReference value){
+        eventsNode=value;
+    }
 
     public static class EventsHolder extends RecyclerView.ViewHolder{
 
@@ -85,10 +86,14 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_videosurveillance_eventslist, container, false);
 
+        // inizializza il riferimento alla directory dove i file dei video saranno scaricati
+        downloadDirectoryRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Domotic/VideoSurveillance/DownloadedVideos");
+
         eventsRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___ZMEVENTVIEWERFRAGMENT___EVENTS);
 
-        eventsNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/Events",parent.groupName));
-        eventsNode.addValueEventListener(valueEventListener);
+        if (eventsNode!=null) {
+            eventsNode.addValueEventListener(valueEventListener);
+        }
 
         fragmentview=view;
 
@@ -130,6 +135,9 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                 holder.eventDateTextView.setText(String.format("%s %s",event.getDate(), event.getTime()));
                 holder.eventMonitorNameTextView.setText(event.getDevice());
 
+                File videoFile = new File(downloadDirectoryRoot, String.format("%s/%s/%s"), )
+
+                if downloadDirectoryRoot.
 
 
             }

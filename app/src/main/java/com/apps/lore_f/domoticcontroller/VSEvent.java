@@ -10,7 +10,7 @@ public class VSEvent {
     private String Date;
     private String Time;
     private String Device;
-    private String ThreadID;
+    private long ThreadID;
     private String VideoLink;
 
     // empty constructor
@@ -33,7 +33,7 @@ public class VSEvent {
         return Device;
     }
 
-    public String getThreadID() {
+    public long getThreadID() {
         return ThreadID;
     }
 
