@@ -24,17 +24,15 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 
-
 public class DownloadFileFromCloud extends Service {
 
-    private String[] fileNames;
+    private String[] remoteLocations;
+    private String[] localLocations;
 
     NotificationManager notificationManager;
 
     // required empty constructor
-    public DownloadFileFromCloud() {
-
-    }
+    public DownloadFileFromCloud() {}
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -55,20 +53,20 @@ public class DownloadFileFromCloud extends Service {
 
     }
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         super.onStartCommand(intent, flags, startId);
 
-        fileNames=intent.getStringArrayExtra("__file_to_download");
+        remoteLocations=intent.getStringArrayExtra("__remote");
+        localLocations=intent.getStringArrayExtra("__local");
 
         // create the notification
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.cloud_download)
                         .setContentTitle("Domotic")
-                        .setContentText("is downloading \"" + fileNames[0] + "\"");
+                        .setContentText("is downloading \"" + remoteLocations[0] + "\"");
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, DeviceViewActivity.class), 0);
@@ -80,7 +78,7 @@ public class DownloadFileFromCloud extends Service {
         // start the service in foreground
         startForeground(1, notification);
 
-        new DownloadTask().execute(fileNames);
+        new DownloadTask().execute(remoteLocations);
 
         // If we get killed, after returning from here, restart
         return START_STICKY;
@@ -100,10 +98,10 @@ public class DownloadFileFromCloud extends Service {
         protected Void doInBackground(String... fileName){
 
             // ottiene un riferimento alla posizione di storage sul cloud
-            StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl("gs://domotic-28a5e.appspot.com/Users/lorenzofailla/uploads/"+fileName[0]);
+            StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(String.format("gs://domotic-28a5e.appspot.com/%s", remoteLocations[0]));
 
             // inizializza la directory locale per il download, se la directory non esiste la crea
-             File downloadDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Domotic");
+             File downloadDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), localLocations[0]);
             if (!downloadDirectory.exists()){
                 downloadDirectory.mkdir();
             }

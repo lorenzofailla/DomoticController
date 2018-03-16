@@ -2,6 +2,7 @@ package com.apps.lore_f.domoticcontroller;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -43,14 +44,14 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         public TextView eventDateTextView;
         public TextView eventMonitorNameTextView;
-        public ImageButton ViewEventButton;
+        public ImageButton viewEventButton;
 
         public EventsHolder (View v){
             super(v);
 
             eventDateTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDATETIME);
             eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTMONITORNAME);
-            ViewEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___REQUESTEVENT);
+            viewEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___REQUESTEVENT);
 
         }
 
@@ -135,9 +136,21 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                 holder.eventDateTextView.setText(String.format("%s %s",event.getDate(), event.getTime()));
                 holder.eventMonitorNameTextView.setText(event.getDevice());
 
-                File videoFile = new File(downloadDirectoryRoot, String.format("%s/%s/%s"), )
+                File videoFile = new File(downloadDirectoryRoot, String.format("%s/%d/%s", event.getDevice(), event.getThreadID(), event.getVideoLink()));
 
-                if downloadDirectoryRoot.
+                if (videoFile.exists()){
+                    holder.viewEventButton.setImageResource(R.drawable.connect);
+                } else {
+                    holder.viewEventButton.setImageResource(R.drawable.cloud_download);
+                    holder.viewEventButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+
+
+                        }
+                    });
+                }
 
 
             }
@@ -165,5 +178,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         eventsRecyclerView.setAdapter(firebaseAdapter);
 
     }
+
 
 }

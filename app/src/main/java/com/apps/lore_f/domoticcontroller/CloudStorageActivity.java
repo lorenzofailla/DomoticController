@@ -108,6 +108,7 @@ public class CloudStorageActivity extends AppCompatActivity {
 
             downloadBTN = (ImageButton) itemView.findViewById(R.id.BTN___STOREDFILE___DOWNLOAD);
             deleteBTN = (ImageButton) itemView.findViewById(R.id.BTN___STOREDFILE___DELETE);
+
         }
 
     }
