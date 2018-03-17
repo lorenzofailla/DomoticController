@@ -1,6 +1,7 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -361,6 +362,5 @@ public class VSCameraViewerFragment extends Fragment {
 
 
     }
-
 
 }

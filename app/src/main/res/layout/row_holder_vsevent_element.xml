@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
 
     <ImageView
+        android:id="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
         android:layout_width="96dp"
         android:layout_height="72dp"
-        android:id="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
-        android:src="@drawable/dummy_movie"
-        />
+        android:src="@drawable/dummy_movie" />
 
     <ImageButton
         android:id="@+id/BTN___VSEVENTROW___REQUESTEVENT"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_toRightOf="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
-        android:src="@drawable/cloud_download"
-        android:contentDescription="" />
+        android:contentDescription=""
+        android:src="@drawable/cloud_download" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/BTN___VSEVENTROW___REQUESTEVENT"
         android:orientation="vertical">
 
@@ -44,7 +44,15 @@
 
     </LinearLayout>
 
-
+    <ProgressBar
+        android:id="@+id/PBR___VSEVENTROW___DOWNLOADPROGRESS"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/IVW___VSEVENTROW___EVENTPREVIEW"
+        android:layout_centerHorizontal="true"
+        android:layout_toRightOf="@id/IVW___VSEVENTROW___EVENTPREVIEW"
+        android:visibility="gone"/>
 
 
 </RelativeLayout>

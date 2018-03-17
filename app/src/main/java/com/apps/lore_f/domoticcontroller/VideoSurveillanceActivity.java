@@ -95,7 +95,9 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
             videoSurveillanceCameraListFragment.deviceName=null;
 
             videoSurveillanceEventsListFragment = new VideoSurveillanceEventsListFragment();
-            videoSurveillanceEventsListFragment.setEventsNode(FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/Events",groupName)));
+            Bundle bundle = new Bundle();
+            bundle.putString(getString(R.string.data_group_name), groupName);
+            videoSurveillanceEventsListFragment.setArguments(bundle);
 
         }
 

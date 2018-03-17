@@ -14,6 +14,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -23,6 +24,8 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+
+import static android.content.ContentValues.TAG;
 
 public class DownloadFileFromCloud extends Service {
 
@@ -58,8 +61,8 @@ public class DownloadFileFromCloud extends Service {
 
         super.onStartCommand(intent, flags, startId);
 
-        remoteLocations=intent.getStringArrayExtra("__remote");
-        localLocations=intent.getStringArrayExtra("__local");
+        remoteLocations=intent.getStringArrayExtra("___remote");
+        localLocations=intent.getStringArrayExtra("___local");
 
         // create the notification
         NotificationCompat.Builder notificationBuilder =
@@ -100,17 +103,18 @@ public class DownloadFileFromCloud extends Service {
             // ottiene un riferimento alla posizione di storage sul cloud
             StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(String.format("gs://domotic-28a5e.appspot.com/%s", remoteLocations[0]));
 
+
             // inizializza la directory locale per il download, se la directory non esiste la crea
              File downloadDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), localLocations[0]);
             if (!downloadDirectory.exists()){
-                downloadDirectory.mkdir();
+                Boolean b= downloadDirectory.mkdirs();
+                Log.i(TAG, b.toString());
             }
 
             // inizializza il file locale per il download
             File localFile = new File(downloadDirectory.getPath() + File.separator + storageRef.getName());
 
             storageRef.getFile(localFile)
-
                     .addOnCompleteListener(new OnCompleteListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<FileDownloadTask.TaskSnapshot> task) {
