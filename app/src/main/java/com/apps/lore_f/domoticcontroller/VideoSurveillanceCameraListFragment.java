@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.zip.DataFormatException;
 
+import static android.content.ContentValues.TAG;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
 public class VideoSurveillanceCameraListFragment extends Fragment {
@@ -158,6 +160,8 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
                     if (imgRawData != null){
 
                         try {
+
+                            // recupera i dati dell'immagine
                             byte[] imageData = decompress(Base64.decode(imgRawData, Base64.DEFAULT));
                             Bitmap shotImage = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
 
@@ -166,6 +170,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
 
                         } catch (IOException | DataFormatException e){
 
+                            Log.d(TAG, e.getMessage());
                             holder.imagePreviewIWV.setImageResource(R.drawable.broken);
 
                         }
