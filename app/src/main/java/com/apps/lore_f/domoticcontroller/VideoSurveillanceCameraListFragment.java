@@ -1,6 +1,7 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -64,6 +65,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
     public static class CamerasHolder extends RecyclerView.ViewHolder {
 
         public TextView cameraNameTXV;
+        public TextView cameraOwnerTXV;
         public ImageView cameraStatusIVW;
         public ImageView imagePreviewIWV;
 
@@ -73,6 +75,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
             cameraNameTXV = itemView.findViewById(R.id.TXV___VSCAMERADEVICE___DEVICENAME);
             cameraStatusIVW = itemView.findViewById(R.id.IVW___VSCAMERADEVICE___STATUS);
             imagePreviewIWV = itemView.findViewById(R.id.IVW___VSCAMERADEVICE___PREVIEW);
+            cameraOwnerTXV = itemView.findViewById(R.id.TXV___VSCAMERADEVICE___DEVICEOWNER);
 
         }
 
@@ -105,7 +108,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
             availableCameras = camerasNode.orderByChild("OwnerDevice");
         }
 
-        availableCameras.addValueEventListener(valueEventListener);
+        availableCameras.addListenerForSingleValueEvent(valueEventListener);
 
         viewCreated = true;
         return view;
@@ -141,9 +144,23 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
             protected void populateViewHolder(CamerasHolder holder, final VSCameraDevice camera, int position) {
 
                 holder.cameraNameTXV.setText(camera.getThreadID());
+                holder.cameraOwnerTXV.setText(camera.getOwnerDevice());
+
                 holder.imagePreviewIWV.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+
+                        Intent intent = new Intent(getContext(), DeviceViewActivity.class);
+                        intent.putExtra("__DEVICE_TO_CONNECT", camera.getOwnerDevice());
+                        intent.putExtra("__HAS_TORRENT_MANAGEMENT", false);
+                        intent.putExtra("__HAS_DIRECTORY_NAVIGATION", false);
+                        intent.putExtra("__HAS_WAKEONLAN", false);
+                        intent.putExtra("__HAS_VIDEOSURVEILLANCE", true);
+                        intent.putExtra("__CAMERA_NAMES", camera.getThreadID());
+                        intent.putExtra("__CAMERA_IDS", camera.getThreadID());
+                        intent.putExtra("__ACTION", "monitor");
+
+                        startActivity(intent);
 
                     }
 

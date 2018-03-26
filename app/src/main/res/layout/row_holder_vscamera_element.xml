@@ -9,22 +9,31 @@
         android:layout_height="72dp"
         android:src="@drawable/ic_image_black_24dp"/>
 
-    <ImageView
-        android:id="@+id/IVW___VSCAMERADEVICE___STATUS"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_toRightOf="@id/IVW___VSCAMERADEVICE___PREVIEW"
-        android:src="@drawable/pause" />
-
     <TextView
         android:id="@+id/TXV___VSCAMERADEVICE___DEVICENAME"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-
-        android:layout_below="@+id/IVW___VSCAMERADEVICE___STATUS"
         android:layout_toRightOf="@id/IVW___VSCAMERADEVICE___PREVIEW"
         android:text="@string/GENERIC_PLACEHOLDER_WAITING"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+
+    <ImageView
+        android:id="@+id/IVW___VSCAMERADEVICE___STATUS"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_toRightOf="@+id/TXV___VSCAMERADEVICE___DEVICENAME"
+        android:src="@drawable/pause" />
+
+    <TextView
+        android:id="@+id/TXV___VSCAMERADEVICE___DEVICEOWNER"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/IVW___VSCAMERADEVICE___PREVIEW"
+        android:layout_below="@+id/TXV___VSCAMERADEVICE___DEVICENAME"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+
 
 </RelativeLayout>
