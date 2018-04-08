@@ -421,21 +421,9 @@ public class DeviceViewActivity extends AppCompatActivity {
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessages.addChildEventListener(newCommandsToProcess);
 
-        // calcola il tempo trascorso dall'ultima risposta online
-        if (System.currentTimeMillis() - lastOnlineReply > replyTimeoutBase) {
-
-            // mostra un ProgressDialog
-            connectionProgressDialog = new ProgressDialog(this);
-            connectionProgressDialog.setIndeterminate(true);
-            connectionProgressDialog.setTitle(R.string.DEVICEVIEW_REFRESHING_DEVICE_CONNECTION);
-            connectionProgressDialog.show();
-
-        } else {
-        }
-
         // attiva il ciclo di richieste
         handler = new Handler();
-        handler.postDelayed(sendWelcomeMessage, 0);
+
     }
 
     @Override
@@ -446,20 +434,14 @@ public class DeviceViewActivity extends AppCompatActivity {
         // rimuove il ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessages.removeEventListener(newCommandsToProcess);
 
-        // rimuove gli OnClickListener ai pulsanti
-        findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(null);
-        findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(null);
-        findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(null);
-        findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(null);
-        findViewById(R.id.BTN___DEVICEVIEW___SSH).setOnClickListener(null);
-
         // rimuove l'OnPageChangeListener al ViewPager
         if (viewPager != null)
             viewPager.removeOnPageChangeListener(onPageChangeListener);
 
         // rimuove gli eventuali task ritardati sull'handler
-        handler.removeCallbacks(sendWelcomeMessage);
         handler.removeCallbacks(manageLastHeartBeatTime);
+
+        handler=null;
 
     }
 
@@ -470,20 +452,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         switch (inMsg.getHeader()) {
 
             case "WELCOME_MESSAGE":
-
-                if (connectionProgressDialog != null) {
-
-                    if (connectionProgressDialog.isShowing()) {
-
-                        connectionProgressDialog.dismiss();
-
-
-                    }
-
-                }
-
-                handler.removeCallbacks(manageLastHeartBeatTime);
-                handler.postDelayed(sendWelcomeMessage, replyTimeoutBase);
 
                 // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
                 TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
