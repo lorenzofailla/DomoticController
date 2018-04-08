@@ -16,49 +16,11 @@
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
-   <LinearLayout
-        android:id="@+id/LLO___DEVICEVIEW___BUTTONSTRIP"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_below="@+id/TXV___DEVICEVIEW___HOSTNAME"
-        android:layout_alignParentLeft="true">
-
-        <ImageButton
-            android:id="@+id/BTN___DEVICEVIEW___DEVICEINFO"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/info_icon" />
-
-        <ImageButton
-            android:id="@+id/BTN___DEVICEVIEW___FILEMANAGER"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/directory" />
-
-        <ImageButton
-            android:id="@+id/BTN___DEVICEVIEW___TORRENTMANAGER"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/torrent" />
-
-       <ImageButton
-           android:id="@+id/BTN___DEVICEVIEW___WAKEONLAN"
-           android:layout_width="45dp"
-           android:layout_height="45dp"
-           android:src="@drawable/alarm" />
-
-       <ImageButton
-           android:id="@+id/BTN___DEVICEVIEW___SSH"
-           android:layout_width="45dp"
-           android:layout_height="45dp"
-           android:src="@drawable/computer" />
-
-    </LinearLayout>
 
     <android.support.v4.view.ViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/PGR___DEVICEVIEW___MAINPAGER"
-        android:layout_below="@+id/LLO___DEVICEVIEW___BUTTONSTRIP"
+        android:layout_below="@+id/TXV___DEVICEVIEW___HOSTNAME"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
@@ -61,13 +62,17 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     public String thisDevice = "lorenzofailla-g3";
     public String groupName;
-    private long replyTimeoutConnection = 15000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
-    private long replyTimeoutBase = 2 * 60000L; // ms // TODO: 20-Sep-17 deve diventare un parametro di configurazione
+    private long timeDifferenceNormal = (long) (1.5*60000); // ms
+    private long timeDifferenceAlarm = (long) (2*60000);
+    private long timeDifferenceCritical = (long) (2.5*60000);
+
+    private long timeDifferenceCheckInterval = 5000L; // ms
+
+    private long lastHeartBeatTime;
 
     private Handler handler;
 
     private ProgressDialog connectionProgressDialog;
-    private ProgressDialog zmProgressDialog;
 
     private long lastOnlineReply;
     private static final String LAST_ONLINE_REPLY = "lastOnlineReply";
@@ -112,11 +117,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         private Fragment[] fragments;
         private String[] pageTitle;
         private FragmentType[] fragmentTypes;
-
-        public CollectionPagerAdapter(FragmentManager fm) {
-            super(fm);
-
-        }
 
         public CollectionPagerAdapter(
                 FragmentManager fm,
@@ -186,37 +186,44 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     // Runnable per chiudere l'Activity in caso il dispositivo non risponda alle chiamate entro il timeout
-    private Runnable watchDog = new Runnable() {
+    private Runnable manageLastHeartBeatTime = new Runnable() {
 
         @Override
         public void run() {
 
-            manageRemoteDeviceNotResponding();
+            long timeDifference=System.currentTimeMillis()-lastHeartBeatTime;
+            int labelColor = Color.GRAY;
+
+            if(timeDifference<=timeDifferenceNormal){
+                labelColor = Color.TRANSPARENT;
+            } else if (timeDifference<=timeDifferenceAlarm) {
+                labelColor = Color.YELLOW;
+            } else {
+                labelColor = Color.RED;
+            }
+
+            findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME).setBackgroundColor(labelColor);
+
+            handler.postDelayed(this, timeDifferenceCheckInterval);
 
         }
 
     };
 
-    // Runnable per chiudere l'Activity in caso il dispositivo non risponda alle chiamate entro il timeout
-    private Runnable sendWelcomeMessage = new Runnable() {
+    private ValueEventListener updateLastHeartBeatTime = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            //
+            // aggiorna il valore di lastHeartBeatTime
+            try {
+                lastHeartBeatTime = dataSnapshot.getValue(long.class);
+            } catch (NullPointerException e) {
+            }
+
+        }
 
         @Override
-        public void run() {
-
-            // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
-            TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
-            remoteHostName.setText(R.string.DEVICEVIEW_REFRESHING_DEVICE_CONNECTION);
-
-            // inizia la connessione al dispositivo: invia la richiesta iniziale
-            sendCommandToDevice(
-                    new Message(
-                            "__requestWelcomeMessage",
-                            "null",
-                            thisDevice
-                    )
-            );
-
-            handler.postDelayed(watchDog, replyTimeoutConnection);
+        public void onCancelled(DatabaseError databaseError) {
 
         }
 
@@ -395,12 +402,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         viewPager.addOnPageChangeListener(onPageChangeListener);
         viewPager.setCurrentItem(homeFragment);
 
-        // assegna gli OnClickListener ai pulsanti
-        findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICEVIEW___SSH).setOnClickListener(onClickListener);
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso
         incomingMessages = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices/" + thisDevice + "/IncomingCommands");
@@ -411,9 +412,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         // calcola il tempo trascorso dall'ultima risposta online
         if (System.currentTimeMillis() - lastOnlineReply > replyTimeoutBase) {
 
-            // nasconde i controlli
-            hideControls();
-
             // mostra un ProgressDialog
             connectionProgressDialog = new ProgressDialog(this);
             connectionProgressDialog.setIndeterminate(true);
@@ -421,9 +419,6 @@ public class DeviceViewActivity extends AppCompatActivity {
             connectionProgressDialog.show();
 
         } else {
-
-            releaseControls();
-
         }
 
         // attiva il ciclo di richieste
@@ -452,7 +447,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // rimuove gli eventuali task ritardati sull'handler
         handler.removeCallbacks(sendWelcomeMessage);
-        handler.removeCallbacks(watchDog);
+        handler.removeCallbacks(manageLastHeartBeatTime);
 
     }
 
@@ -469,13 +464,13 @@ public class DeviceViewActivity extends AppCompatActivity {
                     if (connectionProgressDialog.isShowing()) {
 
                         connectionProgressDialog.dismiss();
-                        releaseControls();
+
 
                     }
 
                 }
 
-                handler.removeCallbacks(watchDog);
+                handler.removeCallbacks(manageLastHeartBeatTime);
                 handler.postDelayed(sendWelcomeMessage, replyTimeoutBase);
 
                 // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
@@ -664,115 +659,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void releaseControls() {
-
-        /*
-        Mostra o nasconde i diversi pulsanti in funzione delle capacità del dispositivio
-         */
-
-        // pulsante per le informazioni del dispositivo è sempre visibile
-        findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setVisibility(View.VISIBLE);
-
-        // gestione torrent
-        if (remoteDeviceTorrent) {
-            //
-            findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.VISIBLE);
-
-        } else {
-            //
-            findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.GONE);
-
-        }
-
-        // gestione file manager
-
-        if (remoteDeviceDirNavi) {
-            //
-            findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.VISIBLE);
-
-        } else {
-            //
-            findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.GONE);
-
-        }
-
-        // wakeonlan
-        if (remoteDeviceWakeOnLan) {
-            //
-            findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setVisibility(View.VISIBLE);
-
-        } else {
-            //
-            findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setVisibility(View.GONE);
-
-        }
-
-    }
-
-    private void hideControls() {
-
-        /*
-        Nasconde la pulsantiera
-         */
-
-        findViewById(R.id.BTN___DEVICEVIEW___DEVICEINFO).setVisibility(View.GONE);
-        findViewById(R.id.BTN___DEVICEVIEW___TORRENTMANAGER).setVisibility(View.GONE);
-        findViewById(R.id.BTN___DEVICEVIEW___FILEMANAGER).setVisibility(View.GONE);
-        findViewById(R.id.BTN___DEVICEVIEW___WAKEONLAN).setVisibility(View.GONE);
-    }
-
-    private View.OnClickListener onClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
-            switch (v.getId()) {
-
-                case R.id.BTN___DEVICEVIEW___SSH:
-
-                    // controlla se esiste un nodo nel database con la sessione ssh relativa al dispositivo corrente
-                    // se esiste apre subito il fragment
-                    // altrimenti invia al dispositivo remoto la richiesta di connessione a una shell SSH
-
-                    // ottiene un riferimento al nodo del database Firebase con le informazioni sulle shell aperte,
-                    // effettua una query per filtrare le shell aperte al dispositivo corrente
-                    DatabaseReference activeShells = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices/" + remoteDeviceName + "/SSHShells");
-                    Query query = activeShells.orderByKey().equalTo(thisDevice);
-                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-
-                            if (dataSnapshot != null) {
-                                //
-                                // non esistono shell aperte
-                                // invia al dispositivo remoto la richiesta di connessione a una shell SSH
-                                sendCommandToDevice(new Message("__initialize_ssh", null, thisDevice));
-
-                            } else {
-                                //
-                                // esiste una shell aperta
-                                // se il fragment per la gestione delle ssh è già stato attivato lo mostra, altrimenti lo crea
-                                //startSSHFragment();
-
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-
-                    });
-
-
-                    break;
-            }
-
-        }
-
-    };
-
-
     public void rebootHost() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -834,7 +720,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-
     private void removeTorrent(final int id) {
 
         new AlertDialog.Builder(this)
@@ -886,7 +771,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-
     public void torrentStartRequest(int torrentID) {
 
         // invia il commando all'host remoto
@@ -894,13 +778,11 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-
     public void torrentStopRequest(int torrentID) {
 
         // invia il commando all'host remoto
         sendCommandToDevice(new Message("__stop_torrent", "" + torrentID, thisDevice));
     }
-
 
     public void torrentRemoveRequest(final int torrentID) {
 
@@ -962,52 +844,6 @@ public class DeviceViewActivity extends AppCompatActivity {
             sendCommandToDevice(new Message("__get_directory_content", fileViewerFragment.currentDirName, thisDevice));
 
         }
-
-    }
-
-    private void manageRemoteDeviceNotResponding() {
-
-        if (connectionProgressDialog.isShowing()) {
-
-            connectionProgressDialog.dismiss();
-
-        }
-
-        // costruisce un AlertDialog e lo mostra a schermo
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.ALERTDIALOG_TITLE_REMOTE_DEVICE_NOT_RESPONDING)
-                .setMessage(R.string.ALERTDIALOG_MESSAGE_REMOTE_DEVICE_NOT_RESPONDING)
-                .setPositiveButton(R.string.ALERTDIALOG_GOT_IT, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                        // aggiorna il database cloud impostando la proprietà online del dispositivo remoto a false
-                        finish();
-                    }
-                })
-                .create()
-                .show();
-
-
-    }
-
-    private void manageZoneMinderTimeOut() {
-
-        zmProgressDialog.cancel();
-
-        // costruisce un AlertDialog e lo mostra a schermo
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.ALERTDIALOG_TITLE_ZM_NOT_RESPONDING)
-                .setMessage(R.string.ALERTDIALOG_MESSAGE_ZM_NOT_RESPONDING)
-                .setPositiveButton(R.string.ALERTDIALOG_GOT_IT, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-
-                })
-                .create()
-                .show();
 
     }
 
