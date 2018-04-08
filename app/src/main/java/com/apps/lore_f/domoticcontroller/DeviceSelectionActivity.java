@@ -263,6 +263,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
 
 
+
         startActivity(intent);
 
     }

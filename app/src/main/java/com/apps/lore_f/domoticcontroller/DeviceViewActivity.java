@@ -59,6 +59,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private boolean remoteDeviceWakeOnLan;
     private boolean remoteDeviceVideoSurveillance;
 
+    private String action;
 
     public String thisDevice = "lorenzofailla-g3";
     public String groupName;
@@ -341,7 +342,18 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             }
 
+            if(intent.hasExtra("__ACTION")){
+
+                action = intent.getStringExtra("__ACTION");
+
+            } else {
+
+                action = "default";
+            }
+
         } else {
+
+            // non ci sono extra nell'Intent
 
             finish();
             return;
@@ -893,6 +905,9 @@ public class DeviceViewActivity extends AppCompatActivity {
          */
         List<Fragment> result = new ArrayList<>();
 
+        int deviceInfoFragmentIndex=0;
+        int firstCameraFragmentIndex=0;
+
         int count = 0;
 
         if (wakeOnLanFragment != null) {
@@ -912,13 +927,26 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         if (deviceInfoFragment != null) {
             result.add(deviceInfoFragment);
-            homeFragment = count;
+            deviceInfoFragmentIndex = count;
             count++;
         }
 
         for (int i = 0; i < nOfAvailableCameras; i++) {
             result.add(cameraViewFragment[i]);
+            if(i==0){
+                firstCameraFragmentIndex=count;
+            }
             count++;
+        }
+
+        switch(action){
+            case "monitor":
+                homeFragment=firstCameraFragmentIndex;
+                 break;
+
+            default:
+                homeFragment=deviceInfoFragmentIndex;
+
         }
 
         return result.toArray(new Fragment[0]);
@@ -985,10 +1013,26 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void initFragments() {
                     /* inizializza i fragment */
 
+        boolean createDeviceInfoFragment;
+
+        switch(action){
+
+            case "monitor":
+                createDeviceInfoFragment=false;
+                break;
+
+            default:
+                createDeviceInfoFragment=true;
+
+        }
+
         //
         // DeviceInfoFragment
-        deviceInfoFragment = new DeviceInfoFragment();
-        deviceInfoFragment.parent = this;
+
+        if(createDeviceInfoFragment) {
+            deviceInfoFragment = new DeviceInfoFragment();
+            deviceInfoFragment.parent = this;
+        }
 
         //
         // VideoSurveillanceCameraListFragment
