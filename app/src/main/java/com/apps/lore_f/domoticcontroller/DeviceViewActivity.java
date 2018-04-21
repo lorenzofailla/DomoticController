@@ -1,18 +1,15 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.app.Notification;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Handler;
-import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +17,6 @@ import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -30,7 +26,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -51,7 +46,9 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     // Firebase Database
-    private DatabaseReference incomingMessages;
+
+    private DatabaseReference incomingMessagesRef;
+    private DatabaseReference lastHeartBeatTimeNodeRef;
 
     public String remoteDeviceName;
     private boolean remoteDeviceTorrent;
@@ -63,17 +60,16 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     public String thisDevice = "lorenzofailla-g3";
     public String groupName;
-    private long timeDifferenceNormal = (long) (1.5*60000); // ms
-    private long timeDifferenceAlarm = (long) (2*60000);
-    private long timeDifferenceCritical = (long) (2.5*60000);
+    private long timeDifferenceNormal = (long) (1.5 * 60000); // ms
+    private long timeDifferenceAlarm = (long) (2 * 60000);
+    private long timeDifferenceCritical = (long) (2.5 * 60000);
+    private long removeDeviceCurrentTimeOffset;
 
     private long timeDifferenceCheckInterval = 5000L; // ms
 
     private long lastHeartBeatTime;
 
     private Handler handler;
-
-    private ProgressDialog connectionProgressDialog;
 
     private long lastOnlineReply;
     private static final String LAST_ONLINE_REPLY = "lastOnlineReply";
@@ -119,7 +115,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         private String[] pageTitle;
         private FragmentType[] fragmentTypes;
 
-        public CollectionPagerAdapter(
+        CollectionPagerAdapter(
                 FragmentManager fm,
                 Fragment[] fragments,
                 String[] titles,
@@ -192,18 +188,18 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void run() {
 
-            long timeDifference=System.currentTimeMillis()-lastHeartBeatTime;
-            int labelColor = Color.GRAY;
+            long timeDifference = System.currentTimeMillis() - lastHeartBeatTime -(System.currentTimeMillis()- removeDeviceCurrentTimeOffset);
+            int labelColor;
 
-            if(timeDifference<=timeDifferenceNormal){
+            if (timeDifference <= timeDifferenceNormal) {
                 labelColor = Color.TRANSPARENT;
-            } else if (timeDifference<=timeDifferenceAlarm) {
+            } else if (timeDifference <= timeDifferenceAlarm) {
                 labelColor = Color.YELLOW;
             } else {
                 labelColor = Color.RED;
             }
 
-            findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME).setBackgroundColor(labelColor);
+            //findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME).setBackgroundColor(labelColor);
 
             handler.postDelayed(this, timeDifferenceCheckInterval);
 
@@ -239,25 +235,25 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             // è arrivato un nuovo messaggio
 
-            // recupera il nuovo messaggio nel formato della classe Message
-            GenericTypeIndicator<Message> msg = new GenericTypeIndicator<Message>() {
-            };
-            Message incomingMessage = dataSnapshot.getValue(msg);
+            if (dataSnapshot != null) {
 
-            // dorme per 10 ms - necessario per evitare timestamp identici negli ID delle risposte
-            try {
+                // recupera il nuovo messaggio nel formato della classe Message
+                GenericTypeIndicator<Message> msg = new GenericTypeIndicator<Message>() {
+                };
+                Message incomingMessage = dataSnapshot.getValue(msg);
 
-                Thread.sleep(10);
+                // dorme per 10 ms - necessario per evitare timestamp identici negli ID delle risposte
+                try {
 
-            } catch (InterruptedException e) {
+                    Thread.sleep(10);
 
-                // nessuna operazione
+                } catch (InterruptedException e) {
+                }
 
+                // processa il messaggio ricevuto
+                if (incomingMessage != null)
+                    processIncomingMessage(incomingMessage, dataSnapshot.getKey());
             }
-
-            // processa il messaggio ricevuto
-            processIncomingMessage(incomingMessage, dataSnapshot.getKey());
-
         }
 
         @Override
@@ -342,7 +338,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             }
 
-            if(intent.hasExtra("__ACTION")){
+            if (intent.hasExtra("__ACTION")) {
 
                 action = intent.getStringExtra("__ACTION");
 
@@ -414,15 +410,50 @@ public class DeviceViewActivity extends AppCompatActivity {
         viewPager.addOnPageChangeListener(onPageChangeListener);
         viewPager.setCurrentItem(homeFragment);
 
+        // inizializza i riferimenti ai nodi del db Firebase
 
-        // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso
-        incomingMessages = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices/" + thisDevice + "/IncomingCommands");
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        String incomingMessagesNode = new StringBuilder()
+                .append("/Groups/")
+                .append(groupName)
+                .append("/Devices/")
+                .append(thisDevice)
+                .append("/IncomingCommands")
+                .toString();
+
+        String lastHeartBeatTimeNode = new StringBuilder()
+                .append("/Groups/")
+                .append(groupName)
+                .append("/Devices/")
+                .append(thisDevice)
+                .append("/LastHeartBeatTime")
+                .toString();
+
+        incomingMessagesRef = firebaseDatabase.getReference(incomingMessagesNode);
+        lastHeartBeatTimeNodeRef = firebaseDatabase.getReference(lastHeartBeatTimeNode);
 
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
-        incomingMessages.addChildEventListener(newCommandsToProcess);
+        incomingMessagesRef.addChildEventListener(newCommandsToProcess);
+        lastHeartBeatTimeNodeRef.addValueEventListener(updateLastHeartBeatTime);
+
+        // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
+        sendCommandToDevice(
+                new Message("__requestWelcomeMessage",
+                        "-",
+                        thisDevice)
+        );
+
+        // invia un messaggio al dispositivo remoto con la richiesta dell'ora corrente
+        sendCommandToDevice(
+                new Message("__get_currenttimemillis",
+                        "-",
+                        thisDevice)
+        );
 
         // attiva il ciclo di richieste
         handler = new Handler();
+
+        handler.postDelayed(manageLastHeartBeatTime, timeDifferenceCheckInterval);
 
     }
 
@@ -431,8 +462,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onPause();
 
-        // rimuove il ChildEventListener al nodo per poter processare i messaggi in ingresso
-        incomingMessages.removeEventListener(newCommandsToProcess);
+        // rimuove i ChildEventListener dai nodi del db di Firebase
+        incomingMessagesRef.removeEventListener(newCommandsToProcess);
+        lastHeartBeatTimeNodeRef.removeEventListener(updateLastHeartBeatTime);
 
         // rimuove l'OnPageChangeListener al ViewPager
         if (viewPager != null)
@@ -441,7 +473,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         // rimuove gli eventuali task ritardati sull'handler
         handler.removeCallbacks(manageLastHeartBeatTime);
 
-        handler=null;
+        handler = null;
 
     }
 
@@ -599,6 +631,15 @@ public class DeviceViewActivity extends AppCompatActivity {
                 deleteMsg = true;
 
                 break;
+
+            case "REMOTE_CURRENT_TIME":
+
+                // aggiorna il valore dell'ora corrente del dispositivo remoto, per tener conto dell'errore nel calcolo dell'heartbeat time
+                removeDeviceCurrentTimeOffset = System.currentTimeMillis() - Long.parseLong(inMsg.getBody());
+
+                break;
+
+
 
         }
 
@@ -873,8 +914,8 @@ public class DeviceViewActivity extends AppCompatActivity {
          */
         List<Fragment> result = new ArrayList<>();
 
-        int deviceInfoFragmentIndex=0;
-        int firstCameraFragmentIndex=0;
+        int deviceInfoFragmentIndex = 0;
+        int firstCameraFragmentIndex = 0;
 
         int count = 0;
 
@@ -901,19 +942,19 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         for (int i = 0; i < nOfAvailableCameras; i++) {
             result.add(cameraViewFragment[i]);
-            if(i==0){
-                firstCameraFragmentIndex=count;
+            if (i == 0) {
+                firstCameraFragmentIndex = count;
             }
             count++;
         }
 
-        switch(action){
+        switch (action) {
             case "monitor":
-                homeFragment=firstCameraFragmentIndex;
-                 break;
+                homeFragment = firstCameraFragmentIndex;
+                break;
 
             default:
-                homeFragment=deviceInfoFragmentIndex;
+                homeFragment = deviceInfoFragmentIndex;
 
         }
 
@@ -979,25 +1020,25 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     private void initFragments() {
-                    /* inizializza i fragment */
+        /* inizializza i fragment */
 
         boolean createDeviceInfoFragment;
 
-        switch(action){
+        switch (action) {
 
             case "monitor":
-                createDeviceInfoFragment=false;
+                createDeviceInfoFragment = false;
                 break;
 
             default:
-                createDeviceInfoFragment=true;
+                createDeviceInfoFragment = true;
 
         }
 
         //
         // DeviceInfoFragment
 
-        if(createDeviceInfoFragment) {
+        if (createDeviceInfoFragment) {
             deviceInfoFragment = new DeviceInfoFragment();
             deviceInfoFragment.parent = this;
         }

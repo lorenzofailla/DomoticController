@@ -33,6 +33,8 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
@@ -52,18 +54,24 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     private DatabaseReference eventsNode;
     private String groupName;
 
+    private String[] eventKeys;
+
     public static class EventsHolder extends RecyclerView.ViewHolder {
 
         public TextView eventDateTextView;
         public TextView eventMonitorNameTextView;
         public ImageButton viewEventButton;
+        public ImageButton deleteEventButton;
         public ProgressBar progressBar;
+        public TextView eventCameraNameTextView;
 
         public EventsHolder(View v) {
             super(v);
 
             eventDateTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDATETIME);
-            eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTMONITORNAME);
+            eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDEVICENAME);
+            eventCameraNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTCAMERANAME);
+            deleteEventButton = v.findViewById(R.id.BTN___VSEVENTROW___DELETEEVENT);
             viewEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___REQUESTEVENT);
             progressBar = v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
 
@@ -76,6 +84,26 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         public void onDataChange(DataSnapshot dataSnapshot) {
 
             refreshAdapter();
+
+            /*
+            definisce l'array delle keys dei record contenuti nel dataSnapshot
+             */
+
+            if (dataSnapshot != null) {
+
+                List<String> keysList = new ArrayList<String>();
+
+                for (DataSnapshot item : dataSnapshot.getChildren()) {
+                    keysList.add(item.getKey());
+                }
+
+                eventKeys = keysList.toArray(new String[0]);
+
+            } else {
+
+                eventKeys = null;
+
+            }
 
         }
 
@@ -150,13 +178,15 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                 eventsNode) {
 
             @Override
-            protected void populateViewHolder(final EventsHolder holder, final VSEvent event, int position) {
+            protected void populateViewHolder(final EventsHolder holder, final VSEvent event, final int position) {
 
                 holder.eventDateTextView.setText(String.format("%s %s", event.getDate(), event.getTime()));
                 holder.eventMonitorNameTextView.setText(event.getDevice());
+                holder.eventCameraNameTextView.setText(event.getCameraName());
 
                 // crea il File relativo alla posizione di download locale sul dispositivo
-                final File videoFile = new File(downloadDirectoryRoot, String.format("%s/%d/%s", event.getDevice(), event.getThreadID(), event.getVideoLink()));
+                final File videoFile = new File(downloadDirectoryRoot, String.format("%s/%s/%s", event.getDevice(), event.getThreadID(), event.getVideoLink()));
+                final String remoteLocation = String.format("Groups/%s/Devices/%s/VideoSurveillance/Events/%s/%s", groupName, event.getDevice(), event.getThreadID(), event.getVideoLink());
 
                 // controlla se il File creato esiste
                 if (videoFile.exists()) {
@@ -191,15 +221,25 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                         @Override
                         public void onClick(View view) {
 
-                            String localLocation = String.format("Domotic/VideoSurveillance/DownloadedVideos/%s/%d", event.getDevice(), event.getThreadID());
-                            String remoteLocation = String.format("Groups/%s/Devices/%s/VideoSurveillance/Events/%d/%s", groupName, event.getDevice(), event.getThreadID(), event.getVideoLink());
+                            String localLocation = String.format("Domotic/VideoSurveillance/DownloadedVideos/%s/%s", event.getDevice(), event.getThreadID());
+
                             new DownloadTask(remoteLocation, localLocation, holder.progressBar).execute();
 
                         }
 
                     });
+
                 }
 
+                holder.deleteEventButton.setOnClickListener(new View.OnClickListener() {
+
+                    public void onClick(View view) {
+
+                        deleteEvent(videoFile, remoteLocation, eventKeys[position]);
+
+                    }
+
+                });
 
             }
 
@@ -234,30 +274,55 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     }
 
+    private void deleteEvent(File localFile, String remoteLocation, String eventKey) {
+
+        /*
+        elimina, se esiste, il file locale
+         */
+
+        if (localFile.exists()) {
+            localFile.delete();
+        }
+
+        /*
+        elimina, se esiste, il file remoto
+         */
+
+        // ottiene un riferimento alla posizione di storage sul cloud
+        StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(String.format("gs://domotic-28a5e.appspot.com/%s", remoteLocation));
+        storageRef.delete();
+
+        /*
+        elimina il nodo del database
+         */
+        eventsNode.child(eventKey).removeValue();
+
+    }
+
     private class DownloadTask extends AsyncTask<Void, Float, Void> {
 
         private String localPath;
         private String remotePath;
         private ProgressBar progressBar;
 
-        public DownloadTask(String remotePath, String localPath, ProgressBar progressBar){
-            this.localPath=localPath;
-            this.remotePath=remotePath;
-            this.progressBar=progressBar;
+        public DownloadTask(String remotePath, String localPath, ProgressBar progressBar) {
+            this.localPath = localPath;
+            this.remotePath = remotePath;
+            this.progressBar = progressBar;
 
             progressBar.setIndeterminate(true);
             progressBar.setVisibility(View.VISIBLE);
         }
 
-        protected Void doInBackground(Void... param){
+        protected Void doInBackground(Void... param) {
 
             // ottiene un riferimento alla posizione di storage sul cloud
             StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(String.format("gs://domotic-28a5e.appspot.com/%s", remotePath));
 
             // inizializza la directory locale per il download, se la directory non esiste la crea
             File downloadDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), localPath);
-            if (!downloadDirectory.exists()){
-                Boolean b= downloadDirectory.mkdirs();
+            if (!downloadDirectory.exists()) {
+                Boolean b = downloadDirectory.mkdirs();
                 Log.i(TAG, b.toString());
             }
 
@@ -288,10 +353,10 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                             // scaricamento in corso
 
                             if (progressBar.isIndeterminate())
-                                    progressBar.setIndeterminate(false);
+                                progressBar.setIndeterminate(false);
 
                             // calcola la percentuale dello scaricamento
-                            int progress = (int) (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
+                            int progress = (int) (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
 
                             // aggiorna la progressBar di conseguenza
                             progressBar.setProgress(progress);

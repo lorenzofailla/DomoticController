@@ -10,8 +10,9 @@ public class VSEvent {
     private String Date;
     private String Time;
     private String Device;
-    private long ThreadID;
+    private String ThreadID;
     private String VideoLink;
+    private String CameraName;
 
     // empty constructor
     public VSEvent() {
@@ -33,11 +34,11 @@ public class VSEvent {
         return Device;
     }
 
-    public long getThreadID() {
+    public String getThreadID() {
         return ThreadID;
     }
 
-    public String getVideoLink() {
-        return VideoLink;
-    }
+    public String getVideoLink() {        return VideoLink;    }
+
+    public String getCameraName() {return CameraName; }
 }

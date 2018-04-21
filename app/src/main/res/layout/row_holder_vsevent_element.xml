@@ -9,6 +9,7 @@
         android:id="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
         android:layout_width="96dp"
         android:layout_height="72dp"
+        android:layout_centerVertical="true"
         android:src="@drawable/dummy_movie" />
 
     <ImageButton
@@ -19,6 +20,15 @@
         android:contentDescription=""
         android:src="@drawable/cloud_download" />
 
+    <ImageButton
+        android:id="@+id/BTN___VSEVENTROW___DELETEEVENT"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_toRightOf="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
+        android:layout_below="@+id/BTN___VSEVENTROW___REQUESTEVENT"
+        android:contentDescription=""
+        android:src="@drawable/delete" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,17 +38,27 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/TXV___VSEVENTROW___EVENTCAMERANAME"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+            android:padding="2dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+        <TextView
             android:id="@+id/TXV___VSEVENTROW___EVENTDATETIME"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+            android:padding="2dp"
             android:textAppearance="@style/TextAppearance.AppCompat" />
 
         <TextView
-            android:id="@+id/TXV___VSEVENTROW___EVENTMONITORNAME"
+            android:id="@+id/TXV___VSEVENTROW___EVENTDEVICENAME"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+            android:padding="2dp"
             android:textAppearance="@style/TextAppearance.AppCompat" />
 
 
@@ -49,10 +69,9 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/IVW___VSEVENTROW___EVENTPREVIEW"
+        android:layout_below="@+id/BTN___VSEVENTROW___DELETEEVENT"
         android:layout_centerHorizontal="true"
         android:layout_toRightOf="@id/IVW___VSEVENTROW___EVENTPREVIEW"
         android:visibility="gone"/>
-
 
 </RelativeLayout>
