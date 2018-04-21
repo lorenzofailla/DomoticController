@@ -210,7 +210,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
                 String cameraStatus=camera.getMoDetStatus();
                 int resId;
                 switch (cameraStatus){
-                    case "PAUSE":
+                    case "PAUSE": case "NOT RUNNING":
                         resId=R.drawable.pause;
                         break;
 

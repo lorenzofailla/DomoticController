@@ -3,6 +3,8 @@ package com.apps.lore_f.domoticcontroller;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,11 +13,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -33,10 +37,14 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.zip.DataFormatException;
 
 import static android.content.ContentValues.TAG;
+import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
 public class VideoSurveillanceEventsListFragment extends Fragment {
 
@@ -64,6 +72,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         public ImageButton deleteEventButton;
         public ProgressBar progressBar;
         public TextView eventCameraNameTextView;
+        public ImageView eventPreviewImage;
 
         public EventsHolder(View v) {
             super(v);
@@ -74,6 +83,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             deleteEventButton = v.findViewById(R.id.BTN___VSEVENTROW___DELETEEVENT);
             viewEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___REQUESTEVENT);
             progressBar = v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
+            eventPreviewImage = v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
 
         }
 
@@ -240,6 +250,35 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                     }
 
                 });
+
+                // definisce l'immagine dell'evento
+                String eventImageData = event.getEventPictureData();
+                if(eventImageData!=null) {
+
+                        try {
+
+                            // recupera i dati dell'immagine
+                            byte[] imageData = decompress(Base64.decode(eventImageData, Base64.DEFAULT));
+                            Bitmap shotImage = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+
+                            // adatta le dimensioni dell'immagine a quelle disponibili su schermo
+                            holder.eventPreviewImage.setImageBitmap(shotImage);
+
+                        } catch (IOException | DataFormatException e){
+
+                            Log.d(TAG, e.getMessage());
+                            holder.eventPreviewImage.setImageResource(R.drawable.broken);
+
+                        }
+
+
+
+                } else {
+
+                    holder.eventPreviewImage.setImageResource(R.drawable.ic_image_black_24dp);
+
+                }
+
 
             }
 

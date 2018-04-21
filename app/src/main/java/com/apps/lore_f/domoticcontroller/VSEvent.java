@@ -13,6 +13,7 @@ public class VSEvent {
     private String ThreadID;
     private String VideoLink;
     private String CameraName;
+    private String eventPictureData;
 
     // empty constructor
     public VSEvent() {
@@ -41,4 +42,6 @@ public class VSEvent {
     public String getVideoLink() {        return VideoLink;    }
 
     public String getCameraName() {return CameraName; }
+
+    public String getEventPictureData() {return eventPictureData; }
 }
