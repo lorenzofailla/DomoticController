@@ -224,8 +224,12 @@ public class DeviceViewActivity extends AppCompatActivity {
             //
             // aggiorna il valore di lastHeartBeatTime
             try {
+                Log.i(TAG,"lastHeartBeatTime: " + dataSnapshot.toString());
                 lastHeartBeatTime = dataSnapshot.getValue(long.class);
             } catch (NullPointerException e) {
+                Log.i(TAG,"lastHeartBeatTime: failed to read datasnapshot");
+
+
             }
 
         }
@@ -438,8 +442,8 @@ public class DeviceViewActivity extends AppCompatActivity {
                 .append("/Groups/")
                 .append(groupName)
                 .append("/Devices/")
-                .append(thisDevice)
-                .append("/LastHeartBeatTime")
+                .append(remoteDeviceName)
+                .append("/lastHeartBeatTime")
                 .toString();
 
         incomingMessagesRef = firebaseDatabase.getReference(incomingMessagesNode);
@@ -650,8 +654,11 @@ public class DeviceViewActivity extends AppCompatActivity {
             case "REMOTE_CURRENT_TIME":
 
                 // aggiorna il valore dell'ora corrente del dispositivo remoto, per tener conto dell'errore nel calcolo dell'heartbeat time
-                remoteDeviceCurrentTimeOffset = System.currentTimeMillis() - Long.parseLong(inMsg.getBody());
+                long now = System.currentTimeMillis();
+                long remote = Long.parseLong(inMsg.getBody());
 
+                remoteDeviceCurrentTimeOffset = now - remote;
+                deleteMsg = true;
                 break;
 
 
