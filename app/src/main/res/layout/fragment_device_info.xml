@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/TXV___DEVICEVIEW___FREEDISKSPACE_VALUE"
-            android:text="@string/DEVICEVIEW_LABEL_FREE_DISK_SPACE"
+            android:text="@string/DEVICEVIEW_LABEL_PING_TIME"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
         <TextView
@@ -58,11 +58,28 @@
             android:layout_below="@+id/TXV___DEVICEVIEW___RESPONSETIME_LABEL"
             android:text="" />
 
+        <TextView
+            android:id="@+id/TXV___DEVICEVIEW___LASTHEARTBEATTIME_LABEL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/TXV___DEVICEVIEW___RESPONSETIME_VALUE"
+            android:text="@string/DEVICEVIEW_LABEL_LASTHEARTBEAT_TIME"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+        <TextView
+            android:id="@+id/TXV___DEVICEVIEW___LASTHEARTBEATTIME_VALUE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/TXV___DEVICEVIEW___LASTHEARTBEATTIME_LABEL"
+            android:text="" />
+
         <LinearLayout
             android:id="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/TXV___DEVICEVIEW___RESPONSETIME_VALUE"
+            android:layout_below="@+id/TXV___DEVICEVIEW___LASTHEARTBEATTIME_VALUE"
             android:orientation="horizontal">
 
             <ImageButton

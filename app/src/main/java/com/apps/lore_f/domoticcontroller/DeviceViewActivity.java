@@ -63,7 +63,8 @@ public class DeviceViewActivity extends AppCompatActivity {
     private long timeDifferenceNormal = (long) (1.5 * 60000); // ms
     private long timeDifferenceAlarm = (long) (2 * 60000);
     private long timeDifferenceCritical = (long) (2.5 * 60000);
-    private long removeDeviceCurrentTimeOffset;
+    private long remoteDeviceCurrentTimeOffset;
+    private long pingStartTime;
 
     private long timeDifferenceCheckInterval = 5000L; // ms
 
@@ -188,7 +189,9 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void run() {
 
-            long timeDifference = System.currentTimeMillis() - lastHeartBeatTime -(System.currentTimeMillis()- removeDeviceCurrentTimeOffset);
+            long timeDifference = System.currentTimeMillis() -remoteDeviceCurrentTimeOffset- lastHeartBeatTime;
+            Log.i(TAG,"Time Difference: "+timeDifference);
+
             int labelColor;
 
             if (timeDifference <= timeDifferenceNormal) {
@@ -200,6 +203,14 @@ public class DeviceViewActivity extends AppCompatActivity {
             }
 
             //findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME).setBackgroundColor(labelColor);
+
+            // modifica il l'aspetto del fragment
+            if (deviceInfoFragment != null) {
+
+                deviceInfoFragment.setLastHeartBeat(String.format("%d ms ago.", timeDifference));
+                if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
+
+            }
 
             handler.postDelayed(this, timeDifferenceCheckInterval);
 
@@ -378,6 +389,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void requestDeviceInfo() {
 
+        pingStartTime=System.currentTimeMillis();
+
         // invia al dispositivo remoto il comando per avere l'uptime
         sendCommandToDevice(
                 new Message(
@@ -502,7 +515,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 // modifica il l'aspetto del fragment
                 if (deviceInfoFragment != null) {
+
                     deviceInfoFragment.upTime = inMsg.getBody().replace("\n", "");
+                    deviceInfoFragment.setPingTime(String.format("%d ms", System.currentTimeMillis()-pingStartTime));
 
                     if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
 
@@ -635,7 +650,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             case "REMOTE_CURRENT_TIME":
 
                 // aggiorna il valore dell'ora corrente del dispositivo remoto, per tener conto dell'errore nel calcolo dell'heartbeat time
-                removeDeviceCurrentTimeOffset = System.currentTimeMillis() - Long.parseLong(inMsg.getBody());
+                remoteDeviceCurrentTimeOffset = System.currentTimeMillis() - Long.parseLong(inMsg.getBody());
 
                 break;
 

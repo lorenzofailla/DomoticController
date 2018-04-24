@@ -6,9 +6,6 @@
     <string name="data_file_key">com.apps.lore_f.domoticcontroller.DATA_FILE_KEY</string>
     <string name="data_group_name">___group_name</string>
 
-
-
-
     <string name="EMPTY"></string>
     <string name="GENERIC_PLACEHOLDER_WAITING">[waiting data...]</string>
 
@@ -72,6 +69,8 @@
     <string name="DEVICEVIEW_LABEL_AVAILABLESERVICES">Available services:</string>
     <string name="DEVICEVIEW_LABEL_UPTIME_REPLY">\"uptime\" reply:</string>
     <string name="DEVICEVIEW_LABEL_FREE_DISK_SPACE">Free disk space:</string>
+    <string name="DEVICEVIEW_LABEL_PING_TIME">Ping time:</string>
+    <string name="DEVICEVIEW_LABEL_LASTHEARTBEAT_TIME">Last heartbeat:</string>
     <string name="DEVICEVIEW_LABEL_DEVICE_OPERATIONS">Device Operations:</string>
     <string name="DEVICEVIEW_REFRESHING_DEVICE_CONNECTION">Connecting to device...</string>
 

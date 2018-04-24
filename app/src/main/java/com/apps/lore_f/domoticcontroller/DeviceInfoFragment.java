@@ -27,6 +27,17 @@ public class DeviceInfoFragment extends Fragment {
 
     public String upTime;
     public String freeSpace;
+    private String pingTime;
+
+    public void setPingTime(String value){
+        pingTime=value;
+    }
+
+    private String lastHeartBeat;
+
+    public void setLastHeartBeat(String value){
+        lastHeartBeat=value;
+    }
 
     public boolean viewCreated = false;
     private View fragmentView;
@@ -175,11 +186,17 @@ public class DeviceInfoFragment extends Fragment {
 
     public void updateView(){
 
-        TextView upTimeReplyTXV = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___UPTIME_VALUE);
+        TextView upTimeReplyTXV = fragmentView.findViewById(R.id.TXV___DEVICEVIEW___UPTIME_VALUE);
         upTimeReplyTXV.setText(upTime);
 
-        TextView freeSpaceTXV = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___FREEDISKSPACE_VALUE);
+        TextView freeSpaceTXV =  fragmentView.findViewById(R.id.TXV___DEVICEVIEW___FREEDISKSPACE_VALUE);
         freeSpaceTXV.setText(freeSpace);
+
+        TextView pingTimeTextView = fragmentView.findViewById(R.id.TXV___DEVICEVIEW___RESPONSETIME_VALUE);
+        pingTimeTextView.setText(pingTime);
+
+        TextView lastHeartBeatTextView = fragmentView.findViewById(R.id.TXV___DEVICEVIEW___LASTHEARTBEATTIME_VALUE);
+        lastHeartBeatTextView.setText(lastHeartBeat);
 
     }
 

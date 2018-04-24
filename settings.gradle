@@ -1,1 +1,1 @@
-include ':app', ':generalutilitieslibrary'
+include ':app', ':generalutilitieslibrary', ':videostreamer'
