@@ -48,8 +48,6 @@
                 android:layout_height="50dp"
               android:src="@drawable/videocam" />
 
-
-
         </LinearLayout>
 
         <ImageView

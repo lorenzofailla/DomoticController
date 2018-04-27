@@ -3,4 +3,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="std_event_preview_thumbnail_width">96dp</dimen>
+    <dimen name="std_event_preview_thumbnail_height">72dp</dimen>
+
 </resources>

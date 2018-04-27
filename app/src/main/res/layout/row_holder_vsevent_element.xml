@@ -1,77 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/RLA___VSEVENTROW___EVENT"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-
-    <ImageView
-        android:id="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
-        android:layout_width="96dp"
-        android:layout_height="72dp"
-        android:layout_centerVertical="true"
-        android:src="@drawable/dummy_movie" />
-
-    <ImageButton
-        android:id="@+id/BTN___VSEVENTROW___REQUESTEVENT"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_toRightOf="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
-        android:contentDescription=""
-        android:src="@drawable/cloud_download" />
-
-    <ImageButton
-        android:id="@+id/BTN___VSEVENTROW___DELETEEVENT"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_toRightOf="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
-        android:layout_below="@+id/BTN___VSEVENTROW___REQUESTEVENT"
-        android:contentDescription=""
-        android:src="@drawable/delete" />
-
     <LinearLayout
+        android:id="@+id/LLO___VSEVENTROW___EVENT"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:orientation="horizontal"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/BTN___VSEVENTROW___REQUESTEVENT"
-        android:orientation="vertical">
+        >
 
-        <TextView
-            android:id="@+id/TXV___VSEVENTROW___EVENTCAMERANAME"
-            android:layout_width="wrap_content"
+        <ImageView
+            android:id="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
+            android:layout_width="96dp"
+            android:layout_height="72dp"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:baselineAlignBottom="false"
+            android:src="@drawable/dummy_movie" />
+
+    <RelativeLayout
+        android:id="@+id/RLA___VSEVENTROW___EVENTDATA"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
+        android:visibility="visible">
+
+        <ImageButton
+            android:id="@+id/BTN___VSEVENTROW___REQUESTEVENT"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/cloud_download" />
+
+        <ImageButton
+            android:id="@+id/BTN___VSEVENTROW___DELETEEVENT"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_below="@+id/BTN___VSEVENTROW___REQUESTEVENT"
+            android:contentDescription=""
+            android:src="@drawable/delete" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-            android:padding="2dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/BTN___VSEVENTROW___REQUESTEVENT"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/TXV___VSEVENTROW___EVENTDATETIME"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/TXV___VSEVENTROW___EVENTCAMERANAME"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+            <TextView
+                android:id="@+id/TXV___VSEVENTROW___EVENTDATETIME"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+                android:textAppearance="@style/TextAppearance.AppCompat" />
+
+            <TextView
+                android:id="@+id/TXV___VSEVENTROW___EVENTDEVICENAME"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+                android:textAppearance="@style/TextAppearance.AppCompat" />
+
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/PBR___VSEVENTROW___DOWNLOADPROGRESS"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-            android:padding="2dp"
-            android:textAppearance="@style/TextAppearance.AppCompat" />
+            android:layout_below="@+id/BTN___VSEVENTROW___DELETEEVENT"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/TXV___VSEVENTROW___EVENTDEVICENAME"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-            android:padding="2dp"
-            android:textAppearance="@style/TextAppearance.AppCompat" />
-
+    </RelativeLayout>
 
     </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/PBR___VSEVENTROW___DOWNLOADPROGRESS"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/BTN___VSEVENTROW___DELETEEVENT"
-        android:layout_centerHorizontal="true"
-        android:layout_toRightOf="@id/IVW___VSEVENTROW___EVENTPREVIEW"
-        android:visibility="gone"/>
 
 </RelativeLayout>

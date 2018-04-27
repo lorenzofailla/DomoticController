@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,11 +18,14 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
+
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -50,6 +55,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     public boolean viewCreated = false;
 
+    private final static int BG_COLOR_SELECTED=Color.argb(64, 0, 0, 127);
+
     private View fragmentview;
 
     private LinearLayoutManager linearLayoutManager;
@@ -64,6 +71,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     private String[] eventKeys;
 
+    private int selectedPosition = -1;
+
     public static class EventsHolder extends RecyclerView.ViewHolder {
 
         public TextView eventDateTextView;
@@ -73,6 +82,9 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         public ProgressBar progressBar;
         public TextView eventCameraNameTextView;
         public ImageView eventPreviewImage;
+
+        public RelativeLayout relativeLayout;
+        public RelativeLayout eventData;
 
         public EventsHolder(View v) {
             super(v);
@@ -85,6 +97,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             progressBar = v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
             eventPreviewImage = v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
 
+            relativeLayout = v.findViewById(R.id.RLA___VSEVENTROW___EVENT);
+            eventData = v.findViewById(R.id.RLA___VSEVENTROW___EVENTDATA);
         }
 
     }
@@ -190,6 +204,11 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             @Override
             protected void populateViewHolder(final EventsHolder holder, final VSEvent event, final int position) {
 
+                if(position==selectedPosition) {
+
+                    holder.relativeLayout.setBackgroundColor(BG_COLOR_SELECTED);
+                }
+
                 holder.eventDateTextView.setText(String.format("%s %s", event.getDate(), event.getTime()));
                 holder.eventMonitorNameTextView.setText(event.getDevice());
                 holder.eventCameraNameTextView.setText(event.getCameraName());
@@ -216,6 +235,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                             intent.setDataAndType(Uri.parse(videoFile.getAbsolutePath()), "video/*");
                             startActivity(intent);
 
+                            selectedPosition=position;
+
                         }
                     });
 
@@ -235,6 +256,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                             new DownloadTask(remoteLocation, localLocation, holder.progressBar).execute();
 
+                            selectedPosition=position;
+
                         }
 
                     });
@@ -246,6 +269,10 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                     public void onClick(View view) {
 
                         deleteEvent(videoFile, remoteLocation, eventKeys[position]);
+
+                        if(position==selectedPosition) {
+                            selectedPosition = -1;
+                        }
 
                     }
 
@@ -264,14 +291,39 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                             // adatta le dimensioni dell'immagine a quelle disponibili su schermo
                             holder.eventPreviewImage.setImageBitmap(shotImage);
 
+                            holder.eventPreviewImage.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+
+                                    ViewGroup.LayoutParams imgLayoutParams = holder.eventPreviewImage.getLayoutParams();
+
+                                    if(holder.eventData.getVisibility()==View.VISIBLE){
+                                        holder.eventData.setVisibility(View.GONE);
+
+                                        LinearLayout imgParent = (LinearLayout) holder.eventPreviewImage.getParent();
+                                        double imgRatio = 1.0*imgLayoutParams.height/imgLayoutParams.width;
+
+                                        imgLayoutParams.width=imgParent.getWidth();
+                                        imgLayoutParams.height=(int) (imgParent.getWidth()*imgRatio);
+
+                                    } else {
+
+                                        holder.eventData.setVisibility(View.VISIBLE);
+
+                                        imgLayoutParams.width=(int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_width);
+                                        imgLayoutParams.height=(int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_height);
+                                    }
+
+                                }
+
+                            });
+
                         } catch (IOException | DataFormatException e){
 
                             Log.d(TAG, e.getMessage());
                             holder.eventPreviewImage.setImageResource(R.drawable.broken);
 
                         }
-
-
 
                 } else {
 
@@ -406,6 +458,11 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
             return null;
         }
+
+    }
+
+    private void markAsRead(int position){
+
     }
 
 
