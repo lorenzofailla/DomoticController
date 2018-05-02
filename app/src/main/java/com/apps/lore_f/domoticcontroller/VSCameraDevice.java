@@ -11,6 +11,8 @@ public class VSCameraDevice {
     private String ThreadID;
     private String OwnerDevice;
     private String MoDetStatus;
+    private int StreamFPS;
+    private String CameraName;
 
     private HashMap<String, Object> LastShotData;
 
@@ -29,6 +31,10 @@ public class VSCameraDevice {
     public String getMoDetStatus() {
         return MoDetStatus;
     }
+
+    public int getStreamFPS() {return StreamFPS;}
+
+    public String getCameraName() {return CameraName;}
 
     public HashMap<String, Object> getLastShotData() { return LastShotData;}
 

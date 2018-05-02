@@ -130,7 +130,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-
         @Override
         public Fragment getItem(int i) {
 

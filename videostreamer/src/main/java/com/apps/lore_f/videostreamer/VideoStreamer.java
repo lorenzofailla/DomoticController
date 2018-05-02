@@ -1,5 +1,6 @@
 package com.apps.lore_f.videostreamer;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import net.sf.jipcam.axis.MjpegFrame;
@@ -21,9 +22,9 @@ import java.util.List;
 public class VideoStreamer {
 
     private final static String TAG = "VideoStreamer";
-    private final static int DEFAULT_MAX_BUFFER_TIME=5;
-    private final static int DEFAULT_MIN_BUFFER_TIME=1;
-    private final static double DEFAULT_FPS=25.0;
+    private final static int DEFAULT_MAX_BUFFER_TIME = 5;
+    private final static int DEFAULT_MIN_BUFFER_TIME = 1;
+    private final static double DEFAULT_FPS = 25.0;
 
     private PipedOutputStream out = new PipedOutputStream();
     private BufferedOutputStream outBuffer = new BufferedOutputStream(out);
@@ -32,42 +33,46 @@ public class VideoStreamer {
     private BufferedInputStream inBuffer = new BufferedInputStream(in);
 
     private boolean running = true;
-    private boolean streaming=false;
+    private boolean streaming = false;
 
     /* interface */
-    interface VideoStreamerListener{
+    public interface VideoStreamerListener {
         void onBufferOk();
+
         void onBufferKo();
+
         void onFrame(byte[] data);
 
     }
 
     private VideoStreamerListener localListener;
 
-    public void setVideoStreamerListener(VideoStreamerListener l){
-        localListener=l;
+    public void setVideoStreamerListener(VideoStreamerListener l) {
+        localListener = l;
     }
 
-    public void removeVideoStreamerListener(VideoStreamerListener l){
-        localListener=null;
+    public void removeVideoStreamerListener(VideoStreamerListener l) {
+        localListener = null;
     }
 
+    private int maxBufferTime = DEFAULT_MAX_BUFFER_TIME;
 
-    private int maxBufferTime=DEFAULT_MAX_BUFFER_TIME;
-    public void setMaxBufferTime(int value){
-        maxBufferTime=value;
+    public void setMaxBufferTime(int value) {
+        maxBufferTime = value;
         reCalcFrameBufferSize();
     }
 
-    private int minBufferTime=DEFAULT_MIN_BUFFER_TIME;
-    public void setMinBufferTime(int value){
-        minBufferTime=value;
+    private int minBufferTime = DEFAULT_MIN_BUFFER_TIME;
+
+    public void setMinBufferTime(int value) {
+        minBufferTime = value;
         reCalcFrameBufferSize();
     }
 
-    private double streamFPS=DEFAULT_FPS;
-    public void setStreamFPS(double value){
-        streamFPS=value;
+    private double streamFPS = DEFAULT_FPS;
+
+    public void setStreamFPS(double value) {
+        streamFPS = value;
         reCalcFrameBufferSize();
     }
 
@@ -76,107 +81,83 @@ public class VideoStreamer {
 
     private List<byte[]> frames = new ArrayList<>();
 
-    private Thread frameFeeder = new Thread(){
+    private class MainAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
-        public void run(){
+        protected Void doInBackground(Void... voids) {
 
-            try {
+            long lastFrameTime = System.currentTimeMillis();
+            long timeBetweenFrames = (int) (1000 / streamFPS);
 
-                MjpegInputStream input = new MjpegInputStream(inBuffer);
+            MjpegInputStream input = new MjpegInputStream(inBuffer);
 
-                while(running){
-
-                    /*
-                    This is the main thread cycle
-                     */
-
-                    /*
+            while (running) {
+                
+                /*
                     Attempts to read a frame from the MJpeg stream
                      */
-                    MjpegFrame frame = input.readMjpegFrame();
-                    if(frame!=null){
+                MjpegFrame frame = null;
+                try {
+                    frame = input.readMjpegFrame();
+                } catch (IOException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+                if (frame != null) {
 
                         /*
                         A new frame has been read. Adds it to the frame buffer list
                         */
 
-                        frames.add(frame.getJpegBytes());
+                    frames.add(frame.getJpegBytes());
+                    Log.d(TAG, String.format("new frame added. total frames:%d, buffer to go:%d", frames.size(), maxFramesBuffer));
 
                         /*
                         if streaming is not active, checks if there are the conditions to resume the streaming
                         */
 
-                        if(!streaming && frames.size()>maxFramesBuffer){
+                    if (!streaming && frames.size() > maxFramesBuffer) {
 
-                            if(localListener!=null)
-                                localListener.onBufferOk();
+                        if (localListener != null)
+                            localListener.onBufferOk();
 
-                            streaming=true;
-
-                        }
+                        streaming = true;
 
                     }
 
                 }
 
-            } catch (IOException e) {
 
-                running = false;
-                Log.e(TAG, e.getMessage());
-
-            }
-
-        }
-
-    };
-
-    private Thread frameStreamer = new Thread(){
-
-        @Override
-        public void run(){
-
-            long lastFrameTime = System.currentTimeMillis();
-            long timeBetweenFrames = (int) (1000/streamFPS);
-
-            while(running){
-
-                while(streaming){
-
-
-                    if (lastFrameTime-System.currentTimeMillis()<timeBetweenFrames){
+                if (streaming && (System.currentTimeMillis() - lastFrameTime > timeBetweenFrames)) {
 
                         /*
-                        waits
+                        serve the next frame
                          */
 
-                    } else {
+                    if (localListener != null) {
+                        localListener.onFrame(frames.get(0));
+                        Log.d(TAG, String.format("new frame served. total frames:%d, buffer to go:%d", frames.size(), minFramesBuffer));
 
-                        if(localListener!=null){
-                            localListener.onFrame(frames.get(0));
-                        }
-
-                        frames.remove(0);
-                        lastFrameTime = System.currentTimeMillis();
 
                     }
 
-                    if(frames.size()<minFramesBuffer)
-                        streaming = false;
+                    frames.remove(0);
+                    lastFrameTime = System.currentTimeMillis();
 
                 }
 
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Log.e(TAG, e.getMessage());
+                if (frames.size() < minFramesBuffer) {
+
+                    streaming = false;
+                    if (localListener != null)
+                        localListener.onBufferKo();
                 }
 
             }
 
+            return null;
         }
-
-    };
+        
+    }
 
     /* constructor */
     public VideoStreamer() {
@@ -188,7 +169,7 @@ public class VideoStreamer {
         }
     }
 
-    public void feed(byte[] data){
+    public void feed(byte[] data) {
 
         /* attempts to write the data byte array into the main data buffer */
 
@@ -198,22 +179,27 @@ public class VideoStreamer {
 
         } catch (IOException e) {
 
-           Log.e(TAG, e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
 
     }
 
-    private void reCalcFrameBufferSize(){
+    private void reCalcFrameBufferSize() {
 
-        minFramesBuffer=(int) (minBufferTime*streamFPS);
-        maxFramesBuffer=(int) (maxBufferTime*streamFPS);
+        minFramesBuffer = (int) (minBufferTime * streamFPS);
+        maxFramesBuffer = (int) (maxBufferTime * streamFPS);
 
     }
 
-    public void start(){
+    public void start() {
 
-        frameFeeder.start();
-        frameStreamer.start();
+        new MainAsyncTask().execute();
+
+    }
+
+    public void stop() {
+
+        running=false;
 
     }
 

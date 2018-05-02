@@ -98,5 +98,9 @@
     <!-- fragment_videosurveillance_eventslist.xml -->
     <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_SELECT_EVENT">Select an event:</string>
 
+    <!-- fragment VSCameraViewerFragment -->
+    <string name="FGM_VSCameraViewerFragment_ProgressDialog_Buffering">Buffering...</string>
+
+
 
 </resources>
