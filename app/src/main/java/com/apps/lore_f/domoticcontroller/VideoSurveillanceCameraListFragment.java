@@ -97,7 +97,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_videosurveillance_cameralist, container, false);
 
-        camerasRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS);
+        camerasRecyclerView = view.findViewById(R.id.RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS);
 
         if (deviceName != null) {
 
@@ -143,7 +143,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
             @Override
             protected void populateViewHolder(CamerasHolder holder, final VSCameraDevice camera, int position) {
 
-                holder.cameraNameTXV.setText(camera.getThreadID());
+                holder.cameraNameTXV.setText(camera.getCameraName());
                 holder.cameraOwnerTXV.setText(camera.getOwnerDevice());
 
                 holder.imagePreviewIWV.setOnClickListener(new View.OnClickListener() {
@@ -156,7 +156,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
                         intent.putExtra("__HAS_DIRECTORY_NAVIGATION", false);
                         intent.putExtra("__HAS_WAKEONLAN", false);
                         intent.putExtra("__HAS_VIDEOSURVEILLANCE", true);
-                        intent.putExtra("__CAMERA_NAMES", camera.getThreadID());
+                        intent.putExtra("__CAMERA_NAMES", camera.getCameraName());
                         intent.putExtra("__CAMERA_IDS", camera.getThreadID());
                         intent.putExtra("__ACTION", "monitor");
 
@@ -210,11 +210,11 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
                 String cameraStatus=camera.getMoDetStatus();
                 int resId;
                 switch (cameraStatus){
-                    case "PAUSE": case "NOT RUNNING":
+                    case VideosurveillanceParameters.STATUS_PAUSED:
                         resId=R.drawable.pause;
                         break;
 
-                    case "RUNNING":
+                    case VideosurveillanceParameters.STATUS_RUNNING:
                         resId=R.drawable.run;
                         break;
 

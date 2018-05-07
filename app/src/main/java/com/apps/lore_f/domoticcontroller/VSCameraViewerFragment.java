@@ -15,8 +15,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.apps.lore_f.videostreamer.VideoStreamer;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,14 +27,10 @@ import java.io.IOException;
 import java.util.zip.DataFormatException;
 
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
-import static com.google.android.gms.internal.zzagz.runOnUiThread;
 
 public class VSCameraViewerFragment extends Fragment {
 
     private final static String TAG = "VSCameraViewerFragment";
-
-    private final static String STATUS_RUNNING = "ACTIVE";
-    private final static String STATUS_PAUSED = "PAUSE";
 
     public boolean viewCreated = false;
     private DeviceViewActivity parent;
@@ -64,148 +58,12 @@ public class VSCameraViewerFragment extends Fragment {
     private Bitmap shotImage;
 
     private View fragmentView;
-    private VideoStreamer videoStreamer;
 
     private boolean fullScreenMode = false;
 
     private ProgressDialog needToBuffer;
 
-    private ValueEventListener streamingFPSEventListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
 
-            if(dataSnapshot!=null) {
-                if (dataSnapshot.getKey().equals("StreamFPS")) {
-
-                /*
-                initialize a new VideoStreamer
-                 */
-
-                    videoStreamer = new VideoStreamer();
-                    int FPSValue = dataSnapshot.getValue(Integer.class);
-                    videoStreamer.setStreamFPS(FPSValue);
-
-                    videoStreamer.setVideoStreamerListener(videoStreamerListener);
-                    fragmentView.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTVIDEOSTREAM).setEnabled(true);
-
-                }
-
-            }
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {}
-    };
-
-    private VideoStreamer.VideoStreamerListener videoStreamerListener = new VideoStreamer.VideoStreamerListener() {
-        @Override
-        public void onBufferOk() {
-
-            /*
-            dismiss the progress bar
-             */
-            if(needToBuffer.isShowing())
-                needToBuffer.dismiss();
-
-        }
-
-        @Override
-        public void onBufferKo() {
-
-            /*
-            streaming needs to buffer
-            shows a progress bar
-             */
-
-            needToBuffer=new ProgressDialog(getContext());
-            needToBuffer.setMessage(getString(R.string.FGM_VSCameraViewerFragment_ProgressDialog_Buffering));
-            needToBuffer.show();
-
-        }
-
-        @Override
-        public void onFrame(final byte[] data) {
-
-            /*
-            Shows the frame image
-             */
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    shotView.setImageBitmap(BitmapFactory.decodeByteArray(data,0,data.length));
-
-                }
-            });
-
-
-        }
-    };
-
-    private ChildEventListener streamingDataEventListener = new ChildEventListener() {
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            if(videoStreamer!=null){
-                String data = dataSnapshot.getValue().toString();
-                try {
-                    videoStreamer.feed(decompress(Base64.decode(data, Base64.DEFAULT)));
-                } catch (IOException | DataFormatException e) {
-                    Log.e(TAG, e.getMessage());
-                }
-            }
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-
-    };
-
-    private ChildEventListener streamingNodeEventListener = new ChildEventListener() {
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-            Log.i(TAG, "End of video stream");
-
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -218,15 +76,6 @@ public class VSCameraViewerFragment extends Fragment {
                     break;
 
                 case R.id.BTN___VSCAMERAVIEW___REQUESTVIDEOSTREAM:
-                    requestStreamingStart();
-
-                    if(videoStreamer!=null){
-                        videoStreamer.start();
-                    }
-
-                    needToBuffer=new ProgressDialog(getContext());
-                    needToBuffer.setMessage(getString(R.string.FGM_VSCameraViewerFragment_ProgressDialog_Buffering));
-                    needToBuffer.show();
 
                     break;
 
@@ -348,16 +197,9 @@ public class VSCameraViewerFragment extends Fragment {
 
         shotNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LastShotData", parent.groupName,parent.remoteDeviceName,cameraID));
         statusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/MoDetStatus", parent.groupName,parent.remoteDeviceName,cameraID));
-        streamingFPSNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/StreamFPS", parent.groupName,parent.remoteDeviceName,cameraID));
-        streamingRootNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/StreamingData/%s", parent.groupName,parent.remoteDeviceName,cameraID,parent.thisDevice));
-        streamingDataNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/StreamingData/%s/DataSegments", parent.groupName,parent.remoteDeviceName,cameraID,parent.thisDevice));
-        streamingDataNodeOrdered = streamingDataNode.orderByKey();
 
         statusNode.addValueEventListener(deviceStatusEventListener);
         shotNode.addValueEventListener(lastShotEventListener);
-        streamingFPSNode.addValueEventListener(streamingFPSEventListener);
-        streamingRootNode.addChildEventListener(streamingNodeEventListener);
-        streamingDataNodeOrdered.addChildEventListener(streamingDataEventListener);
 
         /* store the view object in a global variable */
         fragmentView = view;
@@ -399,23 +241,12 @@ public class VSCameraViewerFragment extends Fragment {
 
         DatabaseReference shotNode;
         DatabaseReference statusNode;
-        DatabaseReference streamingFPSNode;
-        DatabaseReference streamingRootNode;
-        DatabaseReference streamingDataNode;
-        Query streamingDataNodeOrdered;
 
         shotNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LastShotData", parent.groupName,parent.remoteDeviceName,cameraID));
         statusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/MoDetStatus", parent.groupName,parent.remoteDeviceName,cameraID));
-        streamingFPSNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/StreamFPS", parent.groupName,parent.remoteDeviceName,cameraID));
-        streamingRootNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/StreamingData/%s", parent.groupName,parent.remoteDeviceName,cameraID,parent.thisDevice));
-        streamingDataNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/StreamingData/%s/DataSegments", parent.groupName,parent.remoteDeviceName,cameraID,parent.thisDevice));
-        streamingDataNodeOrdered = streamingDataNode.orderByKey();
 
         statusNode.removeEventListener(deviceStatusEventListener);
         shotNode.removeEventListener(lastShotEventListener);
-        streamingFPSNode.removeEventListener(streamingFPSEventListener);
-        streamingRootNode.removeEventListener(streamingNodeEventListener);
-        streamingDataNodeOrdered.removeEventListener(streamingDataEventListener);
 
     }
 
@@ -430,45 +261,6 @@ public class VSCameraViewerFragment extends Fragment {
         parent.sendCommandToDevice(
                 new Message("__request_shots",cameraID,parent.thisDevice)
         );
-    }
-
-    private byte[] getByteArray(DataSnapshot dataSn) {
-
-        int slots = Integer.parseInt(dataSn.child("slots").getValue().toString());
-        int bytesInLastSlot = Integer.parseInt(dataSn.child("bytesinlastslot").getValue().toString());
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-
-            byte[] bytes = new byte[65536];
-
-            for (int i = 1; i < slots + 1; i++) {
-
-                String data = dataSn.child("slotData").child("" + i).getValue().toString();
-                bytes = Base64.decode(data, Base64.DEFAULT);
-
-                if (i == slots) {
-
-                    outputStream.write(bytes, 0, bytesInLastSlot);
-
-                } else {
-
-                    outputStream.write(bytes);
-
-                }
-
-            }
-
-            outputStream.flush();
-            outputStream.close();
-
-            return outputStream.toByteArray();
-
-        } catch (IOException e) {
-
-        }
-        return null;
-
     }
 
     private void manageFullScreenMode() {
@@ -495,11 +287,11 @@ public class VSCameraViewerFragment extends Fragment {
 
         switch(cameraStatus){
 
-            case STATUS_PAUSED:
+            case VideosurveillanceParameters.STATUS_PAUSED:
                 resourceToShow = R.drawable.run;
                 break;
 
-            case STATUS_RUNNING:
+            case VideosurveillanceParameters.STATUS_RUNNING:
                 resourceToShow = R.drawable.pause;
                 break;
 
@@ -522,11 +314,11 @@ public class VSCameraViewerFragment extends Fragment {
 
         switch(cameraStatus){
 
-            case STATUS_PAUSED:
+            case VideosurveillanceParameters.STATUS_PAUSED:
                 commandHeader="__start_modet";
                 break;
 
-            case STATUS_RUNNING:
+            case VideosurveillanceParameters.STATUS_RUNNING:
                 commandHeader="__stop_modet";
                 break;
 
@@ -561,19 +353,6 @@ public class VSCameraViewerFragment extends Fragment {
 
         );
 
-
-    }
-
-    private void requestStreamingStart(){
-
-        parent.sendCommandToDevice(
-                new Message(
-                        "__start_cameravideostreaming",
-                        this.cameraID,
-                        parent.thisDevice
-                )
-
-        );
 
     }
 
