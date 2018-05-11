@@ -1,25 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.apps.lore_f.domoticcontroller.VideoSurveillanceEventsListFragment">
 
     <TextView
-        android:id="@+id/TXV___ZMEVENTVIEWERFRAGMENT___HEADER"
+        android:id="@+id/TXV___VSEVENTVIEWERFRAGMENT___HEADER"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ZoneMinder Event Viewer"
         android:paddingHorizontal="3dp"
         android:paddingVertical="3dp"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/LLA___VSEVENTVIEWERFRAGMENT___FILTERBUTTONS"
+        android:layout_below="@+id/TXV___VSEVENTVIEWERFRAGMENT___HEADER">
+
+        <ImageButton
+            android:id="@+id/BTN___VSEVENTVIEWERFRAGMENT___FILTER-ALL"
+            android:layout_width="@dimen/medium_button_width"
+            android:layout_height="@dimen/medium_button_height"
+            android:src="@drawable/no_filter"/>
+
+        <ImageButton
+            android:id="@+id/BTN___VSEVENTVIEWERFRAGMENT___FILTER-NEWONLY"
+            android:layout_width="@dimen/medium_button_width"
+            android:layout_height="@dimen/medium_button_height"
+            android:src="@drawable/new_item"/>
+
+    </LinearLayout>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/RWV___VSEVENTVIEWERFRAGMENT___EVENTS"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/TXV___ZMEVENTVIEWERFRAGMENT___HEADER"
+        android:layout_below="@+id/LLA___VSEVENTVIEWERFRAGMENT___FILTERBUTTONS"
         android:paddingHorizontal="3dp"
         android:paddingVertical="3dp"/>
 

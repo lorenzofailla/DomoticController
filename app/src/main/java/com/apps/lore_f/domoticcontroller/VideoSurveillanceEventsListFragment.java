@@ -1,6 +1,5 @@
 package com.apps.lore_f.domoticcontroller;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,6 +35,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
@@ -44,47 +45,74 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
 import static android.content.ContentValues.TAG;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
+import static apps.android.loref.GeneralUtilitiesLibrary.getTimeElapsed;
+import static apps.android.loref.GeneralUtilitiesLibrary.getTimeMillis;
 
 public class VideoSurveillanceEventsListFragment extends Fragment {
 
     public boolean viewCreated = false;
 
-    private final static int BG_COLOR_SELECTED=Color.argb(64, 0, 0, 127);
+    private final static int BG_COLOR_SELECTED = Color.argb(32, 0, 0, 127);
 
     private View fragmentview;
 
     private LinearLayoutManager linearLayoutManager;
     private FirebaseRecyclerAdapter<VSEvent, EventsHolder> firebaseAdapter;
 
-    private ProgressDialog progressDialog;
-
     private RecyclerView eventsRecyclerView;
     private File downloadDirectoryRoot;
     private DatabaseReference eventsNode;
+    private Query eventsQuery;
     private String groupName;
 
     private String[] eventKeys;
 
     private int selectedPosition = -1;
 
+    private String ownerDeviceFilter="";
+    private String statusFilter="";
+
     public static class EventsHolder extends RecyclerView.ViewHolder {
 
         public TextView eventDateTextView;
         public TextView eventMonitorNameTextView;
-        public ImageButton viewEventButton;
+
         public ImageButton deleteEventButton;
+        public ImageButton shareEventButton;
         public ProgressBar progressBar;
         public TextView eventCameraNameTextView;
+
         public ImageView eventPreviewImage;
 
-        public RelativeLayout relativeLayout;
-        public RelativeLayout eventData;
+        public ImageView newItemImage;
+        public ImageView lockedItemImage;
+
+        public RelativeLayout eventContainer;
+        public LinearLayout eventLabels;
+        public LinearLayout eventOptions;
+
+        private View.OnClickListener buttonClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                switch(v.getId()){
+
+                    case R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL:
+                        break;
+
+                    case R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY:
+                        break;
+
+                }
+
+
+            }
+        };
 
         public EventsHolder(View v) {
             super(v);
@@ -92,13 +120,19 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             eventDateTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDATETIME);
             eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDEVICENAME);
             eventCameraNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTCAMERANAME);
+            shareEventButton = v.findViewById(R.id.BTN___VSEVENTROW___SHAREEVENT);
             deleteEventButton = v.findViewById(R.id.BTN___VSEVENTROW___DELETEEVENT);
-            viewEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___REQUESTEVENT);
             progressBar = v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
-            eventPreviewImage = v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
 
-            relativeLayout = v.findViewById(R.id.RLA___VSEVENTROW___EVENT);
-            eventData = v.findViewById(R.id.RLA___VSEVENTROW___EVENTDATA);
+            eventPreviewImage = v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
+            newItemImage = v.findViewById(R.id.IMG___VSEVENTROW___NEWITEM);
+            lockedItemImage = v.findViewById(R.id.IMG___VSEVENTROW___LOCKEDITEM);
+
+            eventContainer = v.findViewById(R.id.RLA___VSEVENTROW___EVENT);
+            eventLabels = v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
+            eventOptions = v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
+
+
         }
 
     }
@@ -138,7 +172,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     };
 
     public VideoSurveillanceEventsListFragment() {
-
 
     }
 
@@ -204,12 +237,38 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             @Override
             protected void populateViewHolder(final EventsHolder holder, final VSEvent event, final int position) {
 
-                if(position==selectedPosition) {
+                if (position == selectedPosition) {
 
-                    holder.relativeLayout.setBackgroundColor(BG_COLOR_SELECTED);
+                    holder.eventContainer.setBackgroundColor(BG_COLOR_SELECTED);
+
+                } else {
+
+                    holder.eventContainer.setBackgroundColor(Color.TRANSPARENT);
+
                 }
 
-                holder.eventDateTextView.setText(String.format("%s %s", event.getDate(), event.getTime()));
+                // se è un nuovo evento, mostra l'immagine newItemImage
+                if (event.isNewItem()) {
+                    holder.newItemImage.setVisibility(View.VISIBLE);
+                } else {
+                    holder.newItemImage.setVisibility(View.GONE);
+                }
+
+                // se è un evento bloccato, mostra l'immagine lockedItemImage
+                if (event.isLockedItem()) {
+                    holder.lockedItemImage.setVisibility(View.VISIBLE);
+                } else {
+                    holder.lockedItemImage.setVisibility(View.GONE);
+                }
+
+                holder.eventDateTextView.setText(
+                        getTimeElapsed(
+                                getTimeMillis(
+                                        String.format("%s %s", event.getDate(), event.getTime()),
+                                        "yyyy-MM-dd HH.mm.ss")
+                                )
+                        );
+
                 holder.eventMonitorNameTextView.setText(event.getDevice());
                 holder.eventCameraNameTextView.setText(event.getCameraName());
 
@@ -222,21 +281,30 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                     //
                     // esiste
 
-                    // imposta l'immagine sul pulsante
-                    holder.viewEventButton.setImageResource(R.drawable.connect);
-
                     // imposta l'OnClickListener per lanciare il video tramite un Intent
-                    holder.viewEventButton.setOnClickListener(new View.OnClickListener() {
+                    holder.eventContainer.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
 
                             // lancia il video
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoFile.getAbsolutePath()));
-                            intent.setDataAndType(Uri.parse(videoFile.getAbsolutePath()), "video/*");
-                            startActivity(intent);
+                            playVideo(videoFile.getAbsolutePath());
+                            selectedPosition = position;
 
-                            selectedPosition=position;
+                            // segna l'evento come già letto
+                            markAsRead(eventKeys[position]);
 
+                        }
+
+                    });
+
+                    /*
+                    mostra il pulsante per condividere il video dell'evento
+                     */
+                    holder.shareEventButton.setVisibility(View.VISIBLE);
+                    holder.shareEventButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            shareVideo(videoFile.getAbsolutePath());
                         }
                     });
 
@@ -244,23 +312,26 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                     //
                     // non esiste
 
-                    // imposta l'immagine sul pulsante
-                    holder.viewEventButton.setImageResource(R.drawable.cloud_download);
 
                     // imposta l'OnClickListener per scaricare il video in una cartella locale
-                    holder.viewEventButton.setOnClickListener(new View.OnClickListener() {
+                    holder.eventContainer.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
 
                             String localLocation = String.format("Domotic/VideoSurveillance/DownloadedVideos/%s/%s", event.getDevice(), event.getThreadID());
 
-                            new DownloadTask(remoteLocation, localLocation, holder.progressBar).execute();
+                            new DownloadTask(remoteLocation, localLocation, holder.progressBar, eventKeys[position]).execute();
 
-                            selectedPosition=position;
+                            selectedPosition = position;
 
                         }
 
                     });
+
+                                        /*
+                    nasconde il pulsante per condividere il video dell'evento
+                     */
+                    holder.shareEventButton.setVisibility(View.GONE);
 
                 }
 
@@ -270,7 +341,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                         deleteEvent(videoFile, remoteLocation, eventKeys[position]);
 
-                        if(position==selectedPosition) {
+                        if (position == selectedPosition) {
                             selectedPosition = -1;
                         }
 
@@ -280,50 +351,52 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                 // definisce l'immagine dell'evento
                 String eventImageData = event.getEventPictureData();
-                if(eventImageData!=null) {
+                if (eventImageData != null) {
 
-                        try {
+                    try {
 
-                            // recupera i dati dell'immagine
-                            byte[] imageData = decompress(Base64.decode(eventImageData, Base64.DEFAULT));
-                            Bitmap shotImage = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+                        // recupera i dati dell'immagine
+                        byte[] imageData = decompress(Base64.decode(eventImageData, Base64.DEFAULT));
+                        Bitmap shotImage = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
 
-                            // adatta le dimensioni dell'immagine a quelle disponibili su schermo
-                            holder.eventPreviewImage.setImageBitmap(shotImage);
+                        // adatta le dimensioni dell'immagine a quelle disponibili su schermo
+                        holder.eventPreviewImage.setImageBitmap(shotImage);
 
-                            holder.eventPreviewImage.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
+                        holder.eventPreviewImage.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
 
-                                    ViewGroup.LayoutParams imgLayoutParams = holder.eventPreviewImage.getLayoutParams();
+                                ViewGroup.LayoutParams imgLayoutParams = holder.eventPreviewImage.getLayoutParams();
 
-                                    if(holder.eventData.getVisibility()==View.VISIBLE){
-                                        holder.eventData.setVisibility(View.GONE);
+                                if (holder.eventLabels.getVisibility() == View.VISIBLE) {
+                                    holder.eventLabels.setVisibility(View.GONE);
+                                    holder.eventOptions.setVisibility(View.VISIBLE);
 
-                                        LinearLayout imgParent = (LinearLayout) holder.eventPreviewImage.getParent();
-                                        double imgRatio = 1.0*imgLayoutParams.height/imgLayoutParams.width;
+                                    RelativeLayout imgParent = (RelativeLayout) holder.eventPreviewImage.getParent();
+                                    double imgRatio = 1.0 * imgLayoutParams.height / imgLayoutParams.width;
 
-                                        imgLayoutParams.width=imgParent.getWidth();
-                                        imgLayoutParams.height=(int) (imgParent.getWidth()*imgRatio);
+                                    imgLayoutParams.width = imgParent.getWidth();
+                                    imgLayoutParams.height = (int) (imgParent.getWidth() * imgRatio);
 
-                                    } else {
+                                } else {
 
-                                        holder.eventData.setVisibility(View.VISIBLE);
+                                    holder.eventLabels.setVisibility(View.VISIBLE);
+                                    holder.eventOptions.setVisibility(View.GONE);
 
-                                        imgLayoutParams.width=(int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_width);
-                                        imgLayoutParams.height=(int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_height);
-                                    }
-
+                                    imgLayoutParams.width = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_width);
+                                    imgLayoutParams.height = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_height);
                                 }
 
-                            });
+                            }
 
-                        } catch (IOException | DataFormatException e){
+                        });
 
-                            Log.d(TAG, e.getMessage());
-                            holder.eventPreviewImage.setImageResource(R.drawable.broken);
+                    } catch (IOException | DataFormatException e) {
 
-                        }
+                        Log.d(TAG, e.getMessage());
+                        holder.eventPreviewImage.setImageResource(R.drawable.broken);
+
+                    }
 
                 } else {
 
@@ -395,11 +468,13 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         private String localPath;
         private String remotePath;
         private ProgressBar progressBar;
+        private String eventKey;
 
-        public DownloadTask(String remotePath, String localPath, ProgressBar progressBar) {
+        public DownloadTask(String remotePath, String localPath, ProgressBar progressBar, String eventKey) {
             this.localPath = localPath;
             this.remotePath = remotePath;
             this.progressBar = progressBar;
+            this.eventKey = eventKey;
 
             progressBar.setIndeterminate(true);
             progressBar.setVisibility(View.VISIBLE);
@@ -418,7 +493,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             }
 
             // inizializza il file locale per il download
-            File localFile = new File(downloadDirectory.getPath() + File.separator + storageRef.getName());
+            final String localFileUrl = downloadDirectory.getPath() + File.separator + storageRef.getName();
+            File localFile = new File(localFileUrl);
 
             storageRef.getFile(localFile)
                     .addOnCompleteListener(new OnCompleteListener<FileDownloadTask.TaskSnapshot>() {
@@ -430,8 +506,12 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                             // nasconde la progressbar
                             progressBar.setVisibility(View.GONE);
 
-                            // forza il refresh dell'Adapter
-                            refreshAdapter();
+                            // esegue il video
+                            playVideo(localFileUrl);
+
+                            // segna l'evento come già visto
+                            markAsRead(eventKey);
+
 
                         }
 
@@ -461,7 +541,32 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     }
 
-    private void markAsRead(int position){
+    private void markAsRead(String eventKey) {
+
+        eventsNode.child(eventKey).child("newItem").setValue(false);
+
+    }
+
+    private void playVideo(String videoFullPath) {
+
+        // lancia il video
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoFullPath));
+        intent.setDataAndType(Uri.parse(videoFullPath), "video/*");
+        startActivity(intent);
+
+    }
+
+    private void shareVideo(String videoFullPath) {
+
+        Uri uriPath = Uri.parse(videoFullPath);
+
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "Text");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uriPath);
+        shareIntent.setType("video/*");
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(shareIntent, "send"));
 
     }
 

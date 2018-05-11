@@ -114,10 +114,10 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
 
             switch (i) {
                 case 0:
-                    return videoSurveillanceCameraListFragment;
+                    return videoSurveillanceEventsListFragment;
 
                 case 1:
-                    return videoSurveillanceEventsListFragment;
+                    return videoSurveillanceCameraListFragment;
 
                 default:
                     return null;

@@ -590,12 +590,15 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "HOME_DIRECTORY":
 
-                fileViewerFragment.currentDirName = inMsg.getBody().replace("\n", "");
-                if (fileViewerFragment.viewCreated)
-                    fileViewerFragment.updateContent();
+                if(fileViewerFragment!=null) {
 
-                // invia un instant message con la richiesta del contenuto della directory home ricevuta
-                sendCommandToDevice(new Message("__get_directory_content", inMsg.getBody(), thisDevice));
+                    fileViewerFragment.currentDirName = inMsg.getBody().replace("\n", "");
+                    if (fileViewerFragment.viewCreated)
+                        fileViewerFragment.updateContent();
+
+                    // invia un instant message con la richiesta del contenuto della directory home ricevuta
+                    sendCommandToDevice(new Message("__get_directory_content", inMsg.getBody(), thisDevice));
+                }
 
                 // valorizza il flag per eliminare il messaggio dalla coda
                 deleteMsg = true;
