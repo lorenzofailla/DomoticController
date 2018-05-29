@@ -74,8 +74,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     private int selectedPosition = -1;
 
-    private String ownerDeviceFilter="";
-    private String statusFilter="";
+    private String childKeyFilter=null;
+    private String childValueFilter=null;
 
     public static class EventsHolder extends RecyclerView.ViewHolder {
 
@@ -110,8 +110,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                 }
 
-
             }
+
         };
 
         public EventsHolder(View v) {
@@ -131,7 +131,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             eventContainer = v.findViewById(R.id.RLA___VSEVENTROW___EVENT);
             eventLabels = v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
             eventOptions = v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
-
 
         }
 
@@ -194,7 +193,9 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         // inizializza il nodo del database di Firebase contenente le informazioni sugli eventi
         eventsNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/Events", groupName));
-        eventsNode.addValueEventListener(valueEventListener);
+        childValueFilter="true";
+        childKeyFilter="newItem";
+        generateQuery();
 
         // inizializza il riferimento alla directory dove i file dei video saranno scaricati
         downloadDirectoryRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Domotic/VideoSurveillance/DownloadedVideos");
@@ -217,7 +218,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     @Override
     public void onDetach() {
 
-        eventsNode.removeEventListener(valueEventListener);
+        eventsQuery.removeEventListener(valueEventListener);
         super.onDetach();
 
     }
@@ -232,7 +233,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                 VSEvent.class,
                 R.layout.row_holder_vsevent_element,
                 EventsHolder.class,
-                eventsNode) {
+                eventsQuery) {
 
             @Override
             protected void populateViewHolder(final EventsHolder holder, final VSEvent event, final int position) {
@@ -248,14 +249,14 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                 }
 
                 // se è un nuovo evento, mostra l'immagine newItemImage
-                if (event.isNewItem()) {
+                if (event.isNewItem().equals("true")) {
                     holder.newItemImage.setVisibility(View.VISIBLE);
                 } else {
                     holder.newItemImage.setVisibility(View.GONE);
                 }
 
                 // se è un evento bloccato, mostra l'immagine lockedItemImage
-                if (event.isLockedItem()) {
+                if (event.isLockedItem().equals("true")) {
                     holder.lockedItemImage.setVisibility(View.VISIBLE);
                 } else {
                     holder.lockedItemImage.setVisibility(View.GONE);
@@ -568,6 +569,11 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, "send"));
 
+    }
+
+    private void generateQuery(){
+        eventsQuery = eventsNode.orderByChild(childKeyFilter).equalTo(childValueFilter);
+        eventsQuery.addValueEventListener(valueEventListener);
     }
 
 

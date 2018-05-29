@@ -1,6 +1,8 @@
 package com.apps.lore_f.domoticcontroller;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,12 +14,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.function.ToDoubleBiFunction;
 
@@ -52,7 +56,6 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                     // avvia l'activity per la gestione della videosorveglianza
                     intent = new Intent (getApplicationContext(), VideoSurveillanceActivity.class);
-                    intent.putExtra("__GROUP", groupName);
                     startActivity(intent);
 
                     break;
@@ -119,11 +122,33 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_selection);
 
-        devicesRecyclerView = (RecyclerView) findViewById(R.id.RWV___DEVICE_SELECTION___DEVICES);
+        /*
+        recupera gli extra dalle preferenze, se il nome del gruppo non è stato specificato, l'Activity non può proseguire e viene riaperta l'Activity per la selezione del gruppo
+         */
 
-        /* imposta il nome utente */
-        groupName="lorenzofailla";
-        // TODO: 29-Jan-18 recuperare valore dalle impostazioni
+        // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
+        Context context = getApplicationContext();
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                getString(R.string.data_file_key), Context.MODE_PRIVATE);
+
+        groupName=sharedPref.getString(getString(R.string.data_group_name),null);
+
+        if(groupName==null){
+
+            /*
+            questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
+             */
+
+            // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
+            startActivity(new Intent(this, GroupSelection.class));
+
+            // termina l'Activity corrente
+            finish();
+            return;
+
+        }
+
+        FirebaseMessaging.getInstance().subscribeToTopic(groupName);
 
     }
 
@@ -131,6 +156,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
     protected void onResume(){
 
         super.onResume();
+
+        // handler
+        devicesRecyclerView = (RecyclerView) findViewById(R.id.RWV___DEVICE_SELECTION___DEVICES);
 
         // assegno OnClickListener
         findViewById(R.id.BTN___DEVICE_SELECTION___CLOUDSTORAGE).setOnClickListener(onClickListener);

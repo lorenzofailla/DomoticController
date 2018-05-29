@@ -14,8 +14,8 @@ public class VSEvent {
     private String VideoLink;
     private String CameraName;
     private String eventPictureData;
-    private boolean lockedItem;
-    private boolean newItem;
+    private String lockedItem;
+    private String newItem;
 
     // empty constructor
     public VSEvent() {
@@ -47,8 +47,8 @@ public class VSEvent {
 
     public String getEventPictureData() {return eventPictureData; }
 
-    public boolean isLockedItem(){return lockedItem;}
+    public String isLockedItem(){return lockedItem;}
 
-    public boolean isNewItem(){return newItem; }
+    public String isNewItem(){return newItem; }
 
 }

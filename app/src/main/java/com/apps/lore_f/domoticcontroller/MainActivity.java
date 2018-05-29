@@ -157,7 +157,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             // nome del gruppo impostato,
             //
             // lancia l'Activity DeviceSelectionActivity per selezionare il dispositivo a cui connettersi
-            startActivity(new Intent(this, DeviceSelectionActivity.class));
+            Intent intent = new Intent(this, DeviceSelectionActivity.class);
+            startActivity(intent);
 
         }
 

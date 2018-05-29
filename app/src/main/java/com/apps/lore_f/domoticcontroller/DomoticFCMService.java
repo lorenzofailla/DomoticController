@@ -20,32 +20,42 @@ import static com.google.android.gms.plus.PlusOneDummyView.TAG;
 
 public class DomoticFCMService extends FirebaseMessagingService {
 
+    private static String TAG="DomoticFCMService";
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
+
+        Log.d(TAG, remoteMessage.getData().toString());
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
 
             int drawableResourceId;
+            String activityToShow;
+            String actionCommand;
 
             switch (remoteMessage.getNotification().getTitle()){
 
                 case "Motion detected":
                     drawableResourceId = R.drawable.run;
+                    activityToShow="";
+                    actionCommand="";
                     break;
 
                 default:
+                    activityToShow="";
+                    actionCommand="";
                     drawableResourceId = R.drawable.home;
 
             }
 
-            sendNotification(remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody(), drawableResourceId);
+            sendNotification(remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody(), drawableResourceId, activityToShow, actionCommand);
 
         }
 
     }
 
-    private void sendNotification(String title, String message, int drawableRes) {
+    private void sendNotification(String title, String message, int drawableRes, String activityToShow, String actionCommand) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,

@@ -126,8 +126,6 @@ public class GoogleSignInActivity extends AppCompatActivity implements GoogleApi
 
                         } else {
 
-                            FirebaseMessaging.getInstance().subscribeToTopic("lorenzofailla-home");
-
                             // l'autenticazione è riuscita
                             startActivity(new Intent(GoogleSignInActivity.this, GroupSelection.class));
                             finish();
