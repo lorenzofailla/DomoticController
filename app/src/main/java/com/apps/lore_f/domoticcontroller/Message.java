@@ -10,11 +10,6 @@ public class Message {
     private String body;
     private String replyto;
 
-
-    public Message() {
-
-    }
-
     public Message(String header, String body, String replyto) {
 
         this.header = header;

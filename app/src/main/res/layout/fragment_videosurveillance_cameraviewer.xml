@@ -7,10 +7,10 @@
     tools:context="com.apps.lore_f.domoticcontroller.VSCameraViewerFragment">
 
     <TextView
+        android:id="@+id/TXV___VSCAMERAVIEW___CAMERANAME"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="ZoneMinder Camera Viewer"
-        android:id="@+id/TXV___VSCAMERAVIEW___CAMERANAME" />
+        android:text="ZoneMinder Camera Viewer" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,27 +26,27 @@
 
             <ImageButton
                 android:id="@+id/BTN___VSCAMERAVIEW___SWITCHSTATUS"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="@dimen/medium_button_width"
+                android:layout_height="@dimen/medium_button_height"
                 android:src="@drawable/broken" />
 
             <ImageButton
                 android:id="@+id/BTN___VSCAMERAVIEW___REQUESTSHOT"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="@dimen/medium_button_width"
+                android:layout_height="@dimen/medium_button_height"
                 android:src="@drawable/shot" />
 
             <ImageButton
                 android:id="@+id/BTN___VSCAMERAVIEW___REQUESTVIDEOSTREAM"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/shotseries" />
+                android:layout_width="@dimen/medium_button_width"
+                android:layout_height="@dimen/medium_button_height"
+                android:src="@drawable/live" />
 
             <ImageButton
                 android:id="@+id/BTN___VSCAMERAVIEW___REQUESTMOTIONEVENT"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-              android:src="@drawable/videocam" />
+                android:layout_width="@dimen/medium_button_width"
+                android:layout_height="@dimen/medium_button_height"
+                android:src="@drawable/run" />
 
         </LinearLayout>
 
@@ -58,8 +58,6 @@
             android:src="@drawable/videocam50" />
 
     </LinearLayout>
-
-
 
 
 </RelativeLayout>

@@ -140,7 +140,6 @@ public class GroupSelection extends AppCompatActivity {
                     }
                 });
 
-
             }
 
         };
