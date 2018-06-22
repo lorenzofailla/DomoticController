@@ -10,6 +10,9 @@ public class Message {
     private String body;
     private String replyto;
 
+    // required empty constructor
+    public Message(){}
+
     public Message(String header, String body, String replyto) {
 
         this.header = header;

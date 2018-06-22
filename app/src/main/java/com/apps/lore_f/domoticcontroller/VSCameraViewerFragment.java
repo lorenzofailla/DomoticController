@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
@@ -16,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,6 +29,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
 public class VSCameraViewerFragment extends Fragment {
@@ -62,7 +66,7 @@ public class VSCameraViewerFragment extends Fragment {
     private boolean fullScreenMode = false;
 
     private String liveBroadcastStatus = "";
-    private String liveBroadcastID = "";
+    private String liveBroadcastAddress = "";
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -81,16 +85,15 @@ public class VSCameraViewerFragment extends Fragment {
                     altrimenti, manda un messaggio all'host remoto per l'inizializzazione di uno stream
                      */
 
-                    if (liveBroadcastStatus.equals("ready") && !liveBroadcastID.equals("")) {
+                    if (liveBroadcastStatus.equals("ready") && !liveBroadcastAddress.equals("")) {
 
                         // todo: attiva la visualizzazione
                         Toast.makeText(getContext(), "to be implemented", Toast.LENGTH_SHORT).show();
 
                     } else if (liveBroadcastStatus.equals("idle")) {
 
-                        // todo: richiede un nuovo live stream
-                        //parent.sendCommandToDevice(new Message("__"));
-
+                        // richiede un nuovo live stream all'host remoto
+                        parent.sendCommandToDevice(new Message("__start_streaming_request", cameraID, parent.thisDevice));
 
                     }
 
@@ -177,8 +180,10 @@ public class VSCameraViewerFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            cameraStatus = dataSnapshot.getValue().toString();
-            updateCameraStatus();
+            if (dataSnapshot != null) {
+                cameraStatus = dataSnapshot.getValue().toString();
+                updateCameraStatus();
+            }
 
         }
 
@@ -191,10 +196,26 @@ public class VSCameraViewerFragment extends Fragment {
     private ValueEventListener liveBroadcastStatusListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
+            if (dataSnapshot != null) {
+                liveBroadcastStatus = dataSnapshot.getValue().toString();
+                manageLiveBroadcastStatus();
+            }
+        }
 
-            liveBroadcastStatus = dataSnapshot.getValue().toString();
-            manageLiveBroadcastStatus();
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
 
+        }
+
+    };
+
+    private ValueEventListener liveBroadcastAddressListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            if (dataSnapshot != null) {
+                liveBroadcastAddress = dataSnapshot.getValue().toString();
+                manageLiveBroadcastStatus();
+            }
         }
 
         @Override
@@ -202,6 +223,7 @@ public class VSCameraViewerFragment extends Fragment {
 
         }
     };
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -226,16 +248,22 @@ public class VSCameraViewerFragment extends Fragment {
 
         DatabaseReference shotNode;
         DatabaseReference statusNode;
-        DatabaseReference streamingFPSNode;
-        DatabaseReference streamingRootNode;
-        DatabaseReference streamingDataNode;
-        Query streamingDataNodeOrdered;
+        DatabaseReference youTubeLiveBroadcastStatusNode;
+        DatabaseReference youTubeLiveBroadcastAddressNode;
+
 
         shotNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LastShotData", parent.groupName, parent.remoteDeviceName, cameraID));
         statusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/MoDetStatus", parent.groupName, parent.remoteDeviceName, cameraID));
 
+        youTubeLiveBroadcastStatusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastStatus", parent.groupName, parent.remoteDeviceName, cameraID));
+        youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastData", parent.groupName, parent.remoteDeviceName, cameraID));
+
+
         statusNode.addValueEventListener(deviceStatusEventListener);
         shotNode.addValueEventListener(lastShotEventListener);
+
+        youTubeLiveBroadcastStatusNode.addValueEventListener(liveBroadcastStatusListener);
+        youTubeLiveBroadcastAddressNode.addValueEventListener(liveBroadcastAddressListener);
 
         /* store the view object in a global variable */
         fragmentView = view;
@@ -277,12 +305,18 @@ public class VSCameraViewerFragment extends Fragment {
 
         DatabaseReference shotNode;
         DatabaseReference statusNode;
+        DatabaseReference youTubeLiveBroadcastStatusNode;
+        DatabaseReference youTubeLiveBroadcastAddressNode;
 
         shotNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LastShotData", parent.groupName, parent.remoteDeviceName, cameraID));
         statusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/MoDetStatus", parent.groupName, parent.remoteDeviceName, cameraID));
+        youTubeLiveBroadcastStatusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastStatus", parent.groupName, parent.remoteDeviceName, cameraID));
+        youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastData", parent.groupName, parent.remoteDeviceName, cameraID));
 
         statusNode.removeEventListener(deviceStatusEventListener);
         shotNode.removeEventListener(lastShotEventListener);
+        youTubeLiveBroadcastStatusNode.removeEventListener(liveBroadcastStatusListener);
+        youTubeLiveBroadcastAddressNode.removeEventListener(liveBroadcastAddressListener);
 
     }
 
@@ -303,13 +337,13 @@ public class VSCameraViewerFragment extends Fragment {
 
         if (fullScreenMode) {
 
-            fragmentView.findViewById(R.id.LLO_VSCAMERAVIEW___BUTTONSTRIP).setVisibility(View.GONE);
-            fragmentView.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME).setVisibility(View.GONE);
+            fragmentView.findViewById(R.id.LLO_VSCAMERAVIEW___BUTTONSTRIP).setVisibility(GONE);
+            fragmentView.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME).setVisibility(GONE);
 
         } else {
 
-            fragmentView.findViewById(R.id.LLO_VSCAMERAVIEW___BUTTONSTRIP).setVisibility(View.VISIBLE);
-            fragmentView.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME).setVisibility(View.VISIBLE);
+            fragmentView.findViewById(R.id.LLO_VSCAMERAVIEW___BUTTONSTRIP).setVisibility(VISIBLE);
+            fragmentView.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME).setVisibility(VISIBLE);
         }
 
     }
@@ -437,6 +471,32 @@ public class VSCameraViewerFragment extends Fragment {
 
         }
 
+    }
+
+    private void startLiveBroadcastView(){
+
+        if(fragmentView==null)
+            return;
+
+        ImageView iv = fragmentView.findViewById(R.id.IVW___VSCAMERAVIEW___SHOTVIEW);
+        YouTubePlayerView yt = fragmentView.findViewById(R.id.YTV___VSCAMERAVIEW___LIVEBROADCASTVIEW);
+
+        iv.setVisibility(GONE);
+        yt.setVisibility(VISIBLE);
+
+
+    }
+
+    private void stopLiveBroadcastView(){
+
+        if(fragmentView==null)
+            return;
+
+        ImageView iv = fragmentView.findViewById(R.id.IVW___VSCAMERAVIEW___SHOTVIEW);
+        YouTubePlayerView yt = fragmentView.findViewById(R.id.YTV___VSCAMERAVIEW___LIVEBROADCASTVIEW);
+
+        iv.setVisibility(VISIBLE);
+        yt.setVisibility(GONE);
 
     }
 

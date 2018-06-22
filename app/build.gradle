@@ -47,7 +47,8 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-database:0.4.0'
     //testImplementation 'junit:junit:4.12'
     implementation project(':generalutilitieslibrary')
-}
+    implementation files('libs/YouTubeAndroidPlayerApi.jar')
 
+}
 
 apply plugin: 'com.google.gms.google-services'

@@ -55,7 +55,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitStart"
-            android:src="@drawable/videocam50" />
+            android:src="@drawable/videocam50"
+            android:visibility="visible"/>
+
+        <com.google.android.youtube.player.YouTubePlayerView
+            android:id="@+id/YTV___VSCAMERAVIEW___LIVEBROADCASTVIEW"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+        </com.google.android.youtube.player.YouTubePlayerView>
 
     </LinearLayout>
 
