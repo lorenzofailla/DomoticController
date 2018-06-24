@@ -3,6 +3,7 @@ package com.apps.lore_f.domoticcontroller;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
@@ -16,6 +17,7 @@ import static com.apps.lore_f.domoticcontroller.Developer_Keys.YOUTUBE;
 
 public class YouTubeLiveViewActivity extends YouTubeBaseActivity {
 
+    private static final String TAG = YouTubeLiveViewActivity.class.getName();
     private String liveBroadcastID;
 
     @Override
@@ -49,8 +51,9 @@ public class YouTubeLiveViewActivity extends YouTubeBaseActivity {
             @Override
             public void onInitializationSuccess(YouTubePlayer.Provider provider, final YouTubePlayer youTubePlayer, boolean wasRestored) {
 
-                youTubePlayer.cueVideo(liveBroadcastID);
-                youTubePlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.MINIMAL);
+                youTubePlayer.loadVideo(liveBroadcastID);
+
+                youTubePlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
                 youTubePlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
 
                     @Override
@@ -60,7 +63,7 @@ public class YouTubeLiveViewActivity extends YouTubeBaseActivity {
 
                     @Override
                     public void onLoaded(String s) {
-
+                        Log.d(TAG, "onLoaded: " + s);
                         youTubePlayer.play();
 
                     }
