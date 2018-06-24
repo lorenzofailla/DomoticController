@@ -136,14 +136,4 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
 
     }
 
-    public void startCloudDownloadService(FileInCloudStorage f) {
-
-        String[] param = {f.getFileName()};
-        Intent intent = new Intent(this, DownloadFileFromCloud.class);
-        intent.putExtra("__file_to_download", param);
-
-        startService(intent);
-
-    }
-
 }

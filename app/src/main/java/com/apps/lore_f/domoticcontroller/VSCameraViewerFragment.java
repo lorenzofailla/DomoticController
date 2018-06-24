@@ -1,37 +1,35 @@
 package com.apps.lore_f.domoticcontroller;
 
-import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
+import static com.apps.lore_f.domoticcontroller.Developer_Keys.YOUTUBE;
 
 public class VSCameraViewerFragment extends Fragment {
 
@@ -66,7 +64,9 @@ public class VSCameraViewerFragment extends Fragment {
     private boolean fullScreenMode = false;
 
     private String liveBroadcastStatus = "";
-    private String liveBroadcastAddress = "";
+    private String liveBroadcastID = "";
+
+    private boolean liveBroadcastRequested;
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -85,12 +85,15 @@ public class VSCameraViewerFragment extends Fragment {
                     altrimenti, manda un messaggio all'host remoto per l'inizializzazione di uno stream
                      */
 
-                    if (liveBroadcastStatus.equals("ready") && !liveBroadcastAddress.equals("")) {
+                    if (liveBroadcastStatus.equals("ready") && !liveBroadcastID.equals("")) {
 
-                        // todo: attiva la visualizzazione
-                        Toast.makeText(getContext(), "to be implemented", Toast.LENGTH_SHORT).show();
+                        liveBroadcastRequested = false;
+                        startYouTubeLiveViewActivity();
+
 
                     } else if (liveBroadcastStatus.equals("idle")) {
+
+                        liveBroadcastRequested = true;
 
                         // richiede un nuovo live stream all'host remoto
                         parent.sendCommandToDevice(new Message("__start_streaming_request", cameraID, parent.thisDevice));
@@ -213,7 +216,7 @@ public class VSCameraViewerFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             if (dataSnapshot != null) {
-                liveBroadcastAddress = dataSnapshot.getValue().toString();
+                liveBroadcastID = dataSnapshot.getValue().toString();
                 manageLiveBroadcastStatus();
             }
         }
@@ -269,6 +272,8 @@ public class VSCameraViewerFragment extends Fragment {
         fragmentView = view;
 
         manageFullScreenMode();
+
+        liveBroadcastRequested = false;
 
         viewCreated = true;
         return view;
@@ -442,9 +447,18 @@ public class VSCameraViewerFragment extends Fragment {
                 liveStreamRequestEnabled = true;
                 break;
 
-            case "ready":
-                drawableToShow = R.drawable.live_inv;
+            case "creating":
+                drawableToShow = R.drawable.live_yellow;
                 liveStreamRequestEnabled = true;
+                break;
+
+            case "ready":
+                drawableToShow = R.drawable.live_green;
+                liveStreamRequestEnabled = true;
+
+                if (liveBroadcastRequested)
+                    startYouTubeLiveViewActivity();
+
                 break;
 
             case "not available":
@@ -473,30 +487,11 @@ public class VSCameraViewerFragment extends Fragment {
 
     }
 
-    private void startLiveBroadcastView(){
+    private void startYouTubeLiveViewActivity(){
 
-        if(fragmentView==null)
-            return;
-
-        ImageView iv = fragmentView.findViewById(R.id.IVW___VSCAMERAVIEW___SHOTVIEW);
-        YouTubePlayerView yt = fragmentView.findViewById(R.id.YTV___VSCAMERAVIEW___LIVEBROADCASTVIEW);
-
-        iv.setVisibility(GONE);
-        yt.setVisibility(VISIBLE);
-
-
-    }
-
-    private void stopLiveBroadcastView(){
-
-        if(fragmentView==null)
-            return;
-
-        ImageView iv = fragmentView.findViewById(R.id.IVW___VSCAMERAVIEW___SHOTVIEW);
-        YouTubePlayerView yt = fragmentView.findViewById(R.id.YTV___VSCAMERAVIEW___LIVEBROADCASTVIEW);
-
-        iv.setVisibility(VISIBLE);
-        yt.setVisibility(GONE);
+        Intent intent = new Intent(getContext(), YouTubeLiveViewActivity.class);
+        intent.putExtra("__live_broadcast_ID", liveBroadcastID);
+        startActivity(intent);
 
     }
 
