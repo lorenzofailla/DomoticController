@@ -34,12 +34,17 @@ public class YouTubeLiveViewActivity extends YouTubeBaseActivity {
         Bundle extras = intent.getExtras();
 
         if (intent.hasExtra("__live_broadcast_ID")) {
+
             liveBroadcastID = extras.getString("__live_broadcast_ID");
             startLiveBroadcastView();
+
         } else {
+
             finish();
             return;
+
         }
+
     }
 
     private void startLiveBroadcastView() {
@@ -51,21 +56,21 @@ public class YouTubeLiveViewActivity extends YouTubeBaseActivity {
             @Override
             public void onInitializationSuccess(YouTubePlayer.Provider provider, final YouTubePlayer youTubePlayer, boolean wasRestored) {
 
-                youTubePlayer.loadVideo(liveBroadcastID);
 
                 youTubePlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
-                youTubePlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
 
+                youTubePlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
                     @Override
                     public void onLoading() {
+
+                        Log.d(TAG, "onLoading");
 
                     }
 
                     @Override
                     public void onLoaded(String s) {
-                        Log.d(TAG, "onLoaded: " + s);
+                        Log.d(TAG, "onLoaded: " +s);
                         youTubePlayer.play();
-
                     }
 
                     @Override
@@ -75,19 +80,51 @@ public class YouTubeLiveViewActivity extends YouTubeBaseActivity {
 
                     @Override
                     public void onVideoStarted() {
-
+                        Log.d(TAG, "onVideoStarted");
                     }
 
                     @Override
                     public void onVideoEnded() {
-
+                        Log.d(TAG, "onVideoEnded");
                     }
 
                     @Override
                     public void onError(YouTubePlayer.ErrorReason errorReason) {
 
+                        Log.d(TAG, "onError: " + errorReason.toString());
+
+                    }
+
+                });
+
+                youTubePlayer.setPlaybackEventListener(new YouTubePlayer.PlaybackEventListener() {
+                    @Override
+                    public void onPlaying() {
+                        Log.d(TAG, "onPlaying");
+                    }
+
+                    @Override
+                    public void onPaused() {
+                        Log.d(TAG, "onPaused");
+                    }
+
+                    @Override
+                    public void onStopped() {
+                        Log.d(TAG, "onStopped");
+                    }
+
+                    @Override
+                    public void onBuffering(boolean b) {
+                        Log.d(TAG, "onBuffering: "+b);
+                    }
+
+                    @Override
+                    public void onSeekTo(int i) {
+                        Log.d(TAG, "onSeekTo: " + i);
                     }
                 });
+
+                youTubePlayer.cueVideo(liveBroadcastID);
 
             }
 
