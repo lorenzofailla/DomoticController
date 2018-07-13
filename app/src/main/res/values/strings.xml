@@ -69,6 +69,10 @@
     <string name="DEVICEVIEW_LABEL_UPTIME_REPLY">\"uptime\" reply:</string>
     <string name="DEVICEVIEW_LABEL_FREE_DISK_SPACE">Free disk space:</string>
     <string name="DEVICEVIEW_LABEL_PING_TIME">Ping time:</string>
+    <string name="DEVICEVIEW_LABEL_VPN_STATUS">VPN Status:</string>
+    <string name="DEVICEVIEW_LABEL_VPN_STATUS_NOT_AVAILABLE">Not available.</string>
+    <string name="DEVICEVIEW_LABEL_VPN_STATUS_NOT_CONNECTED">Not connected.</string>
+    <string name="DEVICEVIEW_LABEL_VPN_STATUS_CONNECTED">Connected.</string>
     <string name="DEVICEVIEW_LABEL_LASTHEARTBEAT_TIME">Last heartbeat:</string>
     <string name="DEVICEVIEW_LABEL_DEVICE_OPERATIONS">Device Operations:</string>
     <string name="DEVICEVIEW_REFRESHING_DEVICE_CONNECTION">Connecting to device...</string>
