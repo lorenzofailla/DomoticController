@@ -60,30 +60,13 @@ public class TCPComm {
          inizializza il Socket
         */
 
-        try {
 
-            socket = new Socket(hostAddress, port);
-            in = new BufferedInputStream(socket.getInputStream());
-            out = new BufferedOutputStream(socket.getOutputStream());
-
-            socket.connect(socket.getRemoteSocketAddress());
-
-            // manda una notifica all'interfaccia
-
-            if (listener != null) {
-                listener.onConnected(socket.getLocalPort());
-            }
 
             // avvia il ciclo principale che gestisce la lettura dei dati in entrata
             new MainLoop().execute();
 
 
-        } catch (IOException e) {
 
-            if (listener != null) {
-                listener.onConnectionError(e);
-            }
-        }
 
     }
 
@@ -111,10 +94,32 @@ public class TCPComm {
     }
 
 
-    private class MainLoop extends AsyncTask<Void, Void, Boolean> {
+    private class MainLoop extends AsyncTask<Void, Void, Void> {
 
         @Override
-        protected Boolean doInBackground(Void... voids) {
+        protected Void doInBackground(Void... voids) {
+
+            try {
+
+                socket = new Socket(hostAddress, port);
+                in = new BufferedInputStream(socket.getInputStream());
+                out = new BufferedOutputStream(socket.getOutputStream());
+
+                socket.connect(socket.getRemoteSocketAddress());
+
+                // manda una notifica all'interfaccia
+
+                if (listener != null) {
+                    listener.onConnected(socket.getLocalPort());
+                }
+
+            } catch (IOException e) {
+
+                if (listener != null) {
+                    listener.onConnectionError(e);
+                }
+                return null;
+            }
 
             int b;
             ByteArrayOutputStream outputData = new ByteArrayOutputStream();
@@ -149,7 +154,19 @@ public class TCPComm {
 
             }
 
-            return keepLooping;
+            return null;
+
+        }
+
+    }
+
+    private class InitThread extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+
+            return null;
 
         }
 

@@ -77,7 +77,7 @@
             android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
 
         <android.support.constraint.ConstraintLayout
-            android:id="@+id/RLA___DEVICEINFOFRAGMENT___MANAGE_VPN"
+            android:id="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_VPN"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/TXV___DEVICEVIEW___LASTHEARTBEATTIME_VALUE">
@@ -105,11 +105,40 @@
 
         </android.support.constraint.ConstraintLayout>
 
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_TCP"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_VPN">
+
+            <ImageButton
+                android:id="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
+                android:layout_width="@dimen/medium_button_width"
+                android:layout_height="@dimen/medium_button_height"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_LABEL"
+                android:text="@string/DEVICEVIEW_LABEL_VPN_STATUS"/>
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
+                app:layout_constraintTop_toBottomOf="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_LABEL"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"                 />
+
+        </android.support.constraint.ConstraintLayout>
+
         <LinearLayout
             android:id="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/RLA___DEVICEINFOFRAGMENT___MANAGE_VPN"
+            android:layout_below="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_TCP"
             android:orientation="horizontal">
 
             <ImageButton
@@ -138,7 +167,6 @@
             android:layout_height="match_parent"
             android:layout_alignParentBottom="true"
             android:layout_below="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP" />
-
 
     </RelativeLayout>
 

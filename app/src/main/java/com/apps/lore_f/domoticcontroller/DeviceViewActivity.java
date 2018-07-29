@@ -52,6 +52,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private TCPComm tcpComm;
     private boolean isTCPCommInterfaceAvailable = false;
     private final static long DEFAULT_TCP_PROBING_REPLY_TIMEOUT = 5000;
+    private AlertDialog connectingToDeviceAlertDialog;
 
     public boolean getIsTCPCommInterfaceAvailable() {
         return isTCPCommInterfaceAvailable;
@@ -491,13 +492,13 @@ public class DeviceViewActivity extends AppCompatActivity {
         viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
         viewPager.setAdapter(collectionPagerAdapter);
         viewPager.addOnPageChangeListener(onPageChangeListener);
-        viewPager.setCurrentItem(homeFragment);
+
 
         // attiva il ciclo di richieste
         handler = new Handler();
 
         // inizializza l'interfaccia TCP
-        tcpComm=new TCPComm("10.8.0.14", 9099);
+        tcpComm = new TCPComm("10.8.0.14", 9099);
         tcpComm.setListener(tcpCommListener);
 
         // inizia il test dell'interfaccia TCP
@@ -515,7 +516,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         /*
         Se è attiva l'interfaccia TCP, la termina. Altrimenti, rimuove i ChildEventListener dai nodi del db di Firebase
          */
-        if(isTCPCommInterfaceAvailable){
+        if (isTCPCommInterfaceAvailable) {
 
             tcpComm.setListener(null);
             tcpComm.terminate();
@@ -720,15 +721,23 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     public void sendCommandToDevice(Message command) {
 
-        // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo remoto selezionato
-        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices");
+        if (isTCPCommInterfaceAvailable) {
 
-        // aggiunge il messaggio al nodo
-        deviceIncomingCommands
-                .child(remoteDeviceName)
-                .child("IncomingCommands")
-                .child("" + System.currentTimeMillis())
-                .setValue(command);
+            //tcpComm.sendData(command.getTCPData());
+
+        } else {
+
+
+            // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo remoto selezionato
+            DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices");
+
+            // aggiunge il messaggio al nodo
+            deviceIncomingCommands
+                    .child(remoteDeviceName)
+                    .child("IncomingCommands")
+                    .child("" + System.currentTimeMillis())
+                    .setValue(command);
+        }
 
     }
 
@@ -1167,6 +1176,25 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void startTCPInterfaceTest() {
 
+        // crea l'AlertDialog
+        connectingToDeviceAlertDialog = new AlertDialog.Builder(this)
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+
+                    /*
+                    L'interfaccia TCP non è disponibile
+                     */
+
+                        // imposta il flag su falso
+                        setIsTCPCommIntefaceAvailable(false);
+
+                    }
+                })
+                .setTitle("TITOLO")
+                .setMessage("MESSAGGIO")
+                .create();
+
         // mostra l'AlertDialog
         connectingToDeviceAlertDialog.show();
 
@@ -1194,29 +1222,14 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-    };
+    }
 
-    private AlertDialog connectingToDeviceAlertDialog = new AlertDialog.Builder(this)
-            .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialogInterface) {
+    ;
 
-                    /*
-                    L'interfaccia TCP non è disponibile
-                     */
 
-                    // imposta il flag su falso
-                    setIsTCPCommIntefaceAvailable(false);
+    private void manageTCPInterfaceStatus() {
 
-                }
-            })
-            .setTitle("TITOLO")
-            .setMessage("MESSAGGIO")
-            .create();
-
-    private void manageTCPInterfaceStatus(){
-
-        if(!isTCPCommInterfaceAvailable) {
+        if (!isTCPCommInterfaceAvailable) {
 
             // inizializza i riferimenti ai nodi del db Firebase
 
@@ -1245,6 +1258,8 @@ public class DeviceViewActivity extends AppCompatActivity {
             lastHeartBeatTimeNodeRef.addValueEventListener(updateLastHeartBeatTime);
 
         }
+
+        viewPager.setCurrentItem(homeFragment);
 
         // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
         sendCommandToDevice(
