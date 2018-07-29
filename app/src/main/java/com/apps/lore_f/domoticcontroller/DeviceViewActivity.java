@@ -31,6 +31,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import loref.android.apps.androidtcpcomm.TCPComm;
+import loref.android.apps.androidtcpcomm.TCPCommListener;
+
 public class DeviceViewActivity extends AppCompatActivity {
 
     private static final String TAG = "DeviceViewActivity";
@@ -45,8 +48,72 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    // Firebase Database
+    // TCP Connection Interface
+    private TCPComm tcpComm;
+    private boolean isTCPCommInterfaceAvailable = false;
+    private final static long DEFAULT_TCP_PROBING_REPLY_TIMEOUT = 5000;
 
+    public boolean getIsTCPCommInterfaceAvailable() {
+        return isTCPCommInterfaceAvailable;
+    }
+
+    private void setIsTCPCommIntefaceAvailable(boolean value) {
+        this.isTCPCommInterfaceAvailable = value;
+        manageTCPInterfaceStatus();
+    }
+
+    private TCPCommListener tcpCommListener = new TCPCommListener() {
+        @Override
+        public void onConnected(int port) {
+
+            /*
+            L'interfaccia TCP è disponibile
+             */
+
+            // dismette la finestra di dialogo, se presente
+            if (connectingToDeviceAlertDialog.isShowing()) {
+                connectingToDeviceAlertDialog.dismiss();
+            }
+
+            setIsTCPCommIntefaceAvailable(true);
+
+        }
+
+        @Override
+        public void onConnectionError(Exception e) {
+
+            /*
+            L'interfaccia TCP non è disponibile
+             */
+
+            // pone a false il flag isTCPCommInterfaceAvailable
+            setIsTCPCommIntefaceAvailable(false);
+
+        }
+
+        @Override
+        public void onDataWriteError(Exception e) {
+
+        }
+
+        @Override
+        public void onDataReadError(Exception e) {
+
+        }
+
+        @Override
+        public void onDataLineReceived(byte[] data) {
+
+        }
+
+        @Override
+        public void onClose(boolean byLocal) {
+
+        }
+
+    };
+
+    // Firebase Database
     private DatabaseReference incomingMessagesRef;
     private DatabaseReference lastHeartBeatTimeNodeRef;
 
@@ -188,8 +255,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void run() {
 
-            long timeDifference = System.currentTimeMillis() -remoteDeviceCurrentTimeOffset- lastHeartBeatTime;
-            Log.i(TAG,"Time Difference: "+timeDifference);
+            long timeDifference = System.currentTimeMillis() - remoteDeviceCurrentTimeOffset - lastHeartBeatTime;
+            Log.i(TAG, "Time Difference: " + timeDifference);
 
             int labelColor;
 
@@ -223,10 +290,10 @@ public class DeviceViewActivity extends AppCompatActivity {
             //
             // aggiorna il valore di lastHeartBeatTime
             try {
-                Log.i(TAG,"lastHeartBeatTime: " + dataSnapshot.toString());
+                Log.i(TAG, "lastHeartBeatTime: " + dataSnapshot.toString());
                 lastHeartBeatTime = dataSnapshot.getValue(long.class);
             } catch (NullPointerException e) {
-                Log.i(TAG,"lastHeartBeatTime: failed to read datasnapshot");
+                Log.i(TAG, "lastHeartBeatTime: failed to read datasnapshot");
 
 
             }
@@ -392,7 +459,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void requestDeviceInfo() {
 
-        pingStartTime=System.currentTimeMillis();
+        pingStartTime = System.currentTimeMillis();
 
         // invia al dispositivo remoto il comando per avere l'uptime
         sendCommandToDevice(
@@ -426,48 +493,15 @@ public class DeviceViewActivity extends AppCompatActivity {
         viewPager.addOnPageChangeListener(onPageChangeListener);
         viewPager.setCurrentItem(homeFragment);
 
-        // inizializza i riferimenti ai nodi del db Firebase
-
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        String incomingMessagesNode = new StringBuilder()
-                .append("/Groups/")
-                .append(groupName)
-                .append("/Devices/")
-                .append(thisDevice)
-                .append("/IncomingCommands")
-                .toString();
-
-        String lastHeartBeatTimeNode = new StringBuilder()
-                .append("/Groups/")
-                .append(groupName)
-                .append("/Devices/")
-                .append(remoteDeviceName)
-                .append("/lastHeartBeatTime")
-                .toString();
-
-        incomingMessagesRef = firebaseDatabase.getReference(incomingMessagesNode);
-        lastHeartBeatTimeNodeRef = firebaseDatabase.getReference(lastHeartBeatTimeNode);
-
-        // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
-        incomingMessagesRef.addChildEventListener(newCommandsToProcess);
-        lastHeartBeatTimeNodeRef.addValueEventListener(updateLastHeartBeatTime);
-
-        // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
-        sendCommandToDevice(
-                new Message("__requestWelcomeMessage",
-                        "-",
-                        thisDevice)
-        );
-
-        // invia un messaggio al dispositivo remoto con la richiesta dell'ora corrente
-        sendCommandToDevice(
-                new Message("__get_currenttimemillis",
-                        "-",
-                        thisDevice)
-        );
-
         // attiva il ciclo di richieste
         handler = new Handler();
+
+        // inizializza l'interfaccia TCP
+        tcpComm=new TCPComm("10.8.0.14", 9099);
+        tcpComm.setListener(tcpCommListener);
+
+        // inizia il test dell'interfaccia TCP
+        startTCPInterfaceTest();
 
         handler.postDelayed(manageLastHeartBeatTime, timeDifferenceCheckInterval);
 
@@ -478,9 +512,21 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onPause();
 
-        // rimuove i ChildEventListener dai nodi del db di Firebase
-        incomingMessagesRef.removeEventListener(newCommandsToProcess);
-        lastHeartBeatTimeNodeRef.removeEventListener(updateLastHeartBeatTime);
+        /*
+        Se è attiva l'interfaccia TCP, la termina. Altrimenti, rimuove i ChildEventListener dai nodi del db di Firebase
+         */
+        if(isTCPCommInterfaceAvailable){
+
+            tcpComm.setListener(null);
+            tcpComm.terminate();
+
+        } else {
+
+            // rimuove i ChildEventListener dai nodi del db di Firebase
+            incomingMessagesRef.removeEventListener(newCommandsToProcess);
+            lastHeartBeatTimeNodeRef.removeEventListener(updateLastHeartBeatTime);
+
+        }
 
         // rimuove l'OnPageChangeListener al ViewPager
         if (viewPager != null)
@@ -520,7 +566,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                 if (deviceInfoFragment != null) {
 
                     deviceInfoFragment.upTime = inMsg.getBody().replace("\n", "");
-                    deviceInfoFragment.setPingTime(String.format("%d ms", System.currentTimeMillis()-pingStartTime));
+                    deviceInfoFragment.setPingTime(String.format("%d ms", System.currentTimeMillis() - pingStartTime));
 
                     if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
 
@@ -590,7 +636,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "HOME_DIRECTORY":
 
-                if(fileViewerFragment!=null) {
+                if (fileViewerFragment != null) {
 
                     fileViewerFragment.currentDirName = inMsg.getBody().replace("\n", "");
                     if (fileViewerFragment.viewCreated)
@@ -662,7 +708,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                 remoteDeviceCurrentTimeOffset = now - remote;
                 deleteMsg = true;
                 break;
-
 
 
         }
@@ -1118,6 +1163,103 @@ public class DeviceViewActivity extends AppCompatActivity {
                         getAvailableFragmentTitles(),
                         getAvailableFragmentTypes()
                 );
+    }
+
+    private void startTCPInterfaceTest() {
+
+        // mostra l'AlertDialog
+        connectingToDeviceAlertDialog.show();
+
+        // inizializza l'interfaccia TCP
+        tcpComm.init();
+
+        // avvia il conteggio del timeout
+        handler.postDelayed(new TcpInterfaceProbingTimeout(), DEFAULT_TCP_PROBING_REPLY_TIMEOUT);
+
+    }
+
+    private class TcpInterfaceProbingTimeout implements Runnable {
+        @Override
+        public void run() {
+
+            /*
+            E' trascorso il tempo massimo per testare l'interfaccia TCP, senza risultato. Quindi l'interfaccia TCP non è disponibile
+            */
+
+            // chiama il metodo cancel() dell'AlertDialog
+
+            if (connectingToDeviceAlertDialog.isShowing()) {
+                connectingToDeviceAlertDialog.cancel();
+            }
+
+        }
+
+    };
+
+    private AlertDialog connectingToDeviceAlertDialog = new AlertDialog.Builder(this)
+            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialogInterface) {
+
+                    /*
+                    L'interfaccia TCP non è disponibile
+                     */
+
+                    // imposta il flag su falso
+                    setIsTCPCommIntefaceAvailable(false);
+
+                }
+            })
+            .setTitle("TITOLO")
+            .setMessage("MESSAGGIO")
+            .create();
+
+    private void manageTCPInterfaceStatus(){
+
+        if(!isTCPCommInterfaceAvailable) {
+
+            // inizializza i riferimenti ai nodi del db Firebase
+
+            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+            String incomingMessagesNode = new StringBuilder()
+                    .append("/Groups/")
+                    .append(groupName)
+                    .append("/Devices/")
+                    .append(thisDevice)
+                    .append("/IncomingCommands")
+                    .toString();
+
+            String lastHeartBeatTimeNode = new StringBuilder()
+                    .append("/Groups/")
+                    .append(groupName)
+                    .append("/Devices/")
+                    .append(remoteDeviceName)
+                    .append("/lastHeartBeatTime")
+                    .toString();
+
+            incomingMessagesRef = firebaseDatabase.getReference(incomingMessagesNode);
+            lastHeartBeatTimeNodeRef = firebaseDatabase.getReference(lastHeartBeatTimeNode);
+
+            // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
+            incomingMessagesRef.addChildEventListener(newCommandsToProcess);
+            lastHeartBeatTimeNodeRef.addValueEventListener(updateLastHeartBeatTime);
+
+        }
+
+        // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
+        sendCommandToDevice(
+                new Message("__requestWelcomeMessage",
+                        "-",
+                        thisDevice)
+        );
+
+        // invia un messaggio al dispositivo remoto con la richiesta dell'ora corrente
+        sendCommandToDevice(
+                new Message("__get_currenttimemillis",
+                        "-",
+                        thisDevice)
+        );
+
     }
 
 }

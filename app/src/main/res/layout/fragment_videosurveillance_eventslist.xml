@@ -9,7 +9,7 @@
         android:id="@+id/TXV___VSEVENTVIEWERFRAGMENT___HEADER"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ZoneMinder Event Viewer"
+        android:text="@+string/FGM_VIDEOSURVEILLANCE_EVENTSLIST_SELECT_EVENT"
         android:paddingHorizontal="3dp"
         android:paddingVertical="3dp"/>
 
@@ -20,17 +20,17 @@
         android:id="@+id/LLA___VSEVENTVIEWERFRAGMENT___FILTERBUTTONS"
         android:layout_below="@+id/TXV___VSEVENTVIEWERFRAGMENT___HEADER">
 
-        <ImageButton
+        <Button
             android:id="@+id/BTN___VSEVENTVIEWERFRAGMENT___FILTER-ALL"
-            android:layout_width="@dimen/medium_button_width"
-            android:layout_height="@dimen/medium_button_height"
-            android:src="@drawable/no_filter"/>
+            android:layout_width="@dimen/filter_button_width"
+            android:layout_height="@dimen/filter_button_height"
+            android:text="@+string/FGM_VIDEOSURVEILLANCE_EVENTSLIST_FILTER_BUTTON_ALL"/>
 
-        <ImageButton
+        <Button
             android:id="@+id/BTN___VSEVENTVIEWERFRAGMENT___FILTER-NEWONLY"
-            android:layout_width="@dimen/medium_button_width"
-            android:layout_height="@dimen/medium_button_height"
-            android:src="@drawable/new_item"/>
+            android:layout_width="@dimen/filter_button_width"
+            android:layout_height="@dimen/filter_button_height"
+            android:text="@+string/FGM_VIDEOSURVEILLANCE_EVENTSLIST_FILTER_BUTTON_NEW"/>
 
     </LinearLayout>
 

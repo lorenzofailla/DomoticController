@@ -100,5 +100,7 @@
 
     <!-- fragment_videosurveillance_eventslist.xml -->
     <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_SELECT_EVENT">Select an event:</string>
+    <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_FILTER_BUTTON_ALL">ALL</string>
+    <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_FILTER_BUTTON_NEW">NEW</string>
 
 </resources>

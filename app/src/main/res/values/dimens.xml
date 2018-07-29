@@ -16,4 +16,7 @@
     <dimen name="very_small_button_width">24dp</dimen>
     <dimen name="very_small_button_height">24dp</dimen>
 
+    <dimen name="filter_button_width">56dp</dimen>
+    <dimen name="filter_button_height">48dp</dimen>
+
 </resources>

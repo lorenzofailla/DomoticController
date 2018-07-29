@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,6 +20,7 @@ import android.view.LayoutInflater;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -55,11 +55,9 @@ import static apps.android.loref.GeneralUtilitiesLibrary.getTimeMillis;
 
 public class VideoSurveillanceEventsListFragment extends Fragment {
 
-    public boolean viewCreated = false;
-
     private final static int BG_COLOR_SELECTED = Color.argb(32, 0, 0, 127);
 
-    private View fragmentview;
+    private View fragmentView;
 
     private LinearLayoutManager linearLayoutManager;
     private FirebaseRecyclerAdapter<VSEvent, EventsHolder> firebaseAdapter;
@@ -74,8 +72,33 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     private int selectedPosition = -1;
 
-    private String childKeyFilter=null;
-    private String childValueFilter=null;
+    private String childKeyFilter = null;
+    private String childValueFilter = null;
+
+    private View.OnClickListener buttonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            switch (v.getId()) {
+
+                case R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL:
+                    childValueFilter = "";
+                    childKeyFilter = "";
+                    break;
+
+                case R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY:
+                    childValueFilter = "true";
+                    childKeyFilter = "newItem";
+
+                    break;
+
+            }
+
+            generateQuery();
+
+        }
+
+    };
 
     public static class EventsHolder extends RecyclerView.ViewHolder {
 
@@ -96,23 +119,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         public LinearLayout eventLabels;
         public LinearLayout eventOptions;
 
-        private View.OnClickListener buttonClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                switch(v.getId()){
-
-                    case R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL:
-                        break;
-
-                    case R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY:
-                        break;
-
-                }
-
-            }
-
-        };
 
         public EventsHolder(View v) {
             super(v);
@@ -193,18 +199,24 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         // inizializza il nodo del database di Firebase contenente le informazioni sugli eventi
         eventsNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/Events", groupName));
-        childValueFilter="true";
-        childKeyFilter="newItem";
-        generateQuery();
+
 
         // inizializza il riferimento alla directory dove i file dei video saranno scaricati
         downloadDirectoryRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Domotic/VideoSurveillance/DownloadedVideos");
 
         eventsRecyclerView = view.findViewById(R.id.RWV___VSEVENTVIEWERFRAGMENT___EVENTS);
 
-        fragmentview = view;
+        // assegna l'OnClickListener ai pulsanti
+        Button filterAllButton = view.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
+        Button filterNewButton = view.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
+        filterAllButton.setOnClickListener(buttonClickListener);
+        filterNewButton.setOnClickListener(buttonClickListener);
 
-        viewCreated = true;
+        // innesca l'azione di click sul pulsante filtro ALL
+        filterAllButton.callOnClick();
+
+        fragmentView = view;
+
         return view;
 
     }
@@ -218,11 +230,20 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     @Override
     public void onDetach() {
 
+        // rimuove l'assegnazione dell'OnClickListener ai pulsanti
+        if (fragmentView != null) {
+            Button filterAllButton = fragmentView.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
+            Button filterNewButton = fragmentView.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
+            filterAllButton.setOnClickListener(null);
+            filterNewButton.setOnClickListener(null);
+        }
+
+        // rimuove il ValueEventListener dal nodo del database di Firebase
         eventsQuery.removeEventListener(valueEventListener);
+
         super.onDetach();
 
     }
-
 
     private void refreshAdapter() {
 
@@ -267,8 +288,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                                 getTimeMillis(
                                         String.format("%s %s", event.getDate(), event.getTime()),
                                         "yyyy-MM-dd HH.mm.ss")
-                                )
-                        );
+                        )
+                );
 
                 holder.eventMonitorNameTextView.setText(event.getDevice());
                 holder.eventCameraNameTextView.setText(event.getCameraName());
@@ -571,10 +592,9 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     }
 
-    private void generateQuery(){
+    private void generateQuery() {
         eventsQuery = eventsNode.orderByChild(childKeyFilter).equalTo(childValueFilter);
         eventsQuery.addValueEventListener(valueEventListener);
     }
-
 
 }
