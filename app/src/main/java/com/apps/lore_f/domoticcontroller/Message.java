@@ -33,11 +33,4 @@ public class Message {
         return replyto;
     }
 
-    /*
-    public byte[] getTCPData() {
-
-        return String.format("@COMMAND?header=%s&body=%s&replyto=%s", header, body, replyto).getBytes();
-
-    }*/
-
 }

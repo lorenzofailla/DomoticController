@@ -40,6 +40,8 @@
     <string name="ALERTDIALOG_TITLE_CONFIRM_DELETE_FROM_CLOUD">Confirm removal.</string>
     <string name="ALERTDIALOG_TITLE_REMOTE_DEVICE_NOT_RESPONDING">Remote device is off-line</string>
     <string name="ALERTDIALOG_TITLE_PERMISSION_NOT_GRANTED">Permission not granted</string>
+    <string name="ALERTDIALOG_TITLE_PLEASE_WAIT">Please wait</string>
+    <string name="ALERTDIALOG_MESSAGE_DEVICE_CONNECTION">Connecting to device via TCP...</string>
 
     <!-- ***   - Group selection -->
     <string name="GROUP_SELECTION_HEADER">Let\'s select a group!</string>
@@ -73,6 +75,9 @@
     <string name="DEVICEVIEW_LABEL_VPN_STATUS_NOT_AVAILABLE">Not available.</string>
     <string name="DEVICEVIEW_LABEL_VPN_STATUS_NOT_CONNECTED">Not connected.</string>
     <string name="DEVICEVIEW_LABEL_VPN_STATUS_CONNECTED">Connected.</string>
+    <string name="DEVICEVIEW_LABEL_TCP_STATUS">TCP Status:</string>
+    <string name="DEVICEVIEW_LABEL_TCP_STATUS_NOT_CONNECTED">Unreachable.</string>
+    <string name="DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED">Connected.</string>
     <string name="DEVICEVIEW_LABEL_LASTHEARTBEAT_TIME">Last heartbeat:</string>
     <string name="DEVICEVIEW_LABEL_DEVICE_OPERATIONS">Device Operations:</string>
     <string name="DEVICEVIEW_REFRESHING_DEVICE_CONNECTION">Connecting to device...</string>

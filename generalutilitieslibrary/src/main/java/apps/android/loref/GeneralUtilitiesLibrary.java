@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import android.util.Base64;
 import java.util.Calendar;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -20,6 +21,19 @@ public class GeneralUtilitiesLibrary {
     private static final long WEEK_MS=604800000L;
     private static final long MONTH_MS=2419200000L;
     private static final long YEAR_MS=29030400000L;
+
+    public static String decode(String rawData){
+
+        try {
+            return new String(decompress(Base64.decode(rawData, Base64.DEFAULT)), "UTF-8");
+
+        } catch (IOException | DataFormatException e) {
+
+            return e.getMessage();
+
+        }
+
+    }
 
     public static byte[] decompress(byte[] data) throws IOException, DataFormatException {
         Inflater inflater = new Inflater();

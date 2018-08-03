@@ -44,7 +44,10 @@ public class DeviceInfoFragment extends Fragment {
 
     private static final String TAG = "DeviceInfoFragment";
 
-    public DeviceViewActivity parent;
+    private DeviceViewActivity parent;
+    public void setParent(DeviceViewActivity p){
+        parent = p;
+    }
 
     // VPN management
     private boolean isVPNConnected;
@@ -143,6 +146,22 @@ public class DeviceInfoFragment extends Fragment {
 
         // inizializza l'handler alla view, in questo modo i componenti possono essere ritrovati
         fragmentView = view;
+
+        // inizializza la visualizzazione dello stato della connessione TCP
+        int labelToShow = R.string.GENERIC_PLACEHOLDER_WAITING;
+
+        if(parent.getIsTCPCommInterfaceAvailable()){
+
+            labelToShow = R.string.DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED;
+
+        } else {
+
+            labelToShow = R.string.DEVICEVIEW_LABEL_TCP_STATUS_NOT_CONNECTED;
+
+        }
+
+        TextView tcpConnectionStatusLabel = view.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE);
+        tcpConnectionStatusLabel.setText(labelToShow);
 
         // assegna un OnClickListener ai pulsanti
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___CLEARLOG).setOnClickListener(onClickListener);

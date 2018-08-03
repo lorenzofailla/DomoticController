@@ -122,7 +122,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                 app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
                 android:id="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_LABEL"
-                android:text="@string/DEVICEVIEW_LABEL_VPN_STATUS"/>
+                android:text="@string/DEVICEVIEW_LABEL_TCP_STATUS"/>
 
             <TextView
                 android:id="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE"
@@ -130,7 +130,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
                 app:layout_constraintTop_toBottomOf="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_LABEL"
-                android:text="@string/GENERIC_PLACEHOLDER_WAITING"                 />
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"/>
 
         </android.support.constraint.ConstraintLayout>
 

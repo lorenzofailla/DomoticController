@@ -15,6 +15,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.EditText;
@@ -28,11 +29,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.DataFormatException;
 
 import loref.android.apps.androidtcpcomm.TCPComm;
 import loref.android.apps.androidtcpcomm.TCPCommListener;
+
+import static apps.android.loref.GeneralUtilitiesLibrary.decode;
+import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
 public class DeviceViewActivity extends AppCompatActivity {
 
@@ -51,8 +60,12 @@ public class DeviceViewActivity extends AppCompatActivity {
     // TCP Connection Interface
     private TCPComm tcpComm;
     private boolean isTCPCommInterfaceAvailable = false;
-    private final static long DEFAULT_TCP_PROBING_REPLY_TIMEOUT = 5000;
+    private final static long DEFAULT_TCP_PROBING_REPLY_TIMEOUT = 1000;
     private AlertDialog connectingToDeviceAlertDialog;
+
+    public TCPComm getTcpComm() {
+        return tcpComm;
+    }
 
     public boolean getIsTCPCommInterfaceAvailable() {
         return isTCPCommInterfaceAvailable;
@@ -71,12 +84,17 @@ public class DeviceViewActivity extends AppCompatActivity {
             L'interfaccia TCP è disponibile
              */
 
-            // dismette la finestra di dialogo, se presente
-            if (connectingToDeviceAlertDialog.isShowing()) {
-                connectingToDeviceAlertDialog.dismiss();
-            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // dismette la finestra di dialogo, se presente
+                    if (connectingToDeviceAlertDialog.isShowing()) {
+                        connectingToDeviceAlertDialog.dismiss();
+                    }
+                    setIsTCPCommIntefaceAvailable(true);
+                }
+            });
 
-            setIsTCPCommIntefaceAvailable(true);
 
         }
 
@@ -87,23 +105,74 @@ public class DeviceViewActivity extends AppCompatActivity {
             L'interfaccia TCP non è disponibile
              */
 
-            // pone a false il flag isTCPCommInterfaceAvailable
-            setIsTCPCommIntefaceAvailable(false);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // pone a false il flag isTCPCommInterfaceAvailable
+                    setIsTCPCommIntefaceAvailable(false);
+                }
+            });
+
 
         }
 
         @Override
         public void onDataWriteError(Exception e) {
 
+            /*
+            L'interfaccia TCP non è disponibile
+             */
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // pone a false il flag isTCPCommInterfaceAvailable
+                    setIsTCPCommIntefaceAvailable(false);
+                }
+            });
+
         }
 
         @Override
         public void onDataReadError(Exception e) {
 
+            /*
+            L'interfaccia TCP non è disponibile
+             */
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // pone a false il flag isTCPCommInterfaceAvailable
+                    setIsTCPCommIntefaceAvailable(false);
+                }
+            });
+
         }
 
         @Override
         public void onDataLineReceived(byte[] data) {
+
+            String logData;
+            try {
+                logData = new String(data, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                logData = "";
+            }
+            Log.d(TAG, "TCP data received: " + logData);
+
+            final Message inCmd = getCommandFromBytesArray(data);
+            if(!inCmd.getHeader().equals("")){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        processIncomingMessage(inCmd,"null");
+                    }
+                });
+
+
+
+            }
 
         }
 
@@ -157,6 +226,9 @@ public class DeviceViewActivity extends AppCompatActivity {
     private String[] cameraIDs;
     private int nOfAvailableCameras;
     private int homeFragment;
+
+    int deviceInfoFragmentIndex =0;
+    int firstCameraFragmentIndex = 0;
 
     private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -358,6 +430,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_view);
 
@@ -487,13 +560,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onResume();
 
-        initFragments();
-
-        viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
-        viewPager.setAdapter(collectionPagerAdapter);
-        viewPager.addOnPageChangeListener(onPageChangeListener);
-
-
         // attiva il ciclo di richieste
         handler = new Handler();
 
@@ -504,6 +570,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         // inizia il test dell'interfaccia TCP
         startTCPInterfaceTest();
 
+        // pianifica
         handler.postDelayed(manageLastHeartBeatTime, timeDifferenceCheckInterval);
 
     }
@@ -540,9 +607,20 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
+    private void initView() {
+
+        initFragments();
+
+        viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
+        viewPager.setAdapter(collectionPagerAdapter);
+        viewPager.addOnPageChangeListener(onPageChangeListener);
+        viewPager.setCurrentItem(homeFragment);
+    }
+
     private void processIncomingMessage(Message inMsg, String msgKey) {
 
-        boolean deleteMsg = false;
+        boolean deleteMsg = (msgKey!="null");
+        String decodedBody = decode(inMsg.getBody());
 
         switch (inMsg.getHeader()) {
 
@@ -555,9 +633,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                 // aggiorna il valore del tempo dell'ultima risposta
                 lastOnlineReply = System.currentTimeMillis();
 
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
-
                 break;
 
             case "UPTIME_REPLY":
@@ -566,15 +641,12 @@ public class DeviceViewActivity extends AppCompatActivity {
                 // modifica il l'aspetto del fragment
                 if (deviceInfoFragment != null) {
 
-                    deviceInfoFragment.upTime = inMsg.getBody().replace("\n", "");
+                    deviceInfoFragment.upTime = decodedBody.replace("\n", "");
                     deviceInfoFragment.setPingTime(String.format("%d ms", System.currentTimeMillis() - pingStartTime));
 
                     if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
 
                 }
-
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
 
                 break;
 
@@ -583,14 +655,11 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 // modifica il l'aspetto del fragment
                 if (deviceInfoFragment != null) {
-                    deviceInfoFragment.freeSpace = inMsg.getBody().replace("\n", "");
+                    deviceInfoFragment.freeSpace = decodedBody.replace("\n", "");
 
                     if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
 
                 }
-
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
 
                 break;
 
@@ -602,9 +671,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                 // invia un instant message con la richiesta della lista dei torrents
                 requestTorrentsList();
 
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
-
                 break;
 
             case "TORRENTS_LIST":
@@ -614,11 +680,11 @@ public class DeviceViewActivity extends AppCompatActivity {
                 }
 
                 // imposta i parametri di visualizzazione del fragment
-                torrentViewerFragment.nOfTorrents = inMsg.getBody().split("\n").length - 2;
+                torrentViewerFragment.nOfTorrents = decodedBody.split("\n").length - 2;
 
                 if (torrentViewerFragment.nOfTorrents > 0) {
 
-                    torrentViewerFragment.rawTorrentDataLines = inMsg.getBody().split("\n");
+                    torrentViewerFragment.rawTorrentDataLines = decodedBody.split("\n");
 
                 } else {
 
@@ -630,25 +696,19 @@ public class DeviceViewActivity extends AppCompatActivity {
                 if (torrentViewerFragment.viewCreated)
                     torrentViewerFragment.updateContent();
 
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
-
                 break;
 
             case "HOME_DIRECTORY":
 
                 if (fileViewerFragment != null) {
 
-                    fileViewerFragment.currentDirName = inMsg.getBody().replace("\n", "");
+                    fileViewerFragment.currentDirName = decodedBody.replace("\n", "");
                     if (fileViewerFragment.viewCreated)
                         fileViewerFragment.updateContent();
 
                     // invia un instant message con la richiesta del contenuto della directory home ricevuta
-                    sendCommandToDevice(new Message("__get_directory_content", inMsg.getBody(), thisDevice));
+                    sendCommandToDevice(new Message("__get_directory_content", decodedBody, thisDevice));
                 }
-
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
 
                 break;
 
@@ -656,13 +716,10 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 if (fileViewerFragment != null) {
 
-                    fileViewerFragment.rawDirData = inMsg.getBody();
+                    fileViewerFragment.rawDirData = decodedBody;
                     if (fileViewerFragment.viewCreated)
                         fileViewerFragment.updateContent();
                 }
-
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
 
                 break;
 
@@ -670,12 +727,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 Notification notification = new NotificationCompat.Builder(this)
                         .setContentTitle("Message from " + inMsg.getReplyto())
-                        .setContentText(inMsg.getBody())
+                        .setContentText(decodedBody)
                         .setSmallIcon(R.drawable.home)
                         .build();
-
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
 
                 break;
 
@@ -687,16 +741,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 startService(intent);
 
-                // valorizza il flag per eliminare il messaggio dalla coda
-                deleteMsg = true;
-
                 break;
 
             case "SSH_SHELL_READY":
-
-                // avvia il fragment
-                //startSSHFragment();
-                deleteMsg = true;
 
                 break;
 
@@ -704,12 +751,29 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 // aggiorna il valore dell'ora corrente del dispositivo remoto, per tener conto dell'errore nel calcolo dell'heartbeat time
                 long now = System.currentTimeMillis();
-                long remote = Long.parseLong(inMsg.getBody());
+                long remote = Long.parseLong(decodedBody);
 
                 remoteDeviceCurrentTimeOffset = now - remote;
-                deleteMsg = true;
                 break;
 
+            case "FRAME_IMAGE_DATA":
+
+                // recupera lì'ID della telecamera e i dati del fotogramma
+
+                    String frameCameraID=decodedBody.substring(0,1);
+                    String frameData=decodedBody.substring(7);
+
+                    int cameraIndex = Integer.parseInt(frameCameraID);
+                    VSCameraViewerFragment fragment = (VSCameraViewerFragment) getAvailableFragments()[firstCameraFragmentIndex+cameraIndex-1];
+
+                    try {
+                        fragment.refreshFrame((decompress(Base64.decode(frameData, Base64.DEFAULT))));
+                    } catch (IOException | DataFormatException e) {
+
+                    }
+
+
+                break;
 
         }
 
@@ -723,7 +787,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         if (isTCPCommInterfaceAvailable) {
 
-            //tcpComm.sendData(command.getTCPData());
+            tcpComm.sendData(getCommandAsByteArray(command));
+
 
         } else {
 
@@ -992,8 +1057,8 @@ public class DeviceViewActivity extends AppCompatActivity {
          */
         List<Fragment> result = new ArrayList<>();
 
-        int deviceInfoFragmentIndex = 0;
-        int firstCameraFragmentIndex = 0;
+        deviceInfoFragmentIndex = 0;
+        firstCameraFragmentIndex = 0;
 
         int count = 0;
 
@@ -1118,7 +1183,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         if (createDeviceInfoFragment) {
             deviceInfoFragment = new DeviceInfoFragment();
-            deviceInfoFragment.parent = this;
+            deviceInfoFragment.setParent(this);
         }
 
         //
@@ -1191,8 +1256,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     }
                 })
-                .setTitle("TITOLO")
-                .setMessage("MESSAGGIO")
+                .setTitle(R.string.ALERTDIALOG_TITLE_PLEASE_WAIT)
+                .setMessage(R.string.ALERTDIALOG_MESSAGE_DEVICE_CONNECTION)
                 .create();
 
         // mostra l'AlertDialog
@@ -1223,9 +1288,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
     }
-
-    ;
-
 
     private void manageTCPInterfaceStatus() {
 
@@ -1259,7 +1321,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        viewPager.setCurrentItem(homeFragment);
+        initView();
 
         // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
         sendCommandToDevice(
@@ -1274,6 +1336,74 @@ public class DeviceViewActivity extends AppCompatActivity {
                         "-",
                         thisDevice)
         );
+
+    }
+
+    private byte[] getCommandAsByteArray(Message command) {
+        return String.format("@COMMAND?header=%s&body=%s\n", command.getHeader(), command.getBody()).getBytes();
+    }
+
+    private Message getCommandFromBytesArray(byte[] rawData) {
+
+        Message message = new Message("","","");
+        String rawString="";
+        try {
+
+            rawString = new String(rawData, "UTF-8");
+
+        } catch (UnsupportedEncodingException e) {
+
+            return message;
+
+        }
+
+String[] mainLine = rawString.split("[?]");
+        if(mainLine.length!=2){
+            return message;
+        }
+
+        String[] lines = mainLine[1].split("[&]");
+
+        if (lines.length != 3) {
+
+            return message;
+
+        } else {
+
+            String header="";
+            String body="";
+            String replyto="";
+
+            for (String l : lines) {
+
+                String[] struct = l.split("[=]");
+
+                if (struct.length != 2) {
+
+                    return message;
+
+                } else {
+
+                    switch (struct[0]) {
+                        case "header":
+                            header = struct[1];
+                            break;
+                        case "body":
+                            body = struct[1];
+                            break;
+                        case "replyto":
+                            replyto = struct[1];
+                            break;
+
+                    }
+
+                }
+
+            }
+
+            return new Message(header,body,replyto);
+
+        }
 
     }
 

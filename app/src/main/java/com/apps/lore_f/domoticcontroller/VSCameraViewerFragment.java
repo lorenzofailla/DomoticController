@@ -143,13 +143,13 @@ public class VSCameraViewerFragment extends Fragment {
                 VSShotPicture shotData = dataSnapshot.getValue(VSShotPicture.class);
 
                 if (shotData != null) {
-                    byte[] shotImageData = new byte[0];
+                    byte[] shotImageData;
                     try {
-                        shotImageData = decompress(Base64.decode(shotData.getImgData(), Base64.DEFAULT));
-                        shotImage = BitmapFactory.decodeByteArray(shotImageData, 0, shotImageData.length);
 
-                        // adatta le dimensioni dell'immagine a quelle disponibili su schermo
-                        shotView.setImageBitmap(shotImage);
+                        shotImageData = decompress(Base64.decode(shotData.getImgData(), Base64.DEFAULT));
+
+                        refreshFrame(shotImageData);
+
 
                     } catch (IOException | DataFormatException e) {
 
@@ -263,7 +263,10 @@ public class VSCameraViewerFragment extends Fragment {
 
 
         statusNode.addValueEventListener(deviceStatusEventListener);
-        shotNode.addValueEventListener(lastShotEventListener);
+
+        if(!parent.getIsTCPCommInterfaceAvailable()) {
+            shotNode.addValueEventListener(lastShotEventListener);
+        }
 
         youTubeLiveBroadcastStatusNode.addValueEventListener(liveBroadcastStatusListener);
         youTubeLiveBroadcastAddressNode.addValueEventListener(liveBroadcastAddressListener);
@@ -319,16 +322,25 @@ public class VSCameraViewerFragment extends Fragment {
         youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastData", parent.groupName, parent.remoteDeviceName, cameraID));
 
         statusNode.removeEventListener(deviceStatusEventListener);
-        shotNode.removeEventListener(lastShotEventListener);
+        if(!parent.getIsTCPCommInterfaceAvailable()) {
+            shotNode.removeEventListener(lastShotEventListener);
+        }
         youTubeLiveBroadcastStatusNode.removeEventListener(liveBroadcastStatusListener);
         youTubeLiveBroadcastAddressNode.removeEventListener(liveBroadcastAddressListener);
 
     }
 
     public void requestSingleShot() {
-        parent.sendCommandToDevice(
-                new Message("__request_shot", cameraID, parent.thisDevice)
-        );
+
+        if(parent.getIsTCPCommInterfaceAvailable()){
+            parent.sendCommandToDevice(
+                    new Message("__request_shot_data", cameraID, parent.thisDevice)
+            );
+        } else {
+            parent.sendCommandToDevice(
+                    new Message("__request_shot", cameraID, parent.thisDevice)
+            );
+        }
 
     }
 
@@ -492,6 +504,18 @@ public class VSCameraViewerFragment extends Fragment {
         Intent intent = new Intent(getContext(), YouTubeLiveViewActivity.class);
         intent.putExtra("__live_broadcast_ID", liveBroadcastID);
         startActivity(intent);
+
+    }
+
+    public void refreshFrame(byte[] data){
+
+        Bitmap image = BitmapFactory.decodeByteArray(data, 0, data.length);
+        if(shotView!=null) {
+
+            // adatta le dimensioni dell'immagine a quelle disponibili su schermo
+            shotView.setImageBitmap(image);
+
+        }
 
     }
 
