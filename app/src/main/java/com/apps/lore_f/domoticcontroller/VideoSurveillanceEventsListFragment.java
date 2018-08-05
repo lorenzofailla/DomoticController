@@ -65,7 +65,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     private RecyclerView eventsRecyclerView;
     private File downloadDirectoryRoot;
     private DatabaseReference eventsNode;
-    private Query eventsQuery;
+    private DatabaseReference eventsQuery;
     private String groupName;
 
     private String[] eventKeys;
@@ -199,7 +199,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         // inizializza il nodo del database di Firebase contenente le informazioni sugli eventi
         eventsNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/Events", groupName));
-
 
         // inizializza il riferimento alla directory dove i file dei video saranno scaricati
         downloadDirectoryRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Domotic/VideoSurveillance/DownloadedVideos");
@@ -593,8 +592,17 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     }
 
     private void generateQuery() {
-        eventsQuery = eventsNode.orderByChild(childKeyFilter).equalTo(childValueFilter);
+        if(childKeyFilter!="") {
+
+            eventsQuery = eventsNode.orderByChild(childKeyFilter).equalTo(childValueFilter).getRef();
+
+        } else {
+
+            eventsQuery =eventsNode;
+        }
+
         eventsQuery.addValueEventListener(valueEventListener);
+
     }
 
 }
