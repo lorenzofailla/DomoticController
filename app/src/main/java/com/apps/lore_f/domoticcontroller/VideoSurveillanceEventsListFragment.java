@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,11 +27,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Space;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.vision.text.Line;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -49,6 +52,8 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 
 import static android.content.ContentValues.TAG;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 import static apps.android.loref.GeneralUtilitiesLibrary.getTimeElapsed;
 import static apps.android.loref.GeneralUtilitiesLibrary.getTimeMillis;
@@ -65,7 +70,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     private RecyclerView eventsRecyclerView;
     private File downloadDirectoryRoot;
     private DatabaseReference eventsNode;
-    private DatabaseReference eventsQuery;
+    private Query eventsQuery;
     private String groupName;
 
     private String[] eventKeys;
@@ -107,6 +112,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         public ImageButton deleteEventButton;
         public ImageButton shareEventButton;
+        public ImageButton lockEventButton;
+
         public ProgressBar progressBar;
         public TextView eventCameraNameTextView;
 
@@ -115,10 +122,9 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         public ImageView newItemImage;
         public ImageView lockedItemImage;
 
-        public RelativeLayout eventContainer;
+        public RoundRect eventContainer;
         public LinearLayout eventLabels;
         public LinearLayout eventOptions;
-
 
         public EventsHolder(View v) {
             super(v);
@@ -126,17 +132,19 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             eventDateTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDATETIME);
             eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDEVICENAME);
             eventCameraNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTCAMERANAME);
-            shareEventButton = v.findViewById(R.id.BTN___VSEVENTROW___SHAREEVENT);
-            deleteEventButton = v.findViewById(R.id.BTN___VSEVENTROW___DELETEEVENT);
-            progressBar = v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
+            shareEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___SHAREEVENT);
+            deleteEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___DELETEEVENT);
+            lockEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___LOCKEVENT);
 
-            eventPreviewImage = v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
-            newItemImage = v.findViewById(R.id.IMG___VSEVENTROW___NEWITEM);
-            lockedItemImage = v.findViewById(R.id.IMG___VSEVENTROW___LOCKEDITEM);
+            progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
 
-            eventContainer = v.findViewById(R.id.RLA___VSEVENTROW___EVENT);
-            eventLabels = v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
-            eventOptions = v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
+            eventPreviewImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
+            newItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___NEWITEM);
+            lockedItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___LOCKEDITEM);
+
+            eventContainer = (RoundRect) v.findViewById(R.id.RRE___VSEVENTROW___CONTAINER);
+            eventLabels = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
+            eventOptions = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
 
         }
 
@@ -203,11 +211,11 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         // inizializza il riferimento alla directory dove i file dei video saranno scaricati
         downloadDirectoryRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Domotic/VideoSurveillance/DownloadedVideos");
 
-        eventsRecyclerView = view.findViewById(R.id.RWV___VSEVENTVIEWERFRAGMENT___EVENTS);
+        eventsRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___VSEVENTVIEWERFRAGMENT___EVENTS);
 
         // assegna l'OnClickListener ai pulsanti
-        Button filterAllButton = view.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
-        Button filterNewButton = view.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
+        Button filterAllButton = (Button) view.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
+        Button filterNewButton = (Button) view.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
         filterAllButton.setOnClickListener(buttonClickListener);
         filterNewButton.setOnClickListener(buttonClickListener);
 
@@ -231,8 +239,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         // rimuove l'assegnazione dell'OnClickListener ai pulsanti
         if (fragmentView != null) {
-            Button filterAllButton = fragmentView.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
-            Button filterNewButton = fragmentView.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
+            Button filterAllButton = (Button) fragmentView.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
+            Button filterNewButton = (Button) fragmentView.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
             filterAllButton.setOnClickListener(null);
             filterNewButton.setOnClickListener(null);
         }
@@ -270,16 +278,41 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                 // se è un nuovo evento, mostra l'immagine newItemImage
                 if (event.isNewItem().equals("true")) {
-                    holder.newItemImage.setVisibility(View.VISIBLE);
+
+                    holder.newItemImage.setVisibility(VISIBLE);
+
                 } else {
-                    holder.newItemImage.setVisibility(View.GONE);
+
+                    holder.newItemImage.setVisibility(GONE);
+
                 }
 
-                // se è un evento bloccato, mostra l'immagine lockedItemImage
+                // gestisce la visualizzazione degli elementi in funzione del valore del campo "lockedItem"
                 if (event.isLockedItem().equals("true")) {
-                    holder.lockedItemImage.setVisibility(View.VISIBLE);
+
+                    holder.lockedItemImage.setVisibility(VISIBLE);
+                    holder.deleteEventButton.setVisibility(GONE);
+
+                    holder.lockEventButton.setImageResource(R.drawable.unlock);
+                    holder.lockEventButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            markAsLocked(eventKeys[position], "false");
+                        }
+                    });
+
                 } else {
-                    holder.lockedItemImage.setVisibility(View.GONE);
+
+                    holder.lockedItemImage.setVisibility(GONE);
+                    holder.deleteEventButton.setVisibility(VISIBLE);
+
+                    holder.lockEventButton.setImageResource(R.drawable.lock);
+                    holder.lockEventButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            markAsLocked(eventKeys[position], "true");
+                        }
+                    });
                 }
 
                 holder.eventDateTextView.setText(
@@ -312,7 +345,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                             selectedPosition = position;
 
                             // segna l'evento come già letto
-                            markAsRead(eventKeys[position]);
+                            markAsRead(eventKeys[position], "false");
 
                         }
 
@@ -321,7 +354,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                     /*
                     mostra il pulsante per condividere il video dell'evento
                      */
-                    holder.shareEventButton.setVisibility(View.VISIBLE);
+                    holder.shareEventButton.setVisibility(VISIBLE);
                     holder.shareEventButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -332,7 +365,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                 } else {
                     //
                     // non esiste
-
 
                     // imposta l'OnClickListener per scaricare il video in una cartella locale
                     holder.eventContainer.setOnClickListener(new View.OnClickListener() {
@@ -349,10 +381,10 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                     });
 
-                                        /*
+                    /*
                     nasconde il pulsante per condividere il video dell'evento
                      */
-                    holder.shareEventButton.setVisibility(View.GONE);
+                    holder.shareEventButton.setVisibility(GONE);
 
                 }
 
@@ -388,22 +420,28 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                             public void onClick(View view) {
 
                                 ViewGroup.LayoutParams imgLayoutParams = holder.eventPreviewImage.getLayoutParams();
+                                Space s = (Space) fragmentView.findViewById(R.id.SPC___VSEVENTROW___BOTTOM_LEFT);
 
-                                if (holder.eventLabels.getVisibility() == View.VISIBLE) {
-                                    holder.eventLabels.setVisibility(View.GONE);
-                                    holder.eventOptions.setVisibility(View.VISIBLE);
+                                if (holder.eventLabels.getVisibility() == VISIBLE) {
 
-                                    RelativeLayout imgParent = (RelativeLayout) holder.eventPreviewImage.getParent();
+                                    // ingrandisce l'immagine
+                                    holder.eventLabels.setVisibility(GONE);
+                                    holder.eventOptions.setVisibility(VISIBLE);
+
+                                    RoundRect container = (RoundRect) fragmentView.findViewById(R.id.RRE___VSEVENTROW___CONTAINER);
                                     double imgRatio = 1.0 * imgLayoutParams.height / imgLayoutParams.width;
-
-                                    imgLayoutParams.width = imgParent.getWidth();
-                                    imgLayoutParams.height = (int) (imgParent.getWidth() * imgRatio);
+                                    int w = container.getNetWidth();
+                                    imgLayoutParams.width = w;
+                                    imgLayoutParams.height = (int) (w * imgRatio);
 
                                 } else {
 
-                                    holder.eventLabels.setVisibility(View.VISIBLE);
-                                    holder.eventOptions.setVisibility(View.GONE);
+                                    // gestisce la visualizzazione dei pulsanti di opzione
 
+                                    holder.eventLabels.setVisibility(VISIBLE);
+                                    holder.eventOptions.setVisibility(GONE);
+
+                                    // riporta l'immagine al valore originale
                                     imgLayoutParams.width = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_width);
                                     imgLayoutParams.height = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_height);
                                 }
@@ -454,7 +492,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     private void startCloudDownloadService(ProgressBar p) {
 
-        p.setVisibility(View.VISIBLE);
+        p.setVisibility(VISIBLE);
         p.setProgress(50);
 
     }
@@ -498,7 +536,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             this.eventKey = eventKey;
 
             progressBar.setIndeterminate(true);
-            progressBar.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(VISIBLE);
         }
 
         protected Void doInBackground(Void... param) {
@@ -525,13 +563,13 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                             // scaricamento completato
 
                             // nasconde la progressbar
-                            progressBar.setVisibility(View.GONE);
+                            progressBar.setVisibility(GONE);
 
                             // esegue il video
                             playVideo(localFileUrl);
 
                             // segna l'evento come già visto
-                            markAsRead(eventKey);
+                            markAsRead(eventKey, "false");
 
 
                         }
@@ -562,9 +600,15 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     }
 
-    private void markAsRead(String eventKey) {
+    private void markAsRead(String eventKey, String value) {
 
-        eventsNode.child(eventKey).child("newItem").setValue(false);
+        eventsNode.child(eventKey).child("newItem").setValue(value);
+
+    }
+
+    private void markAsLocked(String eventKey, String value) {
+
+        eventsNode.child(eventKey).child("lockedItem").setValue(value);
 
     }
 
@@ -592,13 +636,16 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     }
 
     private void generateQuery() {
-        if(childKeyFilter!="") {
 
-            eventsQuery = eventsNode.orderByChild(childKeyFilter).equalTo(childValueFilter).getRef();
+
+        if (!childKeyFilter.equals("")) {
+
+            //eventsNode.orderByChild(childKeyFilter).equalTo(childValueFilter).addValueEventListener(valueEventListener);
+            eventsQuery = eventsNode.orderByChild(childKeyFilter).equalTo(childValueFilter);
 
         } else {
 
-            eventsQuery =eventsNode;
+            eventsQuery = eventsNode.orderByKey();
         }
 
         eventsQuery.addValueEventListener(valueEventListener);

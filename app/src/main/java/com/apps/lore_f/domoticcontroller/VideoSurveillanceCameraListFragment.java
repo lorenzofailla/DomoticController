@@ -72,10 +72,10 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
         public CamerasHolder(View v) {
             super(v);
 
-            cameraNameTXV = itemView.findViewById(R.id.TXV___VSCAMERADEVICE___DEVICENAME);
-            cameraStatusIVW = itemView.findViewById(R.id.IVW___VSCAMERADEVICE___STATUS);
-            imagePreviewIWV = itemView.findViewById(R.id.IVW___VSCAMERADEVICE___PREVIEW);
-            cameraOwnerTXV = itemView.findViewById(R.id.TXV___VSCAMERADEVICE___DEVICEOWNER);
+            cameraNameTXV = (TextView) itemView.findViewById(R.id.TXV___VSCAMERADEVICE___DEVICENAME);
+            cameraStatusIVW = (ImageView) itemView.findViewById(R.id.IVW___VSCAMERADEVICE___STATUS);
+            imagePreviewIWV = (ImageView) itemView.findViewById(R.id.IVW___VSCAMERADEVICE___PREVIEW);
+            cameraOwnerTXV = (TextView) itemView.findViewById(R.id.TXV___VSCAMERADEVICE___DEVICEOWNER);
 
         }
 
@@ -97,7 +97,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_videosurveillance_cameralist, container, false);
 
-        camerasRecyclerView = view.findViewById(R.id.RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS);
+        camerasRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS);
 
         if (deviceName != null) {
 

@@ -76,9 +76,9 @@ public class GroupSelection extends AppCompatActivity {
         public GroupsHolder(View itemView) {
             super(itemView);
 
-            groupNameTXV = itemView.findViewById(R.id.TXV___ROWGROUP___GROUPNAME);
-            groupDescriptionTXV = itemView.findViewById(R.id.TXV___ROWGROUP___GROUPDESCRIPTION);
-            connectBTN = itemView.findViewById(R.id.BTN___ROWGROUP___CONNECT);
+            groupNameTXV = (TextView) itemView.findViewById(R.id.TXV___ROWGROUP___GROUPNAME);
+            groupDescriptionTXV = (TextView) itemView.findViewById(R.id.TXV___ROWGROUP___GROUPDESCRIPTION);
+            connectBTN = (ImageButton) itemView.findViewById(R.id.BTN___ROWGROUP___CONNECT);
 
         }
 

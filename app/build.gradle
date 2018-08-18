@@ -1,14 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 25
     buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.apps.lore_f.domoticcontroller"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         //testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -29,10 +30,10 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     /*
-            androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-                exclude group: 'com.android.support', module: 'support-annotations'
-            })
-            */
+                androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+                    exclude group: 'com.android.support', module: 'support-annotations'
+                })
+                */
     // Firebase Auth
     // Firebase Cloud Messaging
     implementation 'com.google.firebase:firebase-auth:11.0.2'
@@ -49,7 +50,7 @@ dependencies {
     implementation project(':generalutilitieslibrary')
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation project(':AndroidTCPComm')
-}
+    }
 
 
 apply plugin: 'com.google.gms.google-services'

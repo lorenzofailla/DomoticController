@@ -160,7 +160,7 @@ public class DeviceInfoFragment extends Fragment {
 
         }
 
-        TextView tcpConnectionStatusLabel = view.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE);
+        TextView tcpConnectionStatusLabel = (TextView) view.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE);
         tcpConnectionStatusLabel.setText(labelToShow);
 
         // assegna un OnClickListener ai pulsanti
@@ -204,16 +204,16 @@ public class DeviceInfoFragment extends Fragment {
 
     public void updateView() {
 
-        TextView upTimeReplyTXV = fragmentView.findViewById(R.id.TXV___DEVICEVIEW___UPTIME_VALUE);
+        TextView upTimeReplyTXV = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___UPTIME_VALUE);
         upTimeReplyTXV.setText(upTime);
 
-        TextView freeSpaceTXV = fragmentView.findViewById(R.id.TXV___DEVICEVIEW___FREEDISKSPACE_VALUE);
+        TextView freeSpaceTXV = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___FREEDISKSPACE_VALUE);
         freeSpaceTXV.setText(freeSpace);
 
-        TextView pingTimeTextView = fragmentView.findViewById(R.id.TXV___DEVICEVIEW___RESPONSETIME_VALUE);
+        TextView pingTimeTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___RESPONSETIME_VALUE);
         pingTimeTextView.setText(pingTime);
 
-        TextView lastHeartBeatTextView = fragmentView.findViewById(R.id.TXV___DEVICEVIEW___LASTHEARTBEATTIME_VALUE);
+        TextView lastHeartBeatTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___LASTHEARTBEATTIME_VALUE);
         lastHeartBeatTextView.setText(lastHeartBeat);
 
     }
@@ -253,8 +253,8 @@ public class DeviceInfoFragment extends Fragment {
                 break;
         }
 
-        ImageButton switchButton = fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN);
-        TextView vpnStatusTextView = fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___VPN_STATUS_VALUE);
+        ImageButton switchButton = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN);
+        TextView vpnStatusTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___VPN_STATUS_VALUE);
 
         switchButton.setEnabled(switchButtonEnabled);
         switchButton.setImageResource(drawableToShow);

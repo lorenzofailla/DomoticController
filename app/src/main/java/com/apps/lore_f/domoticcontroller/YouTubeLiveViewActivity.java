@@ -49,7 +49,7 @@ public class YouTubeLiveViewActivity extends YouTubeBaseActivity {
 
     private void startLiveBroadcastView() {
 
-        YouTubePlayerView yt = findViewById(R.id.YTV___VSCAMERAVIEW___LIVEBROADCASTVIEW);
+        YouTubePlayerView yt = (YouTubePlayerView) findViewById(R.id.YTV___VSCAMERAVIEW___LIVEBROADCASTVIEW);
 
         yt.initialize(YOUTUBE, new YouTubePlayer.OnInitializedListener() {
 

@@ -234,10 +234,10 @@ public class VSCameraViewerFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_videosurveillance_cameraviewer, container, false);
 
-        TextView cameraNameTXVview = view.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME);
+        TextView cameraNameTXVview = (TextView) view.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME);
         cameraNameTXVview.setText(cameraName);
 
-        shotView = view.findViewById(R.id.IVW___VSCAMERAVIEW___SHOTVIEW);
+        shotView = (ImageView) view.findViewById(R.id.IVW___VSCAMERAVIEW___SHOTVIEW);
         shotView.setOnClickListener(onClickListener);
 
         view.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTSHOT).setOnClickListener(onClickListener);
@@ -387,7 +387,7 @@ public class VSCameraViewerFragment extends Fragment {
                 break;
         }
 
-        ImageButton statusSwitch = fragmentView.findViewById(R.id.BTN___VSCAMERAVIEW___SWITCHSTATUS);
+        ImageButton statusSwitch = (ImageButton) fragmentView.findViewById(R.id.BTN___VSCAMERAVIEW___SWITCHSTATUS);
         statusSwitch.setImageResource(resourceToShow);
 
     }
@@ -491,7 +491,7 @@ public class VSCameraViewerFragment extends Fragment {
 
         if (fragmentView != null) {
 
-            ImageButton imageButton = fragmentView.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTVIDEOSTREAM);
+            ImageButton imageButton = (ImageButton) fragmentView.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTVIDEOSTREAM);
             imageButton.setImageResource(drawableToShow);
             imageButton.setEnabled(liveStreamRequestEnabled);
 

@@ -10,6 +10,9 @@
     <dimen name="medium_button_width">48dp</dimen>
     <dimen name="medium_button_height">48dp</dimen>
 
+    <dimen name="mediumsmall_button_width">40dp</dimen>
+    <dimen name="mediumsmall_button_height">40dp</dimen>
+
     <dimen name="small_button_width">32dp</dimen>
     <dimen name="small_button_height">32dp</dimen>
 
@@ -18,5 +21,7 @@
 
     <dimen name="filter_button_width">56dp</dimen>
     <dimen name="filter_button_height">48dp</dimen>
+
+    <dimen name="spacer_square_dim">25dp</dimen>
 
 </resources>

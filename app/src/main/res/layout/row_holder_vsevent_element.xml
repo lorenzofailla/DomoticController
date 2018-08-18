@@ -1,40 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/RLA___VSEVENTROW___EVENT"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <com.apps.lore_f.domoticcontroller.RoundRect
+        android:id="@+id/RRE___VSEVENTROW___CONTAINER"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:RR_line_thickness="2dp"
+        app:RR_padding="12dp"
+        app:RR_radius="15dp"
+        app:layout_constraintBottom_toBottomOf="@id/SPC___VSEVENTROW___BOTTOM_LEFT"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Space
+        android:id="@+id/SPC___VSEVENTROW___TOP_LEFT"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim" />
+
+    <Space
+        android:id="@+id/SPC___VSEVENTROW___TOP_LEFT2"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim"
+        app:layout_constraintLeft_toRightOf="@id/SPC___VSEVENTROW___TOP_LEFT" />
+
+    <com.apps.lore_f.domoticcontroller.BlankRect
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/SPC___VSEVENTROW___TOP_LEFT"
+        app:layout_constraintLeft_toLeftOf="@+id/IVW___VSEVENTROW___EVENTTYPE"
+        app:layout_constraintRight_toRightOf="@+id/IVW___VSEVENTROW___LOCKEDITEM"
+        app:layout_constraintTop_toTopOf="@+id/SPC___VSEVENTROW___TOP_LEFT" />
 
     <ImageView
-        android:id="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
-        android:layout_width="@dimen/std_event_preview_thumbnail_width"
-        android:layout_height="@dimen/std_event_preview_thumbnail_height"
-        android:src="@drawable/dummy_movie" />
+        android:id="@+id/IVW___VSEVENTROW___EVENTTYPE"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim"
+        android:src="@drawable/run"
+        app:layout_constraintLeft_toRightOf="@id/SPC___VSEVENTROW___TOP_LEFT2" />
 
+    <ImageView
+        android:id="@+id/IVW___VSEVENTROW___NEWITEM"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim"
+        android:src="@drawable/new_item"
+        android:visibility="gone"
+        app:layout_constraintLeft_toRightOf="@+id/IVW___VSEVENTROW___EVENTTYPE" />
 
-    <LinearLayout
+    <ImageView
+        android:id="@+id/IVW___VSEVENTROW___LOCKEDITEM"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim"
+        android:src="@drawable/lock"
+        android:visibility="gone"
+        app:layout_constraintLeft_toRightOf="@+id/IVW___VSEVENTROW___NEWITEM" />
 
-        android:id="@+id/LLA___VSEVENTROW___LABELS"
+    <Space
+        android:id="@+id/SPC___VSEVENTROW___TOP_RIGHT"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Space
+        android:id="@+id/SPC___VSEVENTROW___TOP_RIGHT2"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim"
+        app:layout_constraintRight_toLeftOf="@+id/SPC___VSEVENTROW___TOP_RIGHT" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/CLA___VSEVENTROW___EVENTDATA"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/LLA___VSEVENTROW___OPTIONS"
+        app:layout_constraintLeft_toRightOf="@id/SPC___VSEVENTROW___TOP_LEFT"
+        app:layout_constraintTop_toBottomOf="@id/SPC___VSEVENTROW___TOP_LEFT">
 
-        android:layout_toRightOf="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/TXV___VSEVENTROW___EVENTCAMERANAME"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        <ImageView
+            android:id="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
+            android:layout_width="@dimen/std_event_preview_thumbnail_width"
+            android:layout_height="@dimen/std_event_preview_thumbnail_height"
+            android:src="@drawable/dummy_movie" />
 
         <LinearLayout
+            android:id="@+id/LLA___VSEVENTROW___LABELS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_toRightOf="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
+            android:orientation="vertical"
+            app:layout_constraintLeft_toRightOf="@id/IVW___VSEVENTROW___EVENTPREVIEW"
+            app:layout_constraintTop_toTopOf="@id/IVW___VSEVENTROW___EVENTPREVIEW">
+
+            <TextView
+                android:id="@+id/TXV___VSEVENTROW___EVENTCAMERANAME"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <TextView
                 android:id="@+id/TXV___VSEVENTROW___EVENTDATETIME"
@@ -44,61 +109,46 @@
                 android:text="@string/GENERIC_PLACEHOLDER_WAITING"
                 android:textAppearance="@style/TextAppearance.AppCompat" />
 
-            <ImageView
-                android:id="@+id/IMG___VSEVENTROW___NEWITEM"
-                android:layout_width="@dimen/very_small_button_width"
-                android:layout_height="@dimen/very_small_button_height"
-                android:src="@drawable/new_item"
-                android:visibility="gone" />
-
-            <ImageView
-                android:id="@+id/IMG___VSEVENTROW___LOCKEDITEM"
-                android:layout_width="@dimen/very_small_button_width"
-                android:layout_height="@dimen/very_small_button_height"
-                android:src="@drawable/lock"
-                android:visibility="gone" />
+            <TextView
+                android:id="@+id/TXV___VSEVENTROW___EVENTDEVICENAME"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+                android:textAppearance="@style/TextAppearance.AppCompat" />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/TXV___VSEVENTROW___EVENTDEVICENAME"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-            android:textAppearance="@style/TextAppearance.AppCompat" />
-
-    </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/LLA___VSEVENTROW___OPTIONS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
+        android:layout_margin="0dp"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:padding="0dp"
+        android:visibility="visible"
+        app:layout_constraintRight_toLeftOf="@id/SPC___VSEVENTROW___TOP_RIGHT2"
+        app:layout_constraintTop_toBottomOf="@id/SPC___VSEVENTROW___TOP_RIGHT2">
 
         <ImageButton
             android:id="@+id/BTN___VSEVENTROW___DELETEEVENT"
-            android:layout_width="@dimen/medium_button_width"
-            android:layout_height="@dimen/medium_button_height"
+            android:layout_width="@dimen/mediumsmall_button_width"
+            android:layout_height="@dimen/mediumsmall_button_height"
             android:src="@drawable/delete" />
 
         <ImageButton
             android:id="@+id/BTN___VSEVENTROW___SHAREEVENT"
-            android:layout_width="@dimen/medium_button_width"
-            android:layout_height="@dimen/medium_button_height"
+            android:layout_width="@dimen/mediumsmall_button_width"
+            android:layout_height="@dimen/mediumsmall_button_height"
             android:src="@drawable/share" />
 
         <ImageButton
             android:id="@+id/BTN___VSEVENTROW___LOCKEVENT"
-            android:layout_width="@dimen/medium_button_width"
-            android:layout_height="@dimen/medium_button_height"
-            android:src="@drawable/lock"
-            android:visibility="gone"/>
-
-
+            android:layout_width="@dimen/mediumsmall_button_width"
+            android:layout_height="@dimen/mediumsmall_button_height"
+            android:src="@drawable/lock" />
 
     </LinearLayout>
 
@@ -107,9 +157,14 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/LLA___VSEVENTROW___LABELS"
         android:layout_centerHorizontal="true"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/CLA___VSEVENTROW___EVENTDATA" />
 
+    <Space
+        android:id="@+id/SPC___VSEVENTROW___BOTTOM_LEFT"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim"
+        app:layout_constraintTop_toBottomOf="@id/PBR___VSEVENTROW___DOWNLOADPROGRESS" />
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>
