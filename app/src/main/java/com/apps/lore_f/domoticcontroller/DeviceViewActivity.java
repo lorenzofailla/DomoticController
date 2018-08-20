@@ -57,10 +57,29 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
+    // Device reply timeout management
+    private final static long DEFAULT_FIRST_RESPONSE_TIMEOUT = 10000;
+    private class DeviceNotRespondingAction implements Runnable {
+
+        @Override
+        public void run() {
+
+            // imposta lo stato del dispositivo come offline
+
+            // termina l'activity corrente
+            finish();
+            return;
+
+        }
+    }
+
+    private DeviceNotRespondingAction deviceNotRespondingAction;
+
     // TCP Connection Interface
     private TCPComm tcpComm;
     private boolean isTCPCommInterfaceAvailable = false;
     private final static long DEFAULT_TCP_PROBING_REPLY_TIMEOUT = 1000;
+
     private AlertDialog connectingToDeviceAlertDialog;
 
     public TCPComm getTcpComm() {
@@ -629,6 +648,9 @@ public class DeviceViewActivity extends AppCompatActivity {
                 // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
                 TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
                 remoteHostName.setText(remoteDeviceName);
+
+                // ferma l'esecuzione del task
+                handler.removeCallbacks(deviceNotRespondingAction);
 
                 // aggiorna il valore del tempo dell'ultima risposta
                 lastOnlineReply = System.currentTimeMillis();
@@ -1329,6 +1351,10 @@ public class DeviceViewActivity extends AppCompatActivity {
                         "-",
                         thisDevice)
         );
+
+        // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
+        deviceNotRespondingAction=new DeviceNotRespondingAction();
+        handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
 
         // invia un messaggio al dispositivo remoto con la richiesta dell'ora corrente
         sendCommandToDevice(

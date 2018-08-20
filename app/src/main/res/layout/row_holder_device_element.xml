@@ -1,37 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="wrap_content">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <com.apps.lore_f.domoticcontroller.RoundRect
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/SPC___ROWDEVICE___BOTTOM_LEFT"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:RR_radius="15dp"
+        app:RR_padding="12dp"
+        app:RR_line_thickness="2dp"/>
 
-    <TextView
-        android:id="@+id/TXV___ROWDEVICE___DEVICENAME"
+    <com.apps.lore_f.domoticcontroller.BlankRect
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="@+id/linearLayout"
+        app:layout_constraintRight_toRightOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="@+id/linearLayout"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"/>
+
+    <Space
+        android:id="@+id/SPC___ROWDEVICE___TOP_LEFT"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim" />
+
+    <Space
+        android:id="@+id/SPC___ROWDEVICE___TOP_LEFT2"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim"
+        app:layout_constraintLeft_toRightOf="@id/SPC___ROWDEVICE___TOP_LEFT"/>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/CLA___ROWDEVICE___DEVICEDATA"
+        app:layout_constraintTop_toBottomOf="@id/SPC___ROWDEVICE___TOP_LEFT"
+        app:layout_constraintLeft_toRightOf="@id/SPC___ROWDEVICE___TOP_LEFT"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-        android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+        android:layout_height="wrap_content">
 
-    <ImageButton
-        android:id="@+id/BTN___ROWDEVICE___CONNECT"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/TXV___ROWDEVICE___DEVICENAME"
-        android:layout_weight="1"
-        android:src="@drawable/connect" />
+        <TextView
+            android:id="@+id/TXV___ROWDEVICE___DEVICENAME"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            app:layout_constraintLeft_toRightOf="@id/BTN___ROWDEVICE___CONNECT"
+            app:layout_constraintTop_toTopOf="@id/BTN___ROWDEVICE___CONNECT"
+            app:layout_constraintBottom_toBottomOf="@id/BTN___ROWDEVICE___CONNECT"
+            android:textAlignment="center"
+            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+
+        <ImageButton
+            android:id="@+id/BTN___ROWDEVICE___CONNECT"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_below="@+id/TXV___ROWDEVICE___DEVICENAME"
+            android:src="@drawable/connect" />
+
+    </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/BTN___ROWDEVICE___CONNECT"
-        android:layout_below="@+id/TXV___ROWDEVICE___DEVICENAME"
-        android:layout_marginLeft="5dp"
-        android:layout_toRightOf="@+id/BTN___ROWDEVICE___CONNECT"
-        android:orientation="horizontal">
+        app:layout_constraintLeft_toRightOf="@id/SPC___ROWDEVICE___TOP_LEFT2"
 
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/IMG___ROWDEVICE___DEVICE_TYPE"
@@ -74,5 +111,10 @@
 
     </LinearLayout>
 
+    <Space
+        android:id="@+id/SPC___ROWDEVICE___BOTTOM_LEFT"
+        android:layout_width="@dimen/spacer_square_dim"
+        android:layout_height="@dimen/spacer_square_dim"
+        app:layout_constraintTop_toBottomOf="@id/CLA___ROWDEVICE___DEVICEDATA"/>
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>
