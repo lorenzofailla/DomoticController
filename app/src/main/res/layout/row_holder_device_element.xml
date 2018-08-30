@@ -47,17 +47,24 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             app:layout_constraintLeft_toRightOf="@id/BTN___ROWDEVICE___CONNECT"
-            app:layout_constraintTop_toTopOf="@id/BTN___ROWDEVICE___CONNECT"
-            app:layout_constraintBottom_toBottomOf="@id/BTN___ROWDEVICE___CONNECT"
             android:textAlignment="center"
             android:text="@string/GENERIC_PLACEHOLDER_WAITING"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+
+        <TextView
+            android:id="@+id/TXV___ROWDEVICE___STATUS-RUNNINGSINCE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/TXV___ROWDEVICE___DEVICENAME"
+            app:layout_constraintLeft_toLeftOf="@+id/TXV___ROWDEVICE___DEVICENAME"
+            android:text="@string/GENERIC_PLACEHOLDER_WAITING"/>
 
         <ImageButton
             android:id="@+id/BTN___ROWDEVICE___CONNECT"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_below="@+id/TXV___ROWDEVICE___DEVICENAME"
+            app:layout_constraintTop_toTopOf="@+id/TXV___ROWDEVICE___DEVICENAME"
+            app:layout_constraintBottom_toBottomOf="@+id/TXV___ROWDEVICE___STATUS-RUNNINGSINCE"
             android:src="@drawable/connect" />
 
     </android.support.constraint.ConstraintLayout>

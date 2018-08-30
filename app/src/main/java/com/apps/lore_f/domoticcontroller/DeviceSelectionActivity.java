@@ -23,7 +23,10 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.HashMap;
 import java.util.function.ToDoubleBiFunction;
+
+import apps.android.loref.GeneralUtilitiesLibrary;
 
 public class DeviceSelectionActivity extends AppCompatActivity {
 
@@ -42,12 +45,12 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         public void onClick(View view) {
 
             Intent intent;
-            switch (view.getId()){
+            switch (view.getId()) {
 
                 case R.id.BTN___DEVICE_SELECTION___CLOUDSTORAGE:
 
                     // avvia l'activity per la gestione del cloud storage
-                    intent = new Intent (getApplicationContext(), CloudStorageActivity.class);
+                    intent = new Intent(getApplicationContext(), CloudStorageActivity.class);
                     startActivity(intent);
 
                     break;
@@ -55,7 +58,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                 case R.id.BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE:
 
                     // avvia l'activity per la gestione della videosorveglianza
-                    intent = new Intent (getApplicationContext(), VideoSurveillanceActivity.class);
+                    intent = new Intent(getApplicationContext(), VideoSurveillanceActivity.class);
                     startActivity(intent);
 
                     break;
@@ -76,16 +79,19 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         public ImageView videoSurveillanceImg;
         public ImageView wakeOnLanImg;
 
+        public TextView deviceRunningSinceTxv;
 
         public DevicesHolder(View v) {
             super(v);
             deviceNameTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___DEVICENAME);
 
             connectToDeviceBtn = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___CONNECT);
-            torrentImg = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
-            directoryNaviImg = (ImageView)  itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
+            torrentImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
+            directoryNaviImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
             videoSurveillanceImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___VIDEOSURVEILLANCE);
             wakeOnLanImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___WAKEONLAN);
+
+            deviceRunningSinceTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_RUNNINGSINCE);
 
         }
 
@@ -131,9 +137,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 getString(R.string.data_file_key), Context.MODE_PRIVATE);
 
-        groupName=sharedPref.getString(getString(R.string.data_group_name),null);
+        groupName = sharedPref.getString(getString(R.string.data_group_name), null);
 
-        if(groupName==null){
+        if (groupName == null) {
 
             /*
             questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
@@ -153,7 +159,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
 
         super.onResume();
 
@@ -173,7 +179,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause(){
+    protected void onPause() {
 
         super.onPause();
 
@@ -185,7 +191,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     }
 
-    private void refreshAdapter(){
+    private void refreshAdapter() {
 
         linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setStackFromEnd(false);
@@ -203,25 +209,25 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
                 //
-                if(device.getHasTorrentManagement()){
+                if (device.getHasTorrentManagement()) {
                     //
                     holder.torrentImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if(device.getHasDirectoryNavigation()){
+                if (device.getHasDirectoryNavigation()) {
                     //
                     holder.directoryNaviImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if(device.getHasVideoSurveillance()){
+                if (device.getHasVideoSurveillance()) {
                     //
                     holder.videoSurveillanceImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if(device.getHasWakeOnLan()){
+                if (device.getHasWakeOnLan()) {
                     //
                     holder.wakeOnLanImg.setVisibility(View.VISIBLE);
 
@@ -244,6 +250,23 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                     }
 
                 });
+
+                // aggiorna la label con l'informazione sull'ultimo update
+
+                HashMap<String, Object> deviceStatus = device.getStatus();
+                long lastUpdate;
+                if (deviceStatus.containsKey("LastUpdate")) {
+                    lastUpdate = (long) deviceStatus.get("LastUpdate");
+                } else {
+                    lastUpdate = -1;
+                }
+
+                if(lastUpdate!=-1){
+
+                    String message = getString(R.string.DEVICEELEMENT_LABEL_RUNNING_SINCE) + GeneralUtilitiesLibrary.getTimeElapsed(lastUpdate);
+                    holder.deviceRunningSinceTxv.setText(message);
+
+                }
 
             }
 
@@ -278,7 +301,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             boolean wakeOnLan,
             boolean videoSurveillance,
             String cameraNames,
-            String cameraIDs){
+            String cameraIDs) {
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
         intent.putExtra("__DEVICE_TO_CONNECT", deviceName);
@@ -288,8 +311,6 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         intent.putExtra("__HAS_VIDEOSURVEILLANCE", videoSurveillance);
         intent.putExtra("__CAMERA_NAMES", cameraNames);
         intent.putExtra("__CAMERA_IDS", cameraIDs);
-
-
 
 
         startActivity(intent);

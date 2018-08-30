@@ -68,7 +68,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             // termina l'activity corrente
             finish();
-            return;
 
         }
     }
