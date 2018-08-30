@@ -17,7 +17,7 @@ public class DeviceToConnect {
     private boolean hasWakeOnLan;
     private String cameraNames;
     private String cameraIDs;
-    private HashMap<String,Object> status;
+    private HashMap<String,Object> Status;
 
 
     // empty constructor
@@ -48,7 +48,7 @@ public class DeviceToConnect {
 
     public String getCameraIDs() { return cameraIDs; }
 
-    public HashMap<String,Object> getStatus() { return status; }
+    public HashMap<String,Object> getStatus() { return Status; }
 
 }
 
