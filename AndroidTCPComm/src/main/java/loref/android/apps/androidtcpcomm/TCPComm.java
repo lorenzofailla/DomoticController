@@ -16,12 +16,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class TCPComm {
 
-    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
-    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
-    private static final BlockingQueue<Runnable> sPoolWorkQueue =
-            new LinkedBlockingQueue<Runnable>(128);
-
     public static final String TAG = "TCPComm";
 
     public static final int DEFAULT_PORT = 9099;
@@ -102,8 +96,6 @@ public class TCPComm {
         AsyncTaskCompat.executeParallel(new SendDataAsync(data));
 
     }
-
-
 
     public void terminate() {
 

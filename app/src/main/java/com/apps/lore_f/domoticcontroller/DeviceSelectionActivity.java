@@ -80,6 +80,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         public ImageView wakeOnLanImg;
 
         public TextView deviceRunningSinceTxv;
+        public TextView deviceLastUpdateTxv;
 
         public DevicesHolder(View v) {
             super(v);
@@ -90,7 +91,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             directoryNaviImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
             videoSurveillanceImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___VIDEOSURVEILLANCE);
             wakeOnLanImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___WAKEONLAN);
-
+            deviceLastUpdateTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_LASTUPDATE);
             deviceRunningSinceTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_RUNNINGSINCE);
 
         }
@@ -261,9 +262,30 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                     lastUpdate = -1;
                 }
 
-                if(lastUpdate!=-1){
+                if(lastUpdate!=-1 && ((System.currentTimeMillis()-lastUpdate)>DefaultValues.LAST_UPDATE_TOO_FAR)){
 
-                    String message = getString(R.string.DEVICEELEMENT_LABEL_RUNNING_SINCE) + GeneralUtilitiesLibrary.getTimeElapsed(lastUpdate);
+                    String message = getString(R.string.DEVICEELEMENT_LABEL_LAST_UPDATE) + GeneralUtilitiesLibrary.getTimeElapsed(lastUpdate, getApplicationContext(), false);
+                    holder.deviceLastUpdateTxv.setText(message);
+                    holder.deviceLastUpdateTxv.setVisibility(View.VISIBLE);
+
+                } else {
+
+                    holder.deviceLastUpdateTxv.setVisibility(View.GONE);
+
+                }
+
+                // aggiorna la label con l'informazione sul tempo di funzionamento del server
+
+                long runningSince;
+                if (deviceStatus.containsKey("RunningSince")) {
+                    runningSince = (long) deviceStatus.get("RunningSince");
+                } else {
+                    runningSince = -1;
+                }
+
+                if(runningSince!=-1){
+
+                    String message = getString(R.string.DEVICEELEMENT_LABEL_RUNNING_SINCE) + GeneralUtilitiesLibrary.getTimeElapsed(runningSince, getApplicationContext(), false);
                     holder.deviceRunningSinceTxv.setText(message);
 
                 }

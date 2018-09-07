@@ -4,7 +4,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
+import android.content.Context;
 import android.util.Base64;
+
+import com.example.generalutilitieslibrary.R;
+
 import java.util.Calendar;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -15,14 +20,14 @@ import java.util.zip.Inflater;
 
 public class GeneralUtilitiesLibrary {
 
-    private static final long MINUTE_MS=60000L;
-    private static final  long HOUR_MS=3600000L;
-    private static final long DAY_MS=86400000L;
-    private static final long WEEK_MS=604800000L;
-    private static final long MONTH_MS=2419200000L;
-    private static final long YEAR_MS=29030400000L;
+    private static final long MINUTE_MS = 60000L;
+    private static final long HOUR_MS = 3600000L;
+    private static final long DAY_MS = 86400000L;
+    private static final long WEEK_MS = 604800000L;
+    private static final long MONTH_MS = 2419200000L;
+    private static final long YEAR_MS = 29030400000L;
 
-    public static String decode(String rawData){
+    public static String decode(String rawData) {
 
         try {
             return new String(decompress(Base64.decode(rawData, Base64.DEFAULT)), "UTF-8");
@@ -51,7 +56,7 @@ public class GeneralUtilitiesLibrary {
 
     }
 
-    public static long getTimeMillis(String timeStamp, String format){
+    public static long getTimeMillis(String timeStamp, String format) {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
         Calendar calendar = simpleDateFormat.getCalendar();
@@ -65,66 +70,145 @@ public class GeneralUtilitiesLibrary {
 
     }
 
-    public static String getTimeElapsed(long when){
+    public static String getTimeElapsed(long when, Context context) {
 
-        long timeDiff = System.currentTimeMillis()-when;
+        return getTimeElapsed(when, context, true);
+
+    }
+
+    public static String getTimeElapsed(long when, Context context, boolean longFormat) {
+
+        long timeDiff = System.currentTimeMillis() - when;
         String unit;
+        int numericQuantity;
         String quantity;
         String prefix;
         String suffix;
 
-        if((timeDiff)<MINUTE_MS){
+        if ((timeDiff) < MINUTE_MS) {
             // now
-            unit="now";
-            quantity="";
-            prefix="";
-            suffix="";
+            if (longFormat) {
+                unit = context.getString(R.string.now);
+            } else {
+                unit = context.getString(R.string.now_compact);
+            }
+            quantity = "";
+            prefix = "";
+            suffix = "";
 
-        } else if ((timeDiff)<HOUR_MS) {
-            // muinutes
-            unit="minutes";
-            quantity="" + (int) (timeDiff/MINUTE_MS);
-            prefix="";
-            suffix="ago";
+        } else if ((timeDiff) < HOUR_MS) {
+            // minutes
 
-        } else if ((timeDiff)<DAY_MS) {
+            numericQuantity = (int) (timeDiff / MINUTE_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.minutes);
+                } else {
+                    unit = context.getString(R.string.minute);
+                }
+
+            } else {
+                unit = context.getString(R.string.minute_compact);
+            }
+            quantity = "" + numericQuantity;
+            prefix = "";
+            suffix = context.getString(R.string.ago);
+
+        } else if ((timeDiff) < DAY_MS) {
             //hours
-            unit="hours";
-            quantity="" + (int) (timeDiff/HOUR_MS);
-            prefix="";
-            suffix="ago";
+            numericQuantity = (int) (timeDiff / HOUR_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.hours);
+                } else {
+                    unit = context.getString(R.string.hour);
+                }
 
-        } else if ((timeDiff)<WEEK_MS) {
+            } else {
+                unit = context.getString(R.string.hour_compact);
+            }
+            quantity = "" + numericQuantity;
+            prefix = "";
+            suffix = context.getString(R.string.ago);
+
+        } else if ((timeDiff) < WEEK_MS) {
             //days
-            unit="days";
-            quantity=""+ (int) (timeDiff/DAY_MS);
-            prefix="";
-            suffix="ago";
+            numericQuantity = (int) (timeDiff / DAY_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.days);
+                } else {
+                    unit = context.getString(R.string.day);
+                }
 
-        } else if ((timeDiff)<MONTH_MS) {
+            } else {
+                unit = context.getString(R.string.day_compact);
+            }
+            quantity = "" + (int) (timeDiff / DAY_MS);
+            prefix = "";
+            suffix = context.getString(R.string.ago);
+
+        } else if ((timeDiff) < MONTH_MS) {
             //weeks
-            unit="weeks";
-            quantity="" + (int) (timeDiff/WEEK_MS);
-            prefix="";
-            suffix="ago";
+            numericQuantity = (int) (timeDiff / WEEK_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.weeks);
+                } else {
+                    unit = context.getString(R.string.week);
+                }
 
-        } else if ((timeDiff)<YEAR_MS) {
+            } else {
+                unit = context.getString(R.string.week_compact);
+            }
+            quantity = "" + (int) (timeDiff / WEEK_MS);
+            prefix = "";
+            suffix = context.getString(R.string.ago);
+
+        } else if ((timeDiff) < YEAR_MS) {
             // months
-            unit="months";
-            quantity=""+ (int) (timeDiff/MONTH_MS);
-            prefix="";
-            suffix="ago";
+            numericQuantity = (int) (timeDiff / MONTH_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.months);
+                } else {
+                    unit = context.getString(R.string.month);
+                }
+
+            } else {
+                unit = context.getString(R.string.month_compact);
+            }
+            quantity = "" + (int) (timeDiff / MONTH_MS);
+            prefix = "";
+            suffix = context.getString(R.string.ago);
 
         } else {
             // years
-            unit="years";
-            quantity=""+ (int) (timeDiff/YEAR_MS);
-            prefix="";
-            suffix="ago";
+            numericQuantity = (int) (timeDiff / YEAR_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.years);
+                } else {
+                    unit = context.getString(R.string.year);
+                }
 
+            } else {
+                unit = context.getString(R.string.year_compact);
+            }
+            quantity = "" + (int) (timeDiff / YEAR_MS);
+            prefix = "";
+            suffix = context.getString(R.string.ago);
         }
 
-        return (String.format("%s %s %s %s", prefix, quantity, unit, suffix));
+
+        if (longFormat) {
+
+            return (prefix + " " + quantity + " " + unit + " " + suffix);
+
+        } else {
+
+            return (quantity + " " + unit);
+        }
 
     }
 

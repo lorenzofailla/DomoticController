@@ -1,3 +1,34 @@
 <resources>
+
     <string name="app_name">General Utilities Library</string>
+
+    <string name="year_compact">Y</string>
+    <string name="year">year</string>
+    <string name="years">years</string>
+
+    <string name="month_compact">M</string>
+    <string name="month">month</string>
+    <string name="months">months</string>
+
+    <string name="week_compact">W</string>
+    <string name="week">week</string>
+    <string name="weeks">weeks</string>
+
+    <string name="day_compact">D</string>
+    <string name="day">day</string>
+    <string name="days">days</string>
+
+    <string name="hour_compact">h</string>
+    <string name="hour">hour</string>
+    <string name="hours">hours</string>
+
+    <string name="minute_compact">m</string>
+    <string name="minute">minute</string>
+    <string name="minutes">minutes</string>
+
+    <string name="now_compact">...</string>
+    <string name="now">now</string>
+
+    <string name="ago">ago</string>
+
 </resources>

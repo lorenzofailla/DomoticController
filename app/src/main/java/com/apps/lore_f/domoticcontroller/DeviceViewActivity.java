@@ -70,6 +70,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             finish();
 
         }
+
     }
 
     private DeviceNotRespondingAction deviceNotRespondingAction;
@@ -203,7 +204,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     // Firebase Database
     private DatabaseReference incomingMessagesRef;
-    private DatabaseReference lastHeartBeatTimeNodeRef;
 
     public String remoteDeviceName;
     private boolean remoteDeviceTorrent;
@@ -222,8 +222,6 @@ public class DeviceViewActivity extends AppCompatActivity {
     private long pingStartTime;
 
     private long timeDifferenceCheckInterval = 5000L; // ms
-
-    private long lastHeartBeatTime;
 
     private Handler handler;
 
@@ -339,64 +337,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
     }
-
-    // Runnable per chiudere l'Activity in caso il dispositivo non risponda alle chiamate entro il timeout
-    private Runnable manageLastHeartBeatTime = new Runnable() {
-
-        @Override
-        public void run() {
-
-            long timeDifference = System.currentTimeMillis() - remoteDeviceCurrentTimeOffset - lastHeartBeatTime;
-            Log.i(TAG, "Time Difference: " + timeDifference);
-
-            int labelColor;
-
-            if (timeDifference <= timeDifferenceNormal) {
-                labelColor = Color.TRANSPARENT;
-            } else if (timeDifference <= timeDifferenceAlarm) {
-                labelColor = Color.YELLOW;
-            } else {
-                labelColor = Color.RED;
-            }
-
-            //findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME).setBackgroundColor(labelColor);
-
-            // modifica il l'aspetto del fragment
-            if (deviceInfoFragment != null) {
-
-                deviceInfoFragment.setLastHeartBeat(String.format("%d ms ago.", timeDifference));
-                if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
-
-            }
-
-            handler.postDelayed(this, timeDifferenceCheckInterval);
-
-        }
-
-    };
-
-    private ValueEventListener updateLastHeartBeatTime = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            //
-            // aggiorna il valore di lastHeartBeatTime
-            try {
-                Log.i(TAG, "lastHeartBeatTime: " + dataSnapshot.toString());
-                lastHeartBeatTime = dataSnapshot.getValue(long.class);
-            } catch (NullPointerException e) {
-                Log.i(TAG, "lastHeartBeatTime: failed to read datasnapshot");
-
-
-            }
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-
-    };
 
     /*
     Listener per nuovi record nel nodo dei messaggi in ingresso.
@@ -588,9 +528,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         // inizia il test dell'interfaccia TCP
         startTCPInterfaceTest();
 
-        // pianifica
-        handler.postDelayed(manageLastHeartBeatTime, timeDifferenceCheckInterval);
-
     }
 
     @Override
@@ -610,16 +547,12 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             // rimuove i ChildEventListener dai nodi del db di Firebase
             incomingMessagesRef.removeEventListener(newCommandsToProcess);
-            lastHeartBeatTimeNodeRef.removeEventListener(updateLastHeartBeatTime);
 
         }
 
         // rimuove l'OnPageChangeListener al ViewPager
         if (viewPager != null)
             viewPager.removeOnPageChangeListener(onPageChangeListener);
-
-        // rimuove gli eventuali task ritardati sull'handler
-        handler.removeCallbacks(manageLastHeartBeatTime);
 
         handler = null;
 
@@ -809,7 +742,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         if (isTCPCommInterfaceAvailable) {
 
             tcpComm.sendData(getCommandAsByteArray(command));
-
 
         } else {
 
@@ -1334,11 +1266,9 @@ public class DeviceViewActivity extends AppCompatActivity {
                     .toString();
 
             incomingMessagesRef = firebaseDatabase.getReference(incomingMessagesNode);
-            lastHeartBeatTimeNodeRef = firebaseDatabase.getReference(lastHeartBeatTimeNode);
 
             // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
             incomingMessagesRef.addChildEventListener(newCommandsToProcess);
-            lastHeartBeatTimeNodeRef.addValueEventListener(updateLastHeartBeatTime);
 
         }
 

@@ -319,7 +319,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                         getTimeElapsed(
                                 getTimeMillis(
                                         String.format("%s %s", event.getDate(), event.getTime()),
-                                        "yyyy-MM-dd HH.mm.ss")
+                                        "yyyy-MM-dd HH.mm.ss"), getContext()
                         )
                 );
 

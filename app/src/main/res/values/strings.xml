@@ -96,6 +96,7 @@
     <string name="DEVICESELECTION_LABEL_SELECT_DEVICE">Select the device to connect to:</string>
 
     <string name="DEVICEELEMENT_LABEL_RUNNING_SINCE">Running since: </string>
+    <string name="DEVICEELEMENT_LABEL_LAST_UPDATE">Last update: </string>
 
     <string name="WOL_DEVICES_LABEL_SELECT_DEVICE">Select the device to wake up:</string>
 
