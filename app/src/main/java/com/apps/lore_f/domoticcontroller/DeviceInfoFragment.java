@@ -1,43 +1,28 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import static com.google.android.gms.internal.zzagz.runOnUiThread;
+import apps.android.loref.GeneralUtilitiesLibrary;
 
 public class DeviceInfoFragment extends Fragment {
 
-    public String upTime;
+    public String systemLoad;
     public String freeSpace;
-    private String pingTime;
-
-    public void setPingTime(String value) {
-        pingTime = value;
-    }
-
-    private String lastHeartBeat;
-
-    public void setLastHeartBeat(String value) {
-        lastHeartBeat = value;
-    }
 
     public boolean viewCreated = false;
     private View fragmentView;
@@ -202,22 +187,6 @@ public class DeviceInfoFragment extends Fragment {
 
     }
 
-    public void updateView() {
-
-        TextView upTimeReplyTXV = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___UPTIME_VALUE);
-        upTimeReplyTXV.setText(upTime);
-
-        TextView freeSpaceTXV = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___FREEDISKSPACE_VALUE);
-        freeSpaceTXV.setText(freeSpace);
-
-        TextView pingTimeTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___RESPONSETIME_VALUE);
-        pingTimeTextView.setText(pingTime);
-
-        TextView lastHeartBeatTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEVIEW___LASTHEARTBEATTIME_VALUE);
-        lastHeartBeatTextView.setText(lastHeartBeat);
-
-    }
-
     private void manageVPNStatus(String status) {
 
         if (fragmentView == null) {
@@ -261,5 +230,27 @@ public class DeviceInfoFragment extends Fragment {
         vpnStatusTextView.setText(textToShow);
 
     }
+
+    public void setGeneralStatus(RemoteDevGeneralStatus status){
+
+        if(fragmentView!=null){
+
+            TextView systemLoadTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___SYSLOAD_VALUE);
+            TextView diskStatusTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___DISKSTATUS_VALUE);
+            TextView runningSinceTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___RUNNINGSINCE_VALUE);
+            TextView lastUpdateTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___LASTUPDATE_VALUE);
+
+            systemLoadTextView.setText(status.getSystemLoad());
+            diskStatusTextView.setText(status.getDiskStatus());
+            runningSinceTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(status.getRunningSince(), getContext()));
+            lastUpdateTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(status.getLastUpdate(), getContext()));
+
+        }
+
+    };
+
+    public void setNetworkStatus(RemoteDevNetworkStatus status){
+        // TODO: 09/09/2018 implementare
+    };
 
 }

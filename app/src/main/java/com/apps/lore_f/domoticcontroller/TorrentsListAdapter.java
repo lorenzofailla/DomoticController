@@ -10,6 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.generic.dataobjects.TorrentInfo;
+
 import java.util.List;
 
 /**

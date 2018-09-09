@@ -68,9 +68,10 @@
     <string name="MNU_MAIN_REVOKE">Revoke Google access</string>
 
     <string name="DEVICEVIEW_LABEL_AVAILABLESERVICES">Available services:</string>
-    <string name="DEVICEVIEW_LABEL_UPTIME_REPLY">\"uptime\" reply:</string>
+    <string name="DEVICEVIEW_LABEL_SYSTEM_LOAD">System load:</string>
     <string name="DEVICEVIEW_LABEL_FREE_DISK_SPACE">Free disk space:</string>
-    <string name="DEVICEVIEW_LABEL_PING_TIME">Ping time:</string>
+    <string name="DEVICEVIEW_LABEL_PUBLICIPADDR">Public IP address:</string>
+    <string name="DEVICEVIEW_LABEL_PRIVATEIPADDR">Local IP address:</string>
     <string name="DEVICEVIEW_LABEL_VPN_STATUS">VPN Status:</string>
     <string name="DEVICEVIEW_LABEL_VPN_STATUS_NOT_AVAILABLE">Not available.</string>
     <string name="DEVICEVIEW_LABEL_VPN_STATUS_NOT_CONNECTED">Not connected.</string>

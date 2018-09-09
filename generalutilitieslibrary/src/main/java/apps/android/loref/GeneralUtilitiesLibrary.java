@@ -88,13 +88,15 @@ public class GeneralUtilitiesLibrary {
         if ((timeDiff) < MINUTE_MS) {
             // now
             if (longFormat) {
-                unit = context.getString(R.string.now);
+                unit = context.getString(R.string.minute);
+                quantity = context.getString(R.string.now);
             } else {
                 unit = context.getString(R.string.now_compact);
+                quantity = "";
             }
-            quantity = "";
+
             prefix = "";
-            suffix = "";
+            suffix = context.getString(R.string.ago);
 
         } else if ((timeDiff) < HOUR_MS) {
             // minutes

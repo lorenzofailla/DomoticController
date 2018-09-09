@@ -1,173 +1,219 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.apps.lore_f.domoticcontroller.DeviceInfoFragment">
 
-    <RelativeLayout
+    <TableLayout
+        android:id="@+id/TBL___DEVICEINFOFRAGMENT___DEVICEINFO"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:padding="2dp">
 
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___UPTIME_LABEL"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:text="@string/DEVICEVIEW_LABEL_UPTIME_REPLY"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
-
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___UPTIME_VALUE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/TXV___DEVICEVIEW___UPTIME_LABEL"
-            android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
-
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___FREEDISKSPACE_LABEL"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/TXV___DEVICEVIEW___UPTIME_VALUE"
-            android:text="@string/DEVICEVIEW_LABEL_FREE_DISK_SPACE"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
-
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___FREEDISKSPACE_VALUE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/TXV___DEVICEVIEW___FREEDISKSPACE_LABEL"
-            android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
-
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___RESPONSETIME_LABEL"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/TXV___DEVICEVIEW___FREEDISKSPACE_VALUE"
-            android:text="@string/DEVICEVIEW_LABEL_PING_TIME"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
-
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___RESPONSETIME_VALUE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/TXV___DEVICEVIEW___RESPONSETIME_LABEL"
-            android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
-
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___LASTHEARTBEATTIME_LABEL"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/TXV___DEVICEVIEW___RESPONSETIME_VALUE"
-            android:text="@string/DEVICEVIEW_LABEL_LASTHEARTBEAT_TIME"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
-
-        <TextView
-            android:id="@+id/TXV___DEVICEVIEW___LASTHEARTBEATTIME_VALUE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/TXV___DEVICEVIEW___LASTHEARTBEATTIME_LABEL"
-            android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
-
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_VPN"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/TXV___DEVICEVIEW___LASTHEARTBEATTIME_VALUE">
-
-            <ImageButton
-                android:id="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_VPN"
-                android:layout_width="@dimen/medium_button_width"
-                android:layout_height="@dimen/medium_button_height"/>
+        <TableRow>
 
             <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___SYSLOAD_LABEL"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_VPN"
-                android:id="@+id/TXV___DEVICEINFOFRAGMENT___VPN_STATUS_LABEL"
-                android:text="@string/DEVICEVIEW_LABEL_VPN_STATUS"/>
+                android:text="@string/DEVICEVIEW_LABEL_SYSTEM_LOAD"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
             <TextView
-                android:id="@+id/TXV___DEVICEINFOFRAGMENT___VPN_STATUS_VALUE"
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___SYSLOAD_VALUE"
+                android:padding="2dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_VPN"
-                app:layout_constraintTop_toBottomOf="@+id/TXV___DEVICEINFOFRAGMENT___VPN_STATUS_LABEL"
-                android:text="@string/GENERIC_PLACEHOLDER_WAITING"                 />
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
 
-        </android.support.constraint.ConstraintLayout>
+        </TableRow>
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_TCP"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_VPN">
-
-            <ImageButton
-                android:id="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
-                android:layout_width="@dimen/medium_button_width"
-                android:layout_height="@dimen/medium_button_height"/>
+        <TableRow>
 
             <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___DISKSTATUS_LABEL"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
-                android:id="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_LABEL"
-                android:text="@string/DEVICEVIEW_LABEL_TCP_STATUS"/>
+                android:text="@string/DEVICEVIEW_LABEL_FREE_DISK_SPACE"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
 
             <TextView
-                android:id="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE"
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___DISKSTATUS_VALUE"
+                android:padding="2dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
-                app:layout_constraintTop_toBottomOf="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_LABEL"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___PUBLICIP_LABEL"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/DEVICEVIEW_LABEL_PUBLICIPADDR"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___PUBLICIP_VALUE"
+                android:padding="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="@string/GENERIC_PLACEHOLDER_WAITING"/>
 
-        </android.support.constraint.ConstraintLayout>
+        </TableRow>
 
-        <LinearLayout
-            android:id="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP"
-            android:layout_width="match_parent"
+        <TableRow>
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___PRIVATEIP_LABEL"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/DEVICEVIEW_LABEL_PRIVATEIPADDR"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___PRIVATEIP_VALUE"
+                android:padding="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"/>
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___RUNNINGSINCE_LABEL"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/DEVICEELEMENT_LABEL_RUNNING_SINCE"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___RUNNINGSINCE_VALUE"
+                android:padding="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"/>
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___LASTUPDATE_LABEL"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/DEVICEELEMENT_LABEL_LAST_UPDATE"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOFRAGMENT___LASTUPDATE_VALUE"
+                android:padding="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"/>
+        </TableRow>
+
+        <TableRow>
+
+        </TableRow>
+
+
+    </TableLayout>
+
+    <LinearLayout
+        android:id="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/TBL___DEVICEINFOFRAGMENT___DEVICEINFO">
+
+        <ImageButton
+            android:id="@+id/BTN___DEVICEINFOFRAGMENT___SHUTDOWN"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/shutdown" />
+
+        <ImageButton
+            android:id="@+id/BTN___DEVICEINFOFRAGMENT___REBOOT"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/reboot" />
+
+        <ImageButton
+            android:id="@+id/BTN___DEVICEINFOFRAGMENT___CLEARLOG"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/clear_log" />
+
+    </LinearLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_VPN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP">
+
+        <ImageButton
+            android:id="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_VPN"
+            android:layout_width="@dimen/medium_button_width"
+            android:layout_height="@dimen/medium_button_height" />
+
+        <TextView
+            android:id="@+id/TXV___DEVICEINFOFRAGMENT___VPN_STATUS_LABEL"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_TCP"
-            android:orientation="horizontal">
+            android:text="@string/DEVICEVIEW_LABEL_VPN_STATUS"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_VPN" />
 
-            <ImageButton
-                android:id="@+id/BTN___DEVICEINFOFRAGMENT___SHUTDOWN"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/shutdown" />
+        <TextView
+            android:id="@+id/TXV___DEVICEINFOFRAGMENT___VPN_STATUS_VALUE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+            app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_VPN"
+            app:layout_constraintTop_toBottomOf="@+id/TXV___DEVICEINFOFRAGMENT___VPN_STATUS_LABEL" />
 
-            <ImageButton
-                android:id="@+id/BTN___DEVICEINFOFRAGMENT___REBOOT"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/reboot" />
+    </android.support.constraint.ConstraintLayout>
 
-            <ImageButton
-                android:id="@+id/BTN___DEVICEINFOFRAGMENT___CLEARLOG"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/clear_log" />
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_TCP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_VPN">
 
-        </LinearLayout>
+        <ImageButton
+            android:id="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
+            android:layout_width="@dimen/medium_button_width"
+            android:layout_height="@dimen/medium_button_height" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/RWV___DEVICEINFOFRAGMENT___LOG"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@+id/LLO___DEVICEINFOFRAGMENT___BUTTONSTRIP" />
+        <TextView
+            android:id="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_LABEL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/DEVICEVIEW_LABEL_TCP_STATUS"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP" />
 
-    </RelativeLayout>
+        <TextView
+            android:id="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+            app:layout_constraintLeft_toRightOf="@+id/BTN___DEVICEINFOFRAGMENT___MANAGE_TCP"
+            app:layout_constraintTop_toBottomOf="@+id/TXV___DEVICEINFOFRAGMENT___TCP_STATUS_LABEL" />
 
-</FrameLayout>
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/RWV___DEVICEINFOFRAGMENT___LOG"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/CLA___DEVICEINFOFRAGMENT___MANAGE_TCP" />
+
+</android.support.constraint.ConstraintLayout>

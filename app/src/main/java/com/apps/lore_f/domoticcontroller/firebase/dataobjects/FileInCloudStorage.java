@@ -1,4 +1,4 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.firebase.dataobjects;
 
 /**
  * Created by lore_f on 26/08/2017.

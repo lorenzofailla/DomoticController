@@ -1,4 +1,4 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.generic.dataobjects;
 
 /**
  * Created by 105053228 on 30/mar/2017.

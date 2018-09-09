@@ -1,4 +1,4 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.firebase.dataobjects;
 
 import java.util.HashMap;
 

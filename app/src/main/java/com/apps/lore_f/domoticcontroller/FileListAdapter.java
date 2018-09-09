@@ -12,6 +12,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.generic.dataobjects.FileInfo;
+
 import java.util.List;
 
 import static android.view.View.GONE;

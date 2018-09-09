@@ -1,16 +1,16 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.apps.lore_f.domoticcontroller.generic.dataobjects.TorrentInfo;
 
 import java.util.ArrayList;
 import java.util.List;

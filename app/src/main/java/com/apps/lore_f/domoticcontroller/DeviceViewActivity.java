@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -21,6 +20,9 @@ import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
+import com.apps.lore_f.domoticcontroller.generic.dataobjects.FileInfo;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,8 +31,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -42,6 +42,8 @@ import loref.android.apps.androidtcpcomm.TCPCommListener;
 
 import static apps.android.loref.GeneralUtilitiesLibrary.decode;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
+
+import static com.apps.lore_f.domoticcontroller.DefaultValues.*;
 
 public class DeviceViewActivity extends AppCompatActivity {
 
@@ -59,6 +61,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     // Device reply timeout management
     private final static long DEFAULT_FIRST_RESPONSE_TIMEOUT = 10000;
+
     private class DeviceNotRespondingAction implements Runnable {
 
         @Override
@@ -181,14 +184,13 @@ public class DeviceViewActivity extends AppCompatActivity {
             Log.d(TAG, "TCP data received: " + logData);
 
             final Message inCmd = getCommandFromBytesArray(data);
-            if(!inCmd.getHeader().equals("")){
+            if (!inCmd.getHeader().equals("")) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        processIncomingMessage(inCmd,"null");
+                        processIncomingMessage(inCmd, "null");
                     }
                 });
-
 
 
             }
@@ -201,6 +203,74 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
     };
+
+    /*
+    ValueEventListener for remote device general status data
+     */
+    ValueEventListener generalStatusValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+
+            String logData;
+            if (dataSnapshot != null) {
+
+                logData = dataSnapshot.toString();
+                RemoteDevGeneralStatus status = dataSnapshot.getValue(RemoteDevGeneralStatus.class);
+
+                if(deviceInfoFragment!=null){
+                    deviceInfoFragment.setGeneralStatus(status);
+                }
+
+            } else {
+
+                logData = LOG_FIREBASEDB_NODATA;
+
+            }
+
+            Log.d(TAG, logData);
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    /*
+    ValueEventListener for remote device network status data
+     */
+    ValueEventListener networkStatusValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+
+            String logData;
+            if (dataSnapshot != null) {
+
+                logData = dataSnapshot.toString();
+                RemoteDevNetworkStatus status = dataSnapshot.getValue(RemoteDevNetworkStatus.class);
+
+                if(deviceInfoFragment!=null){
+                    deviceInfoFragment.setNetworkStatus(status);
+                }
+
+            } else {
+
+                logData = LOG_FIREBASEDB_NODATA;
+
+            }
+
+            Log.d(TAG, logData);
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+
+    };
+
 
     // Firebase Database
     private DatabaseReference incomingMessagesRef;
@@ -215,18 +285,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     public String thisDevice = "lorenzofailla-g3";
     public String groupName;
-    private long timeDifferenceNormal = (long) (1.5 * 60000); // ms
-    private long timeDifferenceAlarm = (long) (2 * 60000);
-    private long timeDifferenceCritical = (long) (2.5 * 60000);
-    private long remoteDeviceCurrentTimeOffset;
-    private long pingStartTime;
-
-    private long timeDifferenceCheckInterval = 5000L; // ms
 
     private Handler handler;
-
-    private long lastOnlineReply;
-    private static final String LAST_ONLINE_REPLY = "lastOnlineReply";
 
     private CollectionPagerAdapter collectionPagerAdapter;
     private ViewPager viewPager;
@@ -243,7 +303,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private int nOfAvailableCameras;
     private int homeFragment;
 
-    int deviceInfoFragmentIndex =0;
+    int deviceInfoFragmentIndex = 0;
     int firstCameraFragmentIndex = 0;
 
     private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
@@ -312,7 +372,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             switch (fragmentTypes[fragmentPosition]) {
 
                 case DEVICE_INFO:
-                    requestDeviceInfo();
+                    // nessuna azione
                     break;
 
                 case DIRECTORY_NAVIGATOR:
@@ -469,48 +529,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        // recupera i dati dalla sessione salvata
-        if (savedInstanceState != null) {
-
-            // recupera il tempo dell'ultima risposta online
-            lastOnlineReply = savedInstanceState.getLong(LAST_ONLINE_REPLY);
-
-        }
-
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-
-        // Save the user's current game state
-        savedInstanceState.putLong(LAST_ONLINE_REPLY, lastOnlineReply);
-
-        // Always call the superclass so it can save the view hierarchy state
-        super.onSaveInstanceState(savedInstanceState);
-    }
-
-    private void requestDeviceInfo() {
-
-        pingStartTime = System.currentTimeMillis();
-
-        // invia al dispositivo remoto il comando per avere l'uptime
-        sendCommandToDevice(
-                new Message(
-                        "__requestUpTime",
-                        "null",
-                        thisDevice
-                )
-        );
-
-        // invia al dispositivo remoto il comando per avere lo spazio disponibile
-        sendCommandToDevice(
-                new Message(
-                        "__requestFreeSpace",
-                        "null",
-                        thisDevice
-                )
-        );
-
     }
 
     @Override
@@ -527,6 +545,14 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // inizia il test dell'interfaccia TCP
         startTCPInterfaceTest();
+
+        // aggancia i listener ai nodi
+        String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
+        String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
+
+        FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
+        FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
+
 
     }
 
@@ -550,6 +576,14 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
+        // rimuove i listener dai nodi
+        String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
+        String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
+
+        FirebaseDatabase.getInstance().getReference(generalStatusNode).removeEventListener(generalStatusValueEventListener);
+        FirebaseDatabase.getInstance().getReference(networkStatusNode).removeEventListener(networkStatusValueEventListener);
+
+
         // rimuove l'OnPageChangeListener al ViewPager
         if (viewPager != null)
             viewPager.removeOnPageChangeListener(onPageChangeListener);
@@ -566,11 +600,12 @@ public class DeviceViewActivity extends AppCompatActivity {
         viewPager.setAdapter(collectionPagerAdapter);
         viewPager.addOnPageChangeListener(onPageChangeListener);
         viewPager.setCurrentItem(homeFragment);
+
     }
 
     private void processIncomingMessage(Message inMsg, String msgKey) {
 
-        boolean deleteMsg = (msgKey!="null");
+        boolean deleteMsg = (msgKey != "null");
         String decodedBody = decode(inMsg.getBody());
 
         switch (inMsg.getHeader()) {
@@ -584,38 +619,19 @@ public class DeviceViewActivity extends AppCompatActivity {
                 // ferma l'esecuzione del task
                 handler.removeCallbacks(deviceNotRespondingAction);
 
-                // aggiorna il valore del tempo dell'ultima risposta
-                lastOnlineReply = System.currentTimeMillis();
-
                 break;
 
-            case "UPTIME_REPLY":
-                // risposta al comando uptime
+            //case "UPTIME_REPLY":
 
-                // modifica il l'aspetto del fragment
-                if (deviceInfoFragment != null) {
+            // nessuna azione
 
-                    deviceInfoFragment.upTime = decodedBody.replace("\n", "");
-                    deviceInfoFragment.setPingTime(String.format("%d ms", System.currentTimeMillis() - pingStartTime));
+            //break;
 
-                    if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
+            //case "FREE_SPACE":
 
-                }
+            // nessuna azione
 
-                break;
-
-            case "FREE_SPACE":
-                // spazio a disposizione sul dispositivo remoto
-
-                // modifica il l'aspetto del fragment
-                if (deviceInfoFragment != null) {
-                    deviceInfoFragment.freeSpace = decodedBody.replace("\n", "");
-
-                    if (deviceInfoFragment.viewCreated) deviceInfoFragment.updateView();
-
-                }
-
-                break;
+            //break;
 
             case "TORRENT_STARTED":
             case "TORRENT_STOPPED":
@@ -701,30 +717,27 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 break;
 
-            case "REMOTE_CURRENT_TIME":
+            // case "REMOTE_CURRENT_TIME":
 
-                // aggiorna il valore dell'ora corrente del dispositivo remoto, per tener conto dell'errore nel calcolo dell'heartbeat time
-                long now = System.currentTimeMillis();
-                long remote = Long.parseLong(decodedBody);
+            // nessuna azione
 
-                remoteDeviceCurrentTimeOffset = now - remote;
-                break;
+            // break;
 
             case "FRAME_IMAGE_DATA":
 
-                // recupera lì'ID della telecamera e i dati del fotogramma
+                // recupera l'ID della telecamera e i dati del fotogramma
 
-                    String frameCameraID=decodedBody.substring(0,1);
-                    String frameData=decodedBody.substring(7);
+                String frameCameraID = decodedBody.substring(0, 1);
+                String frameData = decodedBody.substring(7);
 
-                    int cameraIndex = Integer.parseInt(frameCameraID);
-                    VSCameraViewerFragment fragment = (VSCameraViewerFragment) getAvailableFragments()[firstCameraFragmentIndex+cameraIndex-1];
+                int cameraIndex = Integer.parseInt(frameCameraID);
+                VSCameraViewerFragment fragment = (VSCameraViewerFragment) getAvailableFragments()[firstCameraFragmentIndex + cameraIndex - 1];
 
-                    try {
-                        fragment.refreshFrame((decompress(Base64.decode(frameData, Base64.DEFAULT))));
-                    } catch (IOException | DataFormatException e) {
+                try {
+                    fragment.refreshFrame((decompress(Base64.decode(frameData, Base64.DEFAULT))));
+                } catch (IOException | DataFormatException e) {
 
-                    }
+                }
 
 
                 break;
@@ -1257,14 +1270,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                     .append("/IncomingCommands")
                     .toString();
 
-            String lastHeartBeatTimeNode = new StringBuilder()
-                    .append("/Groups/")
-                    .append(groupName)
-                    .append("/Devices/")
-                    .append(remoteDeviceName)
-                    .append("/lastHeartBeatTime")
-                    .toString();
-
             incomingMessagesRef = firebaseDatabase.getReference(incomingMessagesNode);
 
             // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
@@ -1282,15 +1287,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         );
 
         // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
-        deviceNotRespondingAction=new DeviceNotRespondingAction();
+        deviceNotRespondingAction = new DeviceNotRespondingAction();
         handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
-
-        // invia un messaggio al dispositivo remoto con la richiesta dell'ora corrente
-        sendCommandToDevice(
-                new Message("__get_currenttimemillis",
-                        "-",
-                        thisDevice)
-        );
 
     }
 
@@ -1300,8 +1298,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private Message getCommandFromBytesArray(byte[] rawData) {
 
-        Message message = new Message("","","");
-        String rawString="";
+        Message message = new Message("", "", "");
+        String rawString = "";
         try {
 
             rawString = new String(rawData, "UTF-8");
@@ -1312,8 +1310,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-String[] mainLine = rawString.split("[?]");
-        if(mainLine.length!=2){
+        String[] mainLine = rawString.split("[?]");
+        if (mainLine.length != 2) {
             return message;
         }
 
@@ -1325,9 +1323,9 @@ String[] mainLine = rawString.split("[?]");
 
         } else {
 
-            String header="";
-            String body="";
-            String replyto="";
+            String header = "";
+            String body = "";
+            String replyto = "";
 
             for (String l : lines) {
 
@@ -1356,7 +1354,7 @@ String[] mainLine = rawString.split("[?]");
 
             }
 
-            return new Message(header,body,replyto);
+            return new Message(header, body, replyto);
 
         }
 

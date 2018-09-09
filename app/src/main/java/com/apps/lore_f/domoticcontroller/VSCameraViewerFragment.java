@@ -14,9 +14,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.youtube.player.YouTubeInitializationResult;
-import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayerView;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.VSShotPicture;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,7 +27,6 @@ import java.util.zip.DataFormatException;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
-import static com.apps.lore_f.domoticcontroller.Developer_Keys.YOUTUBE;
 
 public class VSCameraViewerFragment extends Fragment {
 
