@@ -68,9 +68,22 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void run() {
 
             // imposta lo stato del dispositivo come offline
+            String deviceNode=DefaultValues.GROUPNODE+"/"+groupName+"/"+DefaultValues.DEVICENODE+"/"+thisDevice;
+            FirebaseDatabase.getInstance().getReference(deviceNode).child("online").setValue(false, new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
-            // termina l'activity corrente
-            finish();
+                    Log.d(TAG, "No response from server. Closing activity.");
+
+                    if(databaseError!=null)
+                        Log.e(TAG, databaseError.getMessage());
+
+                    // termina l'activity corrente
+                    finish();
+                }
+            });
+
+
 
         }
 
@@ -113,7 +126,9 @@ public class DeviceViewActivity extends AppCompatActivity {
                     if (connectingToDeviceAlertDialog.isShowing()) {
                         connectingToDeviceAlertDialog.dismiss();
                     }
-                    setIsTCPCommIntefaceAvailable(true);
+                    if (!isTCPCommInterfaceAvailable) {
+                        setIsTCPCommIntefaceAvailable(true);
+                    }
                 }
             });
 
@@ -126,14 +141,15 @@ public class DeviceViewActivity extends AppCompatActivity {
             /*
             L'interfaccia TCP non è disponibile
              */
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // pone a false il flag isTCPCommInterfaceAvailable
-                    setIsTCPCommIntefaceAvailable(false);
-                }
-            });
+            if (isTCPCommInterfaceAvailable) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // pone a false il flag isTCPCommInterfaceAvailable
+                        setIsTCPCommIntefaceAvailable(false);
+                    }
+                });
+            }
 
 
         }
@@ -145,14 +161,15 @@ public class DeviceViewActivity extends AppCompatActivity {
             L'interfaccia TCP non è disponibile
              */
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // pone a false il flag isTCPCommInterfaceAvailable
-                    setIsTCPCommIntefaceAvailable(false);
-                }
-            });
-
+            if (isTCPCommInterfaceAvailable) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // pone a false il flag isTCPCommInterfaceAvailable
+                        setIsTCPCommIntefaceAvailable(false);
+                    }
+                });
+            }
         }
 
         @Override
@@ -161,15 +178,15 @@ public class DeviceViewActivity extends AppCompatActivity {
             /*
             L'interfaccia TCP non è disponibile
              */
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // pone a false il flag isTCPCommInterfaceAvailable
-                    setIsTCPCommIntefaceAvailable(false);
-                }
-            });
-
+            if (isTCPCommInterfaceAvailable) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // pone a false il flag isTCPCommInterfaceAvailable
+                        setIsTCPCommIntefaceAvailable(false);
+                    }
+                });
+            }
         }
 
         @Override
@@ -217,7 +234,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                 logData = dataSnapshot.toString();
                 RemoteDevGeneralStatus status = dataSnapshot.getValue(RemoteDevGeneralStatus.class);
 
-                if(deviceInfoFragment!=null){
+                if (deviceInfoFragment != null) {
                     deviceInfoFragment.setGeneralStatus(status);
                 }
 
@@ -250,7 +267,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                 logData = dataSnapshot.toString();
                 RemoteDevNetworkStatus status = dataSnapshot.getValue(RemoteDevNetworkStatus.class);
 
-                if(deviceInfoFragment!=null){
+                if (deviceInfoFragment != null) {
                     deviceInfoFragment.setNetworkStatus(status);
                 }
 
@@ -583,6 +600,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         FirebaseDatabase.getInstance().getReference(generalStatusNode).removeEventListener(generalStatusValueEventListener);
         FirebaseDatabase.getInstance().getReference(networkStatusNode).removeEventListener(networkStatusValueEventListener);
 
+        // se attivo, rimuove l'handler all'azione posticipata per gestire la mancata risposta dal server
+        handler.removeCallbacks(deviceNotRespondingAction);
 
         // rimuove l'OnPageChangeListener al ViewPager
         if (viewPager != null)
@@ -1259,6 +1278,11 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         if (!isTCPCommInterfaceAvailable) {
 
+            // distrugge l'oggetto TCPComm per comunicare con l'host remoto tramite TCP
+            tcpComm.setListener(null);
+            tcpComm.terminate();
+            tcpComm = null;
+
             // inizializza i riferimenti ai nodi del db Firebase
 
             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -1283,6 +1307,18 @@ public class DeviceViewActivity extends AppCompatActivity {
         sendCommandToDevice(
                 new Message("__requestWelcomeMessage",
                         "-",
+                        thisDevice)
+        );
+
+        sendCommandToDevice(
+                new Message("__update_status",
+                        "general",
+                        thisDevice)
+        );
+
+        sendCommandToDevice(
+                new Message("__update_status",
+                        "network",
                         thisDevice)
         );
 

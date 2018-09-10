@@ -250,7 +250,17 @@ public class DeviceInfoFragment extends Fragment {
     };
 
     public void setNetworkStatus(RemoteDevNetworkStatus status){
-        // TODO: 09/09/2018 implementare
+
+        if(fragmentView!=null){
+
+            TextView publicIPTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___PUBLICIP_VALUE);
+            TextView localIPTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___PRIVATEIP_VALUE);
+
+            publicIPTextView.setText(status.getPublicIP());
+            localIPTextView .setText(status.getLocalIP());
+
+        }
+
     };
 
 }

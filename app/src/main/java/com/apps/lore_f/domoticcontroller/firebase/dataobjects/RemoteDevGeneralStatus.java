@@ -62,7 +62,7 @@ public class RemoteDevGeneralStatus {
 
             loadString = Uptime.split("[,]")[3].replaceAll("[ ]", "").split("[:]")[1];
             float load = Float.parseFloat(loadString);
-            return String.format("%0.1f %", load);
+            return String.format("%.1f %%", load*100.0);
 
         } catch (IndexOutOfBoundsException e) {
 
@@ -74,7 +74,7 @@ public class RemoteDevGeneralStatus {
 
     public String getDiskStatus(){
 
-        return String.format("%0.1f MiB (%0.1f%)", FreeSpace, 1.0*FreeSpace/TotalSpace);
+        return String.format("%.1f MiB (%.1f %%)", FreeSpace, 100.0*FreeSpace/TotalSpace);
 
     }
 
