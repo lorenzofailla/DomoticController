@@ -584,7 +584,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             tcpComm.setListener(null);
             tcpComm.terminate();
 
-e        } else {
+        } else {
 
             // rimuove i ChildEventListener dai nodi del db di Firebase
             incomingMessagesRef.removeEventListener(newCommandsToProcess);
@@ -752,7 +752,7 @@ e        } else {
 
                 try {
                     fragment.refreshFrame((decompress(Base64.decode(frameData, Base64.DEFAULT))));
-                } ecatch (IOException | DataFormatException e) {
+                } catch (IOException | DataFormatException e) {
 
                 }
 
