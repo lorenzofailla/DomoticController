@@ -21,13 +21,12 @@ import apps.android.loref.GeneralUtilitiesLibrary;
 
 public class DeviceInfoFragment extends Fragment {
 
-    public String systemLoad;
-    public String freeSpace;
+    private static final String TAG = "DeviceInfoFragment";
 
     public boolean viewCreated = false;
     private View fragmentView;
 
-    private static final String TAG = "DeviceInfoFragment";
+    private String[] hostAddresses;
 
     private DeviceViewActivity parent;
     public void setParent(DeviceViewActivity p){
@@ -251,6 +250,8 @@ public class DeviceInfoFragment extends Fragment {
 
     public void setNetworkStatus(RemoteDevNetworkStatus status){
 
+        setHostAddresses(status.getHostAddresses());
+
         if(fragmentView!=null){
 
             TextView publicIPTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___PUBLICIP_VALUE);
@@ -262,5 +263,23 @@ public class DeviceInfoFragment extends Fragment {
         }
 
     };
+
+    private void setHostAddresses(String[] addresses){
+
+        hostAddresses=addresses;
+
+        int visibility=View.GONE;
+
+        if(hostAddresses.length>1){
+            visibility = View.VISIBLE;
+        }
+
+        if(fragmentView!=null){
+            fragmentView.findViewById(R.id.CLA___DEVICEINFOFRAGMENT___MANAGE_TCP).setVisibility(visibility);
+        }
+
+    }
+
+
 
 }

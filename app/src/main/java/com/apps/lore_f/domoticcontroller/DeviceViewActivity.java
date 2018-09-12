@@ -17,6 +17,7 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -91,7 +92,10 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private DeviceNotRespondingAction deviceNotRespondingAction;
 
-    // TCP Connection Interface
+    /*
+    TCP Connection Interface
+     */
+
     private TCPComm tcpComm;
     private boolean isTCPCommInterfaceAvailable = false;
     private final static long DEFAULT_TCP_PROBING_REPLY_TIMEOUT = 1000;
@@ -220,6 +224,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
     };
+
+
 
     /*
     ValueEventListener for remote device general status data
@@ -556,20 +562,12 @@ public class DeviceViewActivity extends AppCompatActivity {
         // attiva il ciclo di richieste
         handler = new Handler();
 
-        // inizializza l'interfaccia TCP
-        tcpComm = new TCPComm("10.8.0.14", 9099);
-        tcpComm.setListener(tcpCommListener);
-
-        // inizia il test dell'interfaccia TCP
-        startTCPInterfaceTest();
-
         // aggancia i listener ai nodi
         String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
         String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
 
         FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
         FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
-
 
     }
 
@@ -586,7 +584,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             tcpComm.setListener(null);
             tcpComm.terminate();
 
-        } else {
+e        } else {
 
             // rimuove i ChildEventListener dai nodi del db di Firebase
             incomingMessagesRef.removeEventListener(newCommandsToProcess);
@@ -754,7 +752,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 try {
                     fragment.refreshFrame((decompress(Base64.decode(frameData, Base64.DEFAULT))));
-                } catch (IOException | DataFormatException e) {
+                } ecatch (IOException | DataFormatException e) {
 
                 }
 

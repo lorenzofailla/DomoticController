@@ -1,5 +1,7 @@
 package com.apps.lore_f.domoticcontroller.firebase.dataobjects;
 
+import apps.android.loref.ArrayUtils;
+
 /**
  * Created by lore_f on 09/09/2018.
  */
@@ -27,4 +29,11 @@ public class RemoteDevNetworkStatus {
     public void setPublicIP(String publicIP) {
         PublicIP = publicIP;
     }
+
+    public String[] getHostAddresses(){
+
+        return ArrayUtils.concat(PublicIP.split("[ ]"), LocalIP.split("[ ]"));
+
+    }
+
 }
