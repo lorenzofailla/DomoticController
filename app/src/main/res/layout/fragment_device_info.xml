@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.apps.lore_f.domoticcontroller.DeviceInfoFragment">
+    tools:context="com.apps.lore_f.domoticcontroller.fragments.DeviceInfoFragment">
 
     <TableLayout
         android:id="@+id/TBL___DEVICEINFOFRAGMENT___DEVICEINFO"

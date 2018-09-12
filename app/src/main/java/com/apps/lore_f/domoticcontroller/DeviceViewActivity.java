@@ -17,12 +17,12 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
+import com.apps.lore_f.domoticcontroller.fragments.DeviceInfoFragment;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.FileInfo;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -106,7 +106,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         return tcpComm;
     }
 
-    public boolean getIsTCPCommInterfaceAvailable() {
+    public boolean getTCPCommInterfaceStatus() {
         return isTCPCommInterfaceAvailable;
     }
 
@@ -568,6 +568,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
         FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
+
+        setIsTCPCommIntefaceAvailable(false);
 
     }
 
@@ -1222,7 +1224,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                 );
     }
 
-    private void startTCPInterfaceTest() {
+    public void startTCPInterfaceTest() {
 
         // crea l'AlertDialog
         connectingToDeviceAlertDialog = new AlertDialog.Builder(this)

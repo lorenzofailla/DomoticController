@@ -261,7 +261,7 @@ public class VSCameraViewerFragment extends Fragment {
 
         statusNode.addValueEventListener(deviceStatusEventListener);
 
-        if(!parent.getIsTCPCommInterfaceAvailable()) {
+        if(!parent.getTCPCommInterfaceStatus()) {
             shotNode.addValueEventListener(lastShotEventListener);
         }
 
@@ -319,7 +319,7 @@ public class VSCameraViewerFragment extends Fragment {
         youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastData", parent.groupName, parent.remoteDeviceName, cameraID));
 
         statusNode.removeEventListener(deviceStatusEventListener);
-        if(!parent.getIsTCPCommInterfaceAvailable()) {
+        if(!parent.getTCPCommInterfaceStatus()) {
             shotNode.removeEventListener(lastShotEventListener);
         }
         youTubeLiveBroadcastStatusNode.removeEventListener(liveBroadcastStatusListener);
@@ -329,7 +329,7 @@ public class VSCameraViewerFragment extends Fragment {
 
     public void requestSingleShot() {
 
-        if(parent.getIsTCPCommInterfaceAvailable()){
+        if(parent.getTCPCommInterfaceStatus()){
             parent.sendCommandToDevice(
                     new Message("__request_shot_data", cameraID, parent.thisDevice)
             );

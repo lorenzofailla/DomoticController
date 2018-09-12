@@ -1,4 +1,4 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,6 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
+import com.apps.lore_f.domoticcontroller.Message;
+import com.apps.lore_f.domoticcontroller.R;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
 import com.google.firebase.database.DataSnapshot;
@@ -86,6 +89,24 @@ public class DeviceInfoFragment extends Fragment {
                     }
                     break;
 
+                case R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_TCP:
+
+                    if(parent.getTCPCommInterfaceStatus()){
+                        // device is connected to remote host via TCP.
+                        // TCP Comm interface will be disconnected.
+
+                        parent.getTcpComm().terminate();
+
+                    } else {
+                        // device is not connected to remote host via TCP.
+                        // start the TCP Comm interface connection
+
+                        parent.startTCPInterfaceTest();
+                    }
+
+                    break;
+
+
             }
 
         }
@@ -134,7 +155,7 @@ public class DeviceInfoFragment extends Fragment {
         // inizializza la visualizzazione dello stato della connessione TCP
         int labelToShow = R.string.GENERIC_PLACEHOLDER_WAITING;
 
-        if(parent.getIsTCPCommInterfaceAvailable()){
+        if(parent.getTCPCommInterfaceStatus()){
 
             labelToShow = R.string.DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED;
 
@@ -152,9 +173,12 @@ public class DeviceInfoFragment extends Fragment {
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___REBOOT).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___SHUTDOWN).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN).setOnClickListener(onClickListener);
+        view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_TCP).setOnClickListener(onClickListener);
 
         DatabaseReference vpnStatusNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Devices/%s/VPNStatus",parent.groupName, parent.remoteDeviceName));
         vpnStatusNode.addValueEventListener(vpnStatusValueEventListener);
+
+        setHostAddresses(new String[0]);
 
         // aggiorna il flag e effettua il trigger del metodo nel listener
         viewCreated = true;
@@ -183,6 +207,7 @@ public class DeviceInfoFragment extends Fragment {
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___REBOOT).setOnClickListener(null);
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___SHUTDOWN).setOnClickListener(null);
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN).setOnClickListener(null);
+        fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_TCP).setOnClickListener(null);
 
     }
 
