@@ -69,22 +69,20 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void run() {
 
             // imposta lo stato del dispositivo come offline
-            String deviceNode=DefaultValues.GROUPNODE+"/"+groupName+"/"+DefaultValues.DEVICENODE+"/"+thisDevice;
+            String deviceNode = DefaultValues.GROUPNODE + "/" + groupName + "/" + DefaultValues.DEVICENODE + "/" + thisDevice;
             FirebaseDatabase.getInstance().getReference(deviceNode).child("online").setValue(false, new DatabaseReference.CompletionListener() {
                 @Override
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
 
                     Log.d(TAG, "No response from server. Closing activity.");
 
-                    if(databaseError!=null)
+                    if (databaseError != null)
                         Log.e(TAG, databaseError.getMessage());
 
                     // termina l'activity corrente
                     finish();
                 }
             });
-
-
 
         }
 
@@ -93,6 +91,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private DeviceNotRespondingAction deviceNotRespondingAction;
 
     /*
+    ************************************************************************************************
     TCP Connection Interface
      */
 
@@ -101,6 +100,10 @@ public class DeviceViewActivity extends AppCompatActivity {
     private final static long DEFAULT_TCP_PROBING_REPLY_TIMEOUT = 1000;
 
     private AlertDialog connectingToDeviceAlertDialog;
+
+    private void setTCPConnectionAlertDialogMessage(String message){
+        connectingToDeviceAlertDialog.setMessage(message);
+    }
 
     public TCPComm getTcpComm() {
         return tcpComm;
@@ -133,6 +136,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                     if (!isTCPCommInterfaceAvailable) {
                         setIsTCPCommIntefaceAvailable(true);
                     }
+
                 }
             });
 
@@ -225,9 +229,115 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
+    private class TcpInterfaceProbingTimeout implements Runnable {
+        @Override
+        public void run() {
+
+            if (!isTCPCommInterfaceAvailable) {
+
+            /*
+            E' trascorso il tempo massimo per testare l'interfaccia TCP, senza risultato.
+            */
+
+                // incrementa l'indice di indirizzo IP da testare
+                deviceInfoFragment.increaseCurrentHostAddrIndex();
+
+                if (!deviceInfoFragment.getCurrentAddress().equals("")) {
+
+                    // distrugge l'interfaccia TCP
+                    tcpComm.setListener(null);
+                    tcpComm.terminate();
+
+                    // ricrea l'interfaccia TCP
+                    tcpComm = new TCPComm(deviceInfoFragment.getCurrentAddress());
+                    tcpComm.setListener(tcpCommListener);
+
+                    setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
+
+                    tcpComm.init();
+
+                    // avvia il conteggio del timeout
+                    handler.postDelayed(new TcpInterfaceProbingTimeout(), DEFAULT_TCP_PROBING_REPLY_TIMEOUT);
+
+                } else {
+
+                    // chiama il metodo cancel() dell'AlertDialog
+
+                    if (connectingToDeviceAlertDialog.isShowing()) {
+                        connectingToDeviceAlertDialog.cancel();
+                    }
+
+                    setIsTCPCommIntefaceAvailable(false);
+
+                    deviceInfoFragment.resetCurrentHostAddrIndex();
+
+                }
+
+            }
+
+        }
+
+    }
+
+    private void manageTCPInterfaceStatus() {
+
+        if (!isTCPCommInterfaceAvailable) {
+
+            // distrugge l'oggetto TCPComm per comunicare con l'host remoto tramite TCP
+            if (tcpComm != null) {
+                tcpComm.setListener(null);
+                tcpComm.terminate();
+                tcpComm = null;
+            }
+
+            // inizializza i riferimenti ai nodi del db Firebase
+
+            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+            String incomingMessagesNode = new StringBuilder()
+                    .append("/Groups/")
+                    .append(groupName)
+                    .append("/Devices/")
+                    .append(thisDevice)
+                    .append("/IncomingCommands")
+                    .toString();
+
+            incomingMessagesRef = firebaseDatabase.getReference(incomingMessagesNode);
+
+            // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
+            incomingMessagesRef.addChildEventListener(newCommandsToProcess);
+
+        }
+
+        initView();
+
+        // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
+        sendCommandToDevice(
+                new Message("__requestWelcomeMessage",
+                        "-",
+                        thisDevice)
+        );
+
+        sendCommandToDevice(
+                new Message("__update_status",
+                        "general",
+                        thisDevice)
+        );
+
+        sendCommandToDevice(
+                new Message("__update_status",
+                        "network",
+                        thisDevice)
+        );
+
+        // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
+        deviceNotRespondingAction = new DeviceNotRespondingAction();
+        handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
+
+    }
 
 
     /*
+    ************************************************************************************************
     ValueEventListener for remote device general status data
      */
     ValueEventListener generalStatusValueEventListener = new ValueEventListener() {
@@ -1226,107 +1336,52 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     public void startTCPInterfaceTest() {
 
-        // crea l'AlertDialog
-        connectingToDeviceAlertDialog = new AlertDialog.Builder(this)
-                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface) {
+        if (deviceInfoFragment != null) {
+
+            deviceInfoFragment.increaseCurrentHostAddrIndex();
+
+            if (!deviceInfoFragment.getCurrentAddress().equals("")) {
+
+                // crea l'AlertDialog
+                connectingToDeviceAlertDialog = new AlertDialog.Builder(this)
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialogInterface) {
 
                     /*
                     L'interfaccia TCP non è disponibile
                      */
 
-                        // imposta il flag su falso
-                        setIsTCPCommIntefaceAvailable(false);
+                                // imposta il flag su falso
+                                setIsTCPCommIntefaceAvailable(false);
 
-                    }
-                })
-                .setTitle(R.string.ALERTDIALOG_TITLE_PLEASE_WAIT)
-                .setMessage(R.string.ALERTDIALOG_MESSAGE_DEVICE_CONNECTION)
-                .create();
+                            }
+                        })
+                        .setTitle(R.string.ALERTDIALOG_TITLE_PLEASE_WAIT)
+                        .setMessage(R.string.ALERTDIALOG_MESSAGE_DEVICE_CONNECTION)
+                        .create();
 
-        // mostra l'AlertDialog
-        connectingToDeviceAlertDialog.show();
+                // mostra l'AlertDialog
+                connectingToDeviceAlertDialog.show();
 
-        // inizializza l'interfaccia TCP
-        tcpComm.init();
+                // inizializza l'interfaccia TCP
+                tcpComm=new TCPComm(deviceInfoFragment.getCurrentAddress());
+                tcpComm.setListener(tcpCommListener);
 
-        // avvia il conteggio del timeout
-        handler.postDelayed(new TcpInterfaceProbingTimeout(), DEFAULT_TCP_PROBING_REPLY_TIMEOUT);
+                setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
 
-    }
+                tcpComm.init();
 
-    private class TcpInterfaceProbingTimeout implements Runnable {
-        @Override
-        public void run() {
+                // avvia il conteggio del timeout
+                handler.postDelayed(new TcpInterfaceProbingTimeout(), DEFAULT_TCP_PROBING_REPLY_TIMEOUT);
 
-            /*
-            E' trascorso il tempo massimo per testare l'interfaccia TCP, senza risultato. Quindi l'interfaccia TCP non è disponibile
-            */
-
-            // chiama il metodo cancel() dell'AlertDialog
-
-            if (connectingToDeviceAlertDialog.isShowing()) {
-                connectingToDeviceAlertDialog.cancel();
             }
 
         }
 
     }
 
-    private void manageTCPInterfaceStatus() {
 
-        if (!isTCPCommInterfaceAvailable) {
-
-            // distrugge l'oggetto TCPComm per comunicare con l'host remoto tramite TCP
-            tcpComm.setListener(null);
-            tcpComm.terminate();
-            tcpComm = null;
-
-            // inizializza i riferimenti ai nodi del db Firebase
-
-            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-            String incomingMessagesNode = new StringBuilder()
-                    .append("/Groups/")
-                    .append(groupName)
-                    .append("/Devices/")
-                    .append(thisDevice)
-                    .append("/IncomingCommands")
-                    .toString();
-
-            incomingMessagesRef = firebaseDatabase.getReference(incomingMessagesNode);
-
-            // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
-            incomingMessagesRef.addChildEventListener(newCommandsToProcess);
-
-        }
-
-        initView();
-
-        // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
-        sendCommandToDevice(
-                new Message("__requestWelcomeMessage",
-                        "-",
-                        thisDevice)
-        );
-
-        sendCommandToDevice(
-                new Message("__update_status",
-                        "general",
-                        thisDevice)
-        );
-
-        sendCommandToDevice(
-                new Message("__update_status",
-                        "network",
-                        thisDevice)
-        );
-
-        // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
-        deviceNotRespondingAction = new DeviceNotRespondingAction();
-        handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
-
-    }
 
     private byte[] getCommandAsByteArray(Message command) {
         return String.format("@COMMAND?header=%s&body=%s\n", command.getHeader(), command.getBody()).getBytes();

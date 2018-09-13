@@ -31,6 +31,44 @@ public class DeviceInfoFragment extends Fragment {
 
     private String[] hostAddresses;
 
+    public String[] getHostAddresses(){
+        return hostAddresses;
+    }
+
+    public String getAddress(int index){
+
+        try{
+            return hostAddresses[index];
+        } catch (IndexOutOfBoundsException e) {
+            return "";
+        }
+
+    }
+
+    public String getCurrentAddress(){
+
+        return getAddress(currentHostAddrIndex);
+
+    }
+
+    public int getNOfHostAddresses(){
+        return hostAddresses.length;
+    }
+
+    private int currentHostAddrIndex=-1;
+
+    public int getCurrentHostAddrIndex(){
+        return currentHostAddrIndex;
+    }
+
+    public void increaseCurrentHostAddrIndex(){
+        currentHostAddrIndex++;
+    }
+
+    public void resetCurrentHostAddrIndex(){
+        currentHostAddrIndex=-1;
+    }
+
     private DeviceViewActivity parent;
     public void setParent(DeviceViewActivity p){
         parent = p;
