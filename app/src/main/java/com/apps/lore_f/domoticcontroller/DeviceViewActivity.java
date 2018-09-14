@@ -60,6 +60,13 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
+    /*
+    ************************************************************************************************
+    General purpose flags
+     */
+
+    private boolean isPausing;
+
     // Device reply timeout management
     private final static long DEFAULT_FIRST_RESPONSE_TIMEOUT = 10000;
 
@@ -101,7 +108,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private AlertDialog connectingToDeviceAlertDialog;
 
-    private void setTCPConnectionAlertDialogMessage(String message){
+    private void setTCPConnectionAlertDialogMessage(String message) {
         connectingToDeviceAlertDialog.setMessage(message);
     }
 
@@ -113,7 +120,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         return isTCPCommInterfaceAvailable;
     }
 
-    private void setIsTCPCommIntefaceAvailable(boolean value) {
+    public void setIsTCPCommIntefaceAvailable(boolean value) {
         this.isTCPCommInterfaceAvailable = value;
         manageTCPInterfaceStatus();
     }
@@ -225,6 +232,12 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void onClose(boolean byLocal) {
 
+            if(!isPausing) {
+                setIsTCPCommIntefaceAvailable(false);
+            } else {
+                tcpComm.setListener(null);
+            }
+
         }
 
     };
@@ -281,34 +294,35 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private void manageTCPInterfaceStatus() {
 
+        // inizializza i riferimenti ai nodi del db Firebase
+        String incomingMessagesNode = new StringBuilder()
+                .append("/Groups/")
+                .append(groupName)
+                .append("/Devices/")
+                .append(thisDevice)
+                .append("/IncomingCommands")
+                .toString(); // todo: riformattare
+
+        incomingMessagesRef = FirebaseDatabase.getInstance().getReference(incomingMessagesNode);
+
         if (!isTCPCommInterfaceAvailable) {
 
-            // distrugge l'oggetto TCPComm per comunicare con l'host remoto tramite TCP
+            // distrugge l'oggetto TCPComm, se esiste
             if (tcpComm != null) {
                 tcpComm.setListener(null);
                 tcpComm.terminate();
                 tcpComm = null;
             }
 
-            // inizializza i riferimenti ai nodi del db Firebase
-
-            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-            String incomingMessagesNode = new StringBuilder()
-                    .append("/Groups/")
-                    .append(groupName)
-                    .append("/Devices/")
-                    .append(thisDevice)
-                    .append("/IncomingCommands")
-                    .toString();
-
-            incomingMessagesRef = firebaseDatabase.getReference(incomingMessagesNode);
-
             // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
             incomingMessagesRef.addChildEventListener(newCommandsToProcess);
 
-        }
+        } else {
 
-        initView();
+            // rimuove il ChildEventListener al nodo per poter processare i messaggi in ingresso
+            incomingMessagesRef.removeEventListener(newCommandsToProcess);
+
+        }
 
         // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
         sendCommandToDevice(
@@ -334,7 +348,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
 
     }
-
 
     /*
     ************************************************************************************************
@@ -672,12 +685,16 @@ public class DeviceViewActivity extends AppCompatActivity {
         // attiva il ciclo di richieste
         handler = new Handler();
 
+        isPausing=false;
+
         // aggancia i listener ai nodi
         String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
         String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
 
         FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
         FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
+
+        initView();
 
         setIsTCPCommIntefaceAvailable(false);
 
@@ -688,12 +705,13 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onPause();
 
+        isPausing=true;
+
         /*
         Se è attiva l'interfaccia TCP, la termina. Altrimenti, rimuove i ChildEventListener dai nodi del db di Firebase
          */
         if (isTCPCommInterfaceAvailable) {
 
-            tcpComm.setListener(null);
             tcpComm.terminate();
 
         } else {
@@ -1365,7 +1383,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                 connectingToDeviceAlertDialog.show();
 
                 // inizializza l'interfaccia TCP
-                tcpComm=new TCPComm(deviceInfoFragment.getCurrentAddress());
+                tcpComm = new TCPComm(deviceInfoFragment.getCurrentAddress());
                 tcpComm.setListener(tcpCommListener);
 
                 setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
@@ -1380,7 +1398,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
     }
-
 
 
     private byte[] getCommandAsByteArray(Message command) {

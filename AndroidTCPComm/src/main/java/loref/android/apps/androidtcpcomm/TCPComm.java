@@ -203,6 +203,7 @@ public class TCPComm {
 
                 if (listener != null) {
                     listener.onDataReadError(e);
+
                 }
 
             }
