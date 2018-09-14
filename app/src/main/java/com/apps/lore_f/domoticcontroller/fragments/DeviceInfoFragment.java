@@ -67,6 +67,7 @@ public class DeviceInfoFragment extends Fragment {
 
     public void resetCurrentHostAddrIndex(){
         currentHostAddrIndex=-1;
+
     }
 
     private DeviceViewActivity parent;
@@ -189,22 +190,6 @@ public class DeviceInfoFragment extends Fragment {
 
         // inizializza l'handler alla view, in questo modo i componenti possono essere ritrovati
         fragmentView = view;
-
-        // inizializza la visualizzazione dello stato della connessione TCP
-        int labelToShow = R.string.GENERIC_PLACEHOLDER_WAITING;
-
-        if(parent.getTCPCommInterfaceStatus()){
-
-            labelToShow = R.string.DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED;
-
-        } else {
-
-            labelToShow = R.string.DEVICEVIEW_LABEL_TCP_STATUS_NOT_CONNECTED;
-
-        }
-
-        TextView tcpConnectionStatusLabel = (TextView) view.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE);
-        tcpConnectionStatusLabel.setText(labelToShow);
 
         // assegna un OnClickListener ai pulsanti
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___CLEARLOG).setOnClickListener(onClickListener);
@@ -343,6 +328,28 @@ public class DeviceInfoFragment extends Fragment {
 
     }
 
+    public void updateTCPStatus(){
+
+        if(fragmentView!=null) {
+            // inizializza la visualizzazione dello stato della connessione TCP
+            String labelToShow = getString(R.string.GENERIC_PLACEHOLDER_WAITING);
+
+            if (currentHostAddrIndex>0 && parent.getTCPCommInterfaceStatus()) {
+
+                labelToShow = getString(R.string.DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED) + " to: " +getCurrentAddress();
+
+            } else {
+
+                labelToShow = getString(R.string.DEVICEVIEW_LABEL_TCP_STATUS_NOT_CONNECTED);
+
+            }
+
+            TextView tcpConnectionStatusLabel = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE);
+            tcpConnectionStatusLabel.setText(labelToShow);
+
+        }
+
+    }
 
 
 }

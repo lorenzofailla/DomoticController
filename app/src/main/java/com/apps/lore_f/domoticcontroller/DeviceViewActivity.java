@@ -121,7 +121,20 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     public void setIsTCPCommIntefaceAvailable(boolean value) {
+
+
         this.isTCPCommInterfaceAvailable = value;
+
+        if(deviceInfoFragment!=null){
+
+            if(!isTCPCommInterfaceAvailable){
+                deviceInfoFragment.resetCurrentHostAddrIndex();
+            }
+
+            deviceInfoFragment.updateTCPStatus();
+
+        }
+
         manageTCPInterfaceStatus();
     }
 
