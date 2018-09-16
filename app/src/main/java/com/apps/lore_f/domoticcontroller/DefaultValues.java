@@ -10,5 +10,6 @@ public class DefaultValues {
     public static final String NETWORKSTATUSNODE="NetworkStatus";
 
     public static final long LAST_UPDATE_TOO_FAR = 120000L;
+    public final static long TCP_PROBING_REPLY_TIMEOUT = 10000L;
 
 }

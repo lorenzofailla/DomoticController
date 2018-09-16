@@ -106,7 +106,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private TCPComm tcpComm;
     private boolean isTCPCommInterfaceAvailable = false;
-    private final static long DEFAULT_TCP_PROBING_REPLY_TIMEOUT = 1000;
+
 
     private AlertDialog connectingToDeviceAlertDialog;
 
@@ -126,9 +126,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         this.isTCPCommInterfaceAvailable = value;
 
-        if(deviceInfoFragment!=null){
+        if (deviceInfoFragment != null) {
 
-            if(!isTCPCommInterfaceAvailable){
+            if (!isTCPCommInterfaceAvailable) {
                 deviceInfoFragment.resetCurrentHostAddrIndex();
             }
 
@@ -168,8 +168,7 @@ public class DeviceViewActivity extends AppCompatActivity {
              */
 
             // attiva il loop di invio dati
-            TCPDataOutTask tcpDataOutTask = new TCPDataOutTask();
-            AsyncTaskCompat.executeParallel(tcpDataOutTask);
+            tcpComm.startDataOutLoop();
 
         }
 
@@ -179,15 +178,47 @@ public class DeviceViewActivity extends AppCompatActivity {
             /*
             L'interfaccia TCP non è disponibile
              */
-            if (isTCPCommInterfaceAvailable) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // pone a false il flag isTCPCommInterfaceAvailable
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (!isTCPCommInterfaceAvailable) {
+
+                        /*
+                        E' trascorso il tempo massimo per testare l'interfaccia TCP, senza risultato.
+                        */
+
+                        // incrementa l'indice di indirizzo IP da testare
+                        deviceInfoFragment.increaseCurrentHostAddrIndex();
+
+                        if (!deviceInfoFragment.getCurrentAddress().equals("")) {
+
+                            // distrugge l'interfaccia TCP
+                            tcpComm.setRemoteAddress(deviceInfoFragment.getCurrentAddress());
+
+                            setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
+
+                        } else {
+
+                            // chiama il metodo cancel() dell'AlertDialog
+
+                            if (connectingToDeviceAlertDialog.isShowing()) {
+                                connectingToDeviceAlertDialog.cancel();
+                            }
+
+                            setIsTCPCommIntefaceAvailable(false);
+
+                        }
+
+                    } else {
+
                         setIsTCPCommIntefaceAvailable(false);
+
                     }
-                });
-            }
+                }
+
+
+            });
 
 
         }
@@ -255,7 +286,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void onClose(boolean byLocal) {
 
-            if(!isPausing) {
+            if (!isPausing) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -275,44 +306,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void run() {
 
-            if (!isTCPCommInterfaceAvailable) {
-
-            /*
-            E' trascorso il tempo massimo per testare l'interfaccia TCP, senza risultato.
-            */
-
-                // incrementa l'indice di indirizzo IP da testare
-                deviceInfoFragment.increaseCurrentHostAddrIndex();
-
-                if (!deviceInfoFragment.getCurrentAddress().equals("")) {
-
-                    // distrugge l'interfaccia TCP
-                    tcpComm.terminate();
-
-                    // ricrea l'interfaccia TCP
-                    TCPCommTask tcpCommTask = new TCPCommTask();
-                    AsyncTaskCompat.executeParallel(tcpCommTask);
-
-                    setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
-
-                    // avvia il conteggio del timeout
-                    handler.postDelayed(new TcpInterfaceProbingTimeout(), DEFAULT_TCP_PROBING_REPLY_TIMEOUT);
-
-                } else {
-
-                    // chiama il metodo cancel() dell'AlertDialog
-
-                    if (connectingToDeviceAlertDialog.isShowing()) {
-                        connectingToDeviceAlertDialog.cancel();
-                    }
-
-                    setIsTCPCommIntefaceAvailable(false);
-
-                    deviceInfoFragment.resetCurrentHostAddrIndex();
-
-                }
-
-            }
 
         }
 
@@ -379,27 +372,47 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private class TCPCommTask extends AsyncTask<String, String, TCPComm> {
+    public void startTCPInterfaceTest() {
 
-        @Override
-        protected TCPComm doInBackground(String... strings) {
+        if (deviceInfoFragment != null) {
 
-            tcpComm = new TCPComm(deviceInfoFragment.getCurrentAddress());
-            tcpComm.setListener(tcpCommListener);
-            tcpComm.init();
+            deviceInfoFragment.increaseCurrentHostAddrIndex();
 
-            return null;
-        }
+            if (!deviceInfoFragment.getCurrentAddress().equals("")) {
 
-    }
+                // crea l'AlertDialog
+                connectingToDeviceAlertDialog = new AlertDialog.Builder(this)
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialogInterface) {
 
-    private class TCPDataOutTask extends AsyncTask<String, String, TCPComm> {
+                    /*
+                    L'interfaccia TCP non è disponibile
+                     */
 
-        @Override
-        protected TCPComm doInBackground(String... strings) {
+                                // imposta il flag su falso
+                                setIsTCPCommIntefaceAvailable(false);
 
-           tcpComm.startDataOutLoop();
-           return null;
+                            }
+                        })
+                        .setTitle(R.string.ALERTDIALOG_TITLE_PLEASE_WAIT)
+                        .setMessage(R.string.ALERTDIALOG_MESSAGE_DEVICE_CONNECTION)
+                        .create();
+
+                // mostra l'AlertDialog
+                connectingToDeviceAlertDialog.show();
+
+                // inizializza l'interfaccia TCP
+                tcpComm = new TCPComm(deviceInfoFragment.getCurrentAddress());
+                tcpComm.setListener(tcpCommListener);
+                tcpComm.init();
+
+                setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
+
+                // avvia il conteggio del timeout
+                handler.postDelayed(new TcpInterfaceProbingTimeout(), TCP_PROBING_REPLY_TIMEOUT);
+
+            }
 
         }
 
@@ -741,7 +754,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         // attiva il ciclo di richieste
         handler = new Handler();
 
-        isPausing=false;
+        isPausing = false;
 
         // aggancia i listener ai nodi
         String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
@@ -761,7 +774,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onPause();
 
-        isPausing=true;
+        isPausing = true;
 
         /*
         Se è attiva l'interfaccia TCP, la termina. Altrimenti, rimuove i ChildEventListener dai nodi del db di Firebase
@@ -1406,51 +1419,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                         getAvailableFragmentTitles(),
                         getAvailableFragmentTypes()
                 );
-    }
-
-    public void startTCPInterfaceTest() {
-
-        if (deviceInfoFragment != null) {
-
-            deviceInfoFragment.increaseCurrentHostAddrIndex();
-
-            if (!deviceInfoFragment.getCurrentAddress().equals("")) {
-
-                // crea l'AlertDialog
-                connectingToDeviceAlertDialog = new AlertDialog.Builder(this)
-                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialogInterface) {
-
-                    /*
-                    L'interfaccia TCP non è disponibile
-                     */
-
-                                // imposta il flag su falso
-                                setIsTCPCommIntefaceAvailable(false);
-
-                            }
-                        })
-                        .setTitle(R.string.ALERTDIALOG_TITLE_PLEASE_WAIT)
-                        .setMessage(R.string.ALERTDIALOG_MESSAGE_DEVICE_CONNECTION)
-                        .create();
-
-                // mostra l'AlertDialog
-                connectingToDeviceAlertDialog.show();
-
-                // inizializza l'interfaccia TCP
-                TCPCommTask tcpCommTask = new TCPCommTask();
-                AsyncTaskCompat.executeParallel(tcpCommTask);
-
-                setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
-
-                // avvia il conteggio del timeout
-                handler.postDelayed(new TcpInterfaceProbingTimeout(), DEFAULT_TCP_PROBING_REPLY_TIMEOUT);
-
-            }
-
-        }
-
     }
 
 
