@@ -159,7 +159,7 @@ public class TCPComm {
 
                     }
 
-                    while (!addressChanged){
+                    while (isRunning && !addressChanged){
 
                         // does nothing
 
