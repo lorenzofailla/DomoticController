@@ -7,6 +7,7 @@ package loref.android.apps.androidtcpcomm;
 public interface TCPCommListener {
 
     void onConnected(int port);
+    void onInterfaceReady();
     void onConnectionError(Exception e);
     void onDataWriteError (Exception e);
     void onDataReadError (Exception e);

@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.os.AsyncTaskCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -122,7 +124,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     public void setIsTCPCommIntefaceAvailable(boolean value) {
 
-
         this.isTCPCommInterfaceAvailable = value;
 
         if(deviceInfoFragment!=null){
@@ -139,12 +140,9 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     private TCPCommListener tcpCommListener = new TCPCommListener() {
-        @Override
-        public void onConnected(int port) {
 
-            /*
-            L'interfaccia TCP è disponibile
-             */
+        @Override
+        public void onInterfaceReady() {
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -160,6 +158,18 @@ public class DeviceViewActivity extends AppCompatActivity {
                 }
             });
 
+        }
+
+        @Override
+        public void onConnected(int port) {
+
+            /*
+            L'interfaccia TCP è disponibile
+             */
+
+            // attiva il loop di invio dati
+            TCPDataOutTask tcpDataOutTask = new TCPDataOutTask();
+            AsyncTaskCompat.executeParallel(tcpDataOutTask);
 
         }
 
@@ -246,7 +256,13 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void onClose(boolean byLocal) {
 
             if(!isPausing) {
-                setIsTCPCommIntefaceAvailable(false);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setIsTCPCommIntefaceAvailable(false);
+                    }
+                });
+
             } else {
                 tcpComm.setListener(null);
             }
@@ -271,16 +287,13 @@ public class DeviceViewActivity extends AppCompatActivity {
                 if (!deviceInfoFragment.getCurrentAddress().equals("")) {
 
                     // distrugge l'interfaccia TCP
-                    tcpComm.setListener(null);
                     tcpComm.terminate();
 
                     // ricrea l'interfaccia TCP
-                    tcpComm = new TCPComm(deviceInfoFragment.getCurrentAddress());
-                    tcpComm.setListener(tcpCommListener);
+                    TCPCommTask tcpCommTask = new TCPCommTask();
+                    AsyncTaskCompat.executeParallel(tcpCommTask);
 
                     setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
-
-                    tcpComm.init();
 
                     // avvia il conteggio del timeout
                     handler.postDelayed(new TcpInterfaceProbingTimeout(), DEFAULT_TCP_PROBING_REPLY_TIMEOUT);
@@ -344,6 +357,14 @@ public class DeviceViewActivity extends AppCompatActivity {
                         thisDevice)
         );
 
+        // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
+        TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
+        remoteHostName.setText(R.string.GENERIC_PLACEHOLDER_WAITING);
+
+        // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
+        deviceNotRespondingAction = new DeviceNotRespondingAction();
+        handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
+
         sendCommandToDevice(
                 new Message("__update_status",
                         "general",
@@ -356,9 +377,31 @@ public class DeviceViewActivity extends AppCompatActivity {
                         thisDevice)
         );
 
-        // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
-        deviceNotRespondingAction = new DeviceNotRespondingAction();
-        handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
+    }
+
+    private class TCPCommTask extends AsyncTask<String, String, TCPComm> {
+
+        @Override
+        protected TCPComm doInBackground(String... strings) {
+
+            tcpComm = new TCPComm(deviceInfoFragment.getCurrentAddress());
+            tcpComm.setListener(tcpCommListener);
+            tcpComm.init();
+
+            return null;
+        }
+
+    }
+
+    private class TCPDataOutTask extends AsyncTask<String, String, TCPComm> {
+
+        @Override
+        protected TCPComm doInBackground(String... strings) {
+
+           tcpComm.startDataOutLoop();
+           return null;
+
+        }
 
     }
 
@@ -725,7 +768,7 @@ public class DeviceViewActivity extends AppCompatActivity {
          */
         if (isTCPCommInterfaceAvailable) {
 
-            tcpComm.terminate();
+            tcpComm.disconnect();
 
         } else {
 
@@ -1396,12 +1439,10 @@ public class DeviceViewActivity extends AppCompatActivity {
                 connectingToDeviceAlertDialog.show();
 
                 // inizializza l'interfaccia TCP
-                tcpComm = new TCPComm(deviceInfoFragment.getCurrentAddress());
-                tcpComm.setListener(tcpCommListener);
+                TCPCommTask tcpCommTask = new TCPCommTask();
+                AsyncTaskCompat.executeParallel(tcpCommTask);
 
                 setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
-
-                tcpComm.init();
 
                 // avvia il conteggio del timeout
                 handler.postDelayed(new TcpInterfaceProbingTimeout(), DEFAULT_TCP_PROBING_REPLY_TIMEOUT);

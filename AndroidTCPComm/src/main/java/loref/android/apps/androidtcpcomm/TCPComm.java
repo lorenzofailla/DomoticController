@@ -6,13 +6,18 @@ import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class TCPComm {
 
@@ -22,29 +27,40 @@ public class TCPComm {
 
     private Socket socket;
     private String hostAddress;
-    private int port;
+    private int port = DEFAULT_PORT;
 
     private BufferedInputStream in;
     private BufferedOutputStream out;
 
-    private boolean keepLooping = true;
+    private PipedInputStream dataOutPipeReader;
+    private PipedOutputStream dataOutPipeWriter;
+    private BufferedOutputStream dataOutBuffered;
 
     private long bytesIn = 0L;
     private long bytesOut = 0L;
+
+    private boolean isRunning = true;
+    private boolean isChangingAddress = false;
 
     /*
      * getters and setters
      */
 
-    public String getRemoteAddress(){
+    public String getRemoteAddress() {
         return socket.getRemoteSocketAddress().toString();
     }
 
-    public long getBytesIn(){
+    public void setRemoteAddress(String newAddress) {
+
+        isChangingAddress=false;
+
+    }
+
+    public long getBytesIn() {
         return bytesIn;
     }
 
-    public long getBytesOut(){
+    public long getBytesOut() {
         return bytesOut;
     }
 
@@ -53,14 +69,16 @@ public class TCPComm {
      */
 
     public TCPComm(String hostAddress) {
+
         this.hostAddress = hostAddress;
-        this.port = DEFAULT_PORT;
 
     }
 
     public TCPComm(String hostAddress, int port) {
+
         this.hostAddress = hostAddress;
         this.port = port;
+
     }
 
     /*
@@ -86,131 +104,131 @@ public class TCPComm {
          inizializza il Socket
         */
 
-        // avvia il ciclo principale che gestisce la lettura dei dati in entrata
-        AsyncTaskCompat.executeParallel(new MainLoop());
+        int b;
+        ByteArrayOutputStream receivedData = new ByteArrayOutputStream();
+
+        try {
+
+            socket = new Socket(hostAddress, port);
+            in = new BufferedInputStream(socket.getInputStream());
+            out = new BufferedOutputStream(socket.getOutputStream());
+
+            // manda una notifica all'interfaccia
+
+            if (listener != null) {
+                listener.onConnected(socket.getLocalPort());
+            }
+
+            while (!isChangingAddress && isRunning && (b = in.read()) != -1) {
+
+                bytesIn++;
+                receivedData.write(b);
+
+                if (b == '\n') {
+
+                    receivedData.flush();
+                    if (listener != null) {
+                        listener.onDataLineReceived(receivedData.toByteArray());
+                    }
+
+                    // reinizializza l'array di byte
+                    receivedData = new ByteArrayOutputStream();
+
+                }
+
+            }
+
+            if (listener != null && !isChangingAddress) {
+                listener.onClose(!isRunning);
+            }
+
+            socket.close();
+            in.close();
+            out.close();
+
+        } catch (IOException e) {
+
+            if (listener != null) {
+                listener.onConnectionError(e);
+            }
+
+        }
+
+    }
+
+    public void startDataOutLoop() {
+
+        int b;
+
+        // inizializza i piped stream
+        dataOutPipeReader = new PipedInputStream();
+        dataOutPipeWriter = new PipedOutputStream();
+
+        // inizializza il buffer dei dati in ingresso da mandare al server
+        dataOutBuffered = new BufferedOutputStream(dataOutPipeWriter);
+
+        // manda una notifica all'interfaccia
+
+        if (listener != null) {
+            listener.onInterfaceReady();
+        }
+
+        // collega i piped stream
+        try {
+
+            dataOutPipeWriter.connect(dataOutPipeReader);
+
+            while (isRunning && ((b=dataOutPipeReader.read())!=-1)){
+
+                out.write(b);
+                bytesOut++;
+
+                if(b=='\n'){
+                    out.flush();
+                }
+
+            }
+
+            dataOutBuffered.close();
+            dataOutPipeWriter.close();
+            dataOutPipeReader.close();
+
+        } catch (IOException e) {
+
+            if (listener != null) {
+                listener.onDataWriteError(e);
+            }
+
+        }
 
     }
 
     public void sendData(byte[] data) {
 
-        AsyncTaskCompat.executeParallel(new SendDataAsync(data));
+        try {
+
+            dataOutBuffered.write(data);
+            dataOutBuffered.flush();
+
+        } catch (IOException e) {
+
+            if (listener != null) {
+                listener.onDataWriteError(e);
+            }
+
+        }
 
     }
 
     public void terminate() {
 
-        keepLooping = false;
+      isRunning=false;
 
     }
 
-    private class SendDataAsync extends AsyncTask<Void, Void, Void> {
+    public void disconnect() {
 
-        private byte[] dataToBeSent;
-
-        public SendDataAsync(byte[] dataToBeSent) {
-            this.dataToBeSent = dataToBeSent;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            try {
-
-                out.write(dataToBeSent);
-                out.flush();
-
-                bytesOut+=dataToBeSent.length;
-
-                String logData;
-                try {
-                    logData = new String(dataToBeSent, "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    logData = "";
-                }
-                Log.d(TAG, "TCP data sent: " + logData);
-
-            } catch (IOException e) {
-
-                if (listener != null) {
-                    listener.onDataWriteError(e);
-                }
-
-            }
-
-            return null;
-        }
-
-    }
-
-    private class MainLoop extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            try {
-
-                socket = new Socket(hostAddress, port);
-                in = new BufferedInputStream(socket.getInputStream());
-                out = new BufferedOutputStream(socket.getOutputStream());
-
-                // manda una notifica all'interfaccia
-
-                if (listener != null) {
-                    listener.onConnected(socket.getLocalPort());
-                }
-
-            } catch (IOException e) {
-
-                if (listener != null) {
-                    listener.onConnectionError(e);
-                }
-                return null;
-            }
-
-            int b;
-            ByteArrayOutputStream outputData = new ByteArrayOutputStream();
-
-            try {
-
-                while (keepLooping && (b = in.read()) != -1) {
-
-                    bytesIn++;
-                    outputData.write(b);
-
-                    if (b == '\n') {
-
-                        outputData.flush();
-                        if (listener != null) {
-                            listener.onDataLineReceived(outputData.toByteArray());
-                        }
-
-                        // reinizializza l'array di byte
-                        outputData = new ByteArrayOutputStream();
-
-                    }
-
-                }
-
-                if (listener != null) {
-                    listener.onClose(!keepLooping);
-                }
-
-                socket.close();
-
-                Log.d(TAG, "Socket closed");
-
-            } catch (IOException e) {
-
-                if (listener != null) {
-                    listener.onDataReadError(e);
-
-                }
-
-            }
-
-            return null;
-
-        }
+        sendData("@EXIT\n".getBytes());
 
     }
 

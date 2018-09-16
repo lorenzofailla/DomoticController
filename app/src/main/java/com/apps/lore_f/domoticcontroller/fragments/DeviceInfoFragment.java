@@ -134,7 +134,7 @@ public class DeviceInfoFragment extends Fragment {
                         // device is connected to remote host via TCP.
                         // TCP Comm interface will be disconnected.
 
-                        parent.setIsTCPCommIntefaceAvailable(false);
+                        parent.getTcpComm().disconnect();
 
                     } else {
                         // device is not connected to remote host via TCP.
@@ -145,10 +145,10 @@ public class DeviceInfoFragment extends Fragment {
 
                     break;
 
-
             }
 
         }
+
     };
 
     private ValueEventListener vpnStatusValueEventListener = new ValueEventListener() {
