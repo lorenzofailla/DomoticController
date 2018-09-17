@@ -5,12 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.os.AsyncTaskCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -88,8 +86,11 @@ public class DeviceViewActivity extends AppCompatActivity {
                     if (databaseError != null)
                         Log.e(TAG, databaseError.getMessage());
 
+                    deviceNotRespondingAction=null;
+
                     // termina l'activity corrente
                     finish();
+
                 }
             });
 
@@ -97,7 +98,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private DeviceNotRespondingAction deviceNotRespondingAction;
+    private DeviceNotRespondingAction deviceNotRespondingAction=null;
 
     /*
     ************************************************************************************************
@@ -287,29 +288,26 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void onClose(boolean byLocal) {
 
             if (!isPausing) {
+
+                tcpComm.terminate();
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         setIsTCPCommIntefaceAvailable(false);
                     }
+
                 });
 
             } else {
+
                 tcpComm.setListener(null);
+
             }
 
         }
 
     };
-
-    private class TcpInterfaceProbingTimeout implements Runnable {
-        @Override
-        public void run() {
-
-
-        }
-
-    }
 
     private void manageTCPInterfaceStatus() {
 
@@ -329,7 +327,6 @@ public class DeviceViewActivity extends AppCompatActivity {
             // distrugge l'oggetto TCPComm, se esiste
             if (tcpComm != null) {
                 tcpComm.setListener(null);
-                tcpComm.terminate();
                 tcpComm = null;
             }
 
@@ -350,13 +347,20 @@ public class DeviceViewActivity extends AppCompatActivity {
                         thisDevice)
         );
 
+        // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
+
+        if(deviceNotRespondingAction!=null) {
+            handler.removeCallbacks(deviceNotRespondingAction);
+        }
+
+        deviceNotRespondingAction = new DeviceNotRespondingAction();
+        handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
+
         // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
         TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
         remoteHostName.setText(R.string.GENERIC_PLACEHOLDER_WAITING);
 
-        // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
-        deviceNotRespondingAction = new DeviceNotRespondingAction();
-        handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
+
 
         sendCommandToDevice(
                 new Message("__update_status",
@@ -409,9 +413,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
 
-                // avvia il conteggio del timeout
-                handler.postDelayed(new TcpInterfaceProbingTimeout(), TCP_PROBING_REPLY_TIMEOUT);
-
             }
 
         }
@@ -422,6 +423,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     ************************************************************************************************
     ValueEventListener for remote device general status data
      */
+
     ValueEventListener generalStatusValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -455,6 +457,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     /*
     ValueEventListener for remote device network status data
      */
+
     ValueEventListener networkStatusValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -798,7 +801,9 @@ public class DeviceViewActivity extends AppCompatActivity {
         FirebaseDatabase.getInstance().getReference(networkStatusNode).removeEventListener(networkStatusValueEventListener);
 
         // se attivo, rimuove l'handler all'azione posticipata per gestire la mancata risposta dal server
-        handler.removeCallbacks(deviceNotRespondingAction);
+        if(deviceNotRespondingAction!=null) {
+            handler.removeCallbacks(deviceNotRespondingAction);
+        }
 
         // rimuove l'OnPageChangeListener al ViewPager
         if (viewPager != null)
@@ -833,7 +838,9 @@ public class DeviceViewActivity extends AppCompatActivity {
                 remoteHostName.setText(remoteDeviceName);
 
                 // ferma l'esecuzione del task
-                handler.removeCallbacks(deviceNotRespondingAction);
+                if(deviceNotRespondingAction!=null) {
+                    handler.removeCallbacks(deviceNotRespondingAction);
+                }
 
                 break;
 

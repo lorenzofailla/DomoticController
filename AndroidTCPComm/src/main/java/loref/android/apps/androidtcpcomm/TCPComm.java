@@ -47,7 +47,7 @@ public class TCPComm {
 
     public void setRemoteAddress(String newAddress) {
 
-        hostAddress=newAddress;
+        hostAddress = newAddress;
         addressChanged = true;
 
     }
@@ -122,7 +122,7 @@ public class TCPComm {
                     in = new BufferedInputStream(socket.getInputStream());
                     out = new BufferedOutputStream(socket.getOutputStream());
 
-                    while (isRunning && (b = in.read()) != -1) {
+                    while ((b = in.read()) != -1) {
 
                         bytesIn++;
                         receivedData.write(b);
@@ -145,11 +145,7 @@ public class TCPComm {
                         listener.onClose(!isRunning);
                     }
 
-                    socket.close();
                     isConnected = false;
-
-                    in.close();
-                    out.close();
 
                 } catch (IOException e) {
 
@@ -159,10 +155,48 @@ public class TCPComm {
 
                     }
 
-                    while (isRunning && !addressChanged){
+                    while (isRunning && !addressChanged) {
 
                         // does nothing
 
+                    }
+
+                } finally {
+
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                    } catch (NullPointerException e) {
+                    }
+
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                    } catch (NullPointerException e) {
+                    }
+
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                    } catch (NullPointerException e) {
+                    }
+
+                    try {
+                        dataOutBuffered.close();
+                    } catch (IOException e) {
+                    } catch (NullPointerException e) {
+                    }
+
+                    try {
+                        dataOutPipeReader.close();
+                    } catch (IOException e) {
+                    } catch (NullPointerException e) {
+                    }
+
+                    try {
+                        dataOutPipeWriter.close();
+                    } catch (IOException e) {
+                    } catch (NullPointerException e) {
                     }
 
                 }
@@ -171,6 +205,13 @@ public class TCPComm {
 
             return null;
 
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            Log.d(TAG, "MainLoop closed.");
         }
 
     }
@@ -200,7 +241,7 @@ public class TCPComm {
 
                 dataOutPipeWriter.connect(dataOutPipeReader);
 
-                while (isRunning && ((b = dataOutPipeReader.read()) != -1)) {
+                while (((b = dataOutPipeReader.read()) != -1)) {
 
                     out.write(b);
                     bytesOut++;
@@ -210,10 +251,6 @@ public class TCPComm {
                     }
 
                 }
-
-                dataOutBuffered.close();
-                dataOutPipeWriter.close();
-                dataOutPipeReader.close();
 
             } catch (IOException e) {
 
@@ -227,6 +264,13 @@ public class TCPComm {
 
         }
 
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            Log.d(TAG, "DataOutLoop closed.");
+
+        }
 
     }
 

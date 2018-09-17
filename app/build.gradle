@@ -50,7 +50,7 @@ dependencies {
     implementation project(':generalutilitieslibrary')
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation project(':AndroidTCPComm')
-    }
+}
 
 
 apply plugin: 'com.google.gms.google-services'
