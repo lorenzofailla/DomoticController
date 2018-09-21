@@ -1,7 +1,9 @@
 package com.apps.lore_f.domoticcontroller.activities;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.webkit.WebView;
 
 import com.apps.lore_f.domoticcontroller.R;
 
@@ -12,4 +14,30 @@ public class LiveCamViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_cam_view);
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        WebView webView = (WebView) findViewById(R.id.WVW___LIVECAMVIEW___WEBVIEW);
+
+
+        Intent intent = getIntent();
+        if(intent.hasExtra("__URL_TO_VIEW")){
+
+            webView.loadUrl(intent.getStringExtra("__URL_TO_VIEW"));
+
+        } else {
+
+            finish();
+
+        }
+
+    }
+
 }

@@ -108,7 +108,6 @@ public class DeviceViewActivity extends AppCompatActivity {
     private TCPComm tcpComm;
     private boolean isTCPCommInterfaceAvailable = false;
 
-
     private AlertDialog connectingToDeviceAlertDialog;
 
     private void setTCPConnectionAlertDialogMessage(String message) {
@@ -419,6 +418,10 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
+    public String getCurrentTCPAddress(){
+        return deviceInfoFragment.getCurrentAddress();
+    }
+
     /*
     ************************************************************************************************
     ValueEventListener for remote device general status data
@@ -609,6 +612,14 @@ public class DeviceViewActivity extends AppCompatActivity {
                 case WOL_MANAGER:
                     /* no action */
                     break;
+
+                case CAMERA_VIEWER:
+                    /*
+                    * Calls
+                    * */
+
+                    VSCameraViewerFragment f = (VSCameraViewerFragment) fragments[fragmentPosition];
+                    f.manageLiveBroadcastStatus();
 
             }
 
