@@ -86,7 +86,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                     if (databaseError != null)
                         Log.e(TAG, databaseError.getMessage());
 
-                    deviceNotRespondingAction=null;
+                    deviceNotRespondingAction = null;
 
                     // termina l'activity corrente
                     finish();
@@ -98,7 +98,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private DeviceNotRespondingAction deviceNotRespondingAction=null;
+    private DeviceNotRespondingAction deviceNotRespondingAction = null;
 
     /*
     ************************************************************************************************
@@ -237,8 +237,11 @@ public class DeviceViewActivity extends AppCompatActivity {
                         // pone a false il flag isTCPCommInterfaceAvailable
                         setIsTCPCommIntefaceAvailable(false);
                     }
+
                 });
+
             }
+
         }
 
         @Override
@@ -348,7 +351,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
 
-        if(deviceNotRespondingAction!=null) {
+        if (deviceNotRespondingAction != null) {
             handler.removeCallbacks(deviceNotRespondingAction);
         }
 
@@ -358,7 +361,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         // mostra il nome del dispositivo remoto nella TextView 'remoteHostName'
         TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
         remoteHostName.setText(R.string.GENERIC_PLACEHOLDER_WAITING);
-
 
 
         sendCommandToDevice(
@@ -418,7 +420,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    public String getCurrentTCPAddress(){
+    public String getCurrentTCPAddress() {
         return deviceInfoFragment.getCurrentAddress();
     }
 
@@ -615,8 +617,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 case CAMERA_VIEWER:
                     /*
-                    * Calls
-                    * */
+                     * Calls
+                     * */
 
                     VSCameraViewerFragment f = (VSCameraViewerFragment) fragments[fragmentPosition];
                     f.manageLiveBroadcastStatus();
@@ -683,6 +685,13 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // recupera l'extra dall'intent,
         // ottiene il nome del dispositivo remoto e altri parametri
+
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
@@ -758,13 +767,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-    }
-
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-
         // attiva il ciclo di richieste
         handler = new Handler();
 
@@ -812,7 +814,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         FirebaseDatabase.getInstance().getReference(networkStatusNode).removeEventListener(networkStatusValueEventListener);
 
         // se attivo, rimuove l'handler all'azione posticipata per gestire la mancata risposta dal server
-        if(deviceNotRespondingAction!=null) {
+        if (deviceNotRespondingAction != null) {
             handler.removeCallbacks(deviceNotRespondingAction);
         }
 
@@ -849,7 +851,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                 remoteHostName.setText(remoteDeviceName);
 
                 // ferma l'esecuzione del task
-                if(deviceNotRespondingAction!=null) {
+                if (deviceNotRespondingAction != null) {
                     handler.removeCallbacks(deviceNotRespondingAction);
                 }
 
@@ -1365,7 +1367,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void initFragments() {
         /* inizializza i fragment */
 
-        boolean createDeviceInfoFragment;
+        boolean createDeviceInfoFragment=(action=="monitor");
 
         switch (action) {
 

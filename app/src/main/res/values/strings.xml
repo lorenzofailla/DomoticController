@@ -94,7 +94,9 @@
     <string name="VSMGM_PD_LABEL_CONNECTING">Waiting for reply...</string>
     <string name="VSMGM_PD_TITLE_CONNECTING">Connecting to VideoSurveillance</string>
 
-    <string name="DEVICESELECTION_LABEL_SELECT_DEVICE">Select the device to connect to:</string>
+    <string name="DEVICESELECTION_LABEL_RETRIEVING_DEVICES">Retrieving the list of available devices...</string>
+    <string name="DEVICESELECTION_LABEL_SELECT_DEVICE">Available devices: %d. Select the device to connect to:</string>
+    <string name="DEVICESELECTION_LABEL_NO_DEVICE">No device currently available.</string>
 
     <string name="DEVICEELEMENT_LABEL_RUNNING_SINCE">Running since: </string>
     <string name="DEVICEELEMENT_LABEL_LAST_UPDATE">Last update: </string>

@@ -15,7 +15,7 @@
         android:id="@+id/TXV___DEVICE_SELECTION___LABEL"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/DEVICESELECTION_LABEL_SELECT_DEVICE" />
+        android:text="@string/DEVICESELECTION_LABEL_RETRIEVING_DEVICES" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/RWV___DEVICE_SELECTION___DEVICES"

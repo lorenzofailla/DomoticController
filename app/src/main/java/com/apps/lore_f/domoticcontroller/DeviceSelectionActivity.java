@@ -112,13 +112,30 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
             }
 
+            /*
+            aggiorna il contenuto della label
+             */
+
+            TextView availableDevicesTextView = (TextView) findViewById(R.id.TXV___DEVICE_SELECTION___LABEL);
+
+            long availableDevicesNumber = dataSnapshot.getChildrenCount();
+            String message;
+
+            if(availableDevicesNumber>0){
+                message = String.format(getString(R.string.DEVICESELECTION_LABEL_SELECT_DEVICE),availableDevicesNumber);
+            } else {
+                message = getString(R.string.DEVICESELECTION_LABEL_NO_DEVICE);
+            }
+
+            availableDevicesTextView.setText(message);
+
             // aggiorna l'adapter
             refreshAdapter();
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
-
+            Log.e(TAG, databaseError.getMessage());
         }
 
     };
