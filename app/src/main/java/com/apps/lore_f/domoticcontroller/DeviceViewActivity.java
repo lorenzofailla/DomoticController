@@ -441,6 +441,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 if (deviceInfoFragment != null) {
                     deviceInfoFragment.setGeneralStatus(status);
+                } else {
+
                 }
 
             } else {
@@ -685,14 +687,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // recupera l'extra dall'intent,
         // ottiene il nome del dispositivo remoto e altri parametri
-
-    }
-
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         if (extras != null) {
@@ -767,6 +761,15 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
+        initView();
+
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
         // attiva il ciclo di richieste
         handler = new Handler();
 
@@ -779,7 +782,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
         FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
 
-        initView();
+
 
         setIsTCPCommIntefaceAvailable(false);
 
@@ -1383,7 +1386,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         //
         // DeviceInfoFragment
 
-        if (createDeviceInfoFragment) {
+        if (createDeviceInfoFragment /*&& deviceInfoFragment==null*/) {
+
             deviceInfoFragment = new DeviceInfoFragment();
             deviceInfoFragment.setParent(this);
         }

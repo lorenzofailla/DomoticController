@@ -3,6 +3,7 @@ package com.apps.lore_f.domoticcontroller.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -172,12 +173,14 @@ public class DeviceInfoFragment extends Fragment {
 
     public DeviceInfoFragment() {
         // Required empty public constructor
+        Log.d(TAG, "DeviceInfoFragment constructor call.");
 
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "DeviceInfoFragment onCreate.");
 
     }
 
@@ -214,7 +217,7 @@ public class DeviceInfoFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-
+        Log.d(TAG, "DeviceInfoFragment onAttach.");
     }
 
     @Override
@@ -292,6 +295,8 @@ public class DeviceInfoFragment extends Fragment {
             runningSinceTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(status.getRunningSince(), getContext()));
             lastUpdateTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(status.getLastUpdate(), getContext()));
 
+        } else {
+            Log.d(TAG, "View of the fragment is null.");
         }
 
     };
