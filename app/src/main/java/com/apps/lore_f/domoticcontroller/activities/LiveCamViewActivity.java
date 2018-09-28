@@ -24,8 +24,13 @@ public class LiveCamViewActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        // recupera l'handler alla WebView
         WebView webView = (WebView) findViewById(R.id.WVW___LIVECAMVIEW___WEBVIEW);
 
+        // imposta alcuni parametri della WebView
+        webView.getSettings().setDisplayZoomControls(true);
+        webView.getSettings().setLoadWithOverviewMode(true);
+        webView.getSettings().setUseWideViewPort(true);
 
         Intent intent = getIntent();
         if(intent.hasExtra("__URL_TO_VIEW")){

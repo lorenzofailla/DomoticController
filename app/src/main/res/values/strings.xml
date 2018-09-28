@@ -77,7 +77,7 @@
     <string name="DEVICEVIEW_LABEL_VPN_STATUS_NOT_CONNECTED">Not connected.</string>
     <string name="DEVICEVIEW_LABEL_VPN_STATUS_CONNECTED">Connected.</string>
     <string name="DEVICEVIEW_LABEL_TCP_STATUS">TCP Status:</string>
-    <string name="DEVICEVIEW_LABEL_TCP_STATUS_NOT_CONNECTED">Unreachable.</string>
+    <string name="DEVICEVIEW_LABEL_TCP_STATUS_NOT_CONNECTED">Not connected.</string>
     <string name="DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED">Connected.</string>
     <string name="DEVICEVIEW_LABEL_LASTHEARTBEAT_TIME">Last heartbeat:</string>
     <string name="DEVICEVIEW_LABEL_DEVICE_OPERATIONS">Device Operations:</string>

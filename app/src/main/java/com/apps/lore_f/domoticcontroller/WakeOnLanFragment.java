@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.WOLDeviceEntry;
+import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

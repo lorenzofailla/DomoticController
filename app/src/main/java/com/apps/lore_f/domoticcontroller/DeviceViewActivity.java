@@ -23,7 +23,9 @@ import android.widget.TextView;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
 import com.apps.lore_f.domoticcontroller.fragments.DeviceInfoFragment;
+import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.FileInfo;
+import com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,8 +36,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.DataFormatException;
 
 import loref.android.apps.androidtcpcomm.TCPComm;
@@ -45,20 +45,218 @@ import static apps.android.loref.GeneralUtilitiesLibrary.decode;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
 import static com.apps.lore_f.domoticcontroller.DefaultValues.*;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.CAMERA_VIEWER;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.DEVICE_INFO;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.DIRECTORY_NAVIGATOR;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.TORRENT_MANAGER;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.WOL_MANAGER;
+import static com.apps.lore_f.domoticcontroller.generic.classes.MessageStaticMethods.createMessageFromBytesArray;
+import static com.apps.lore_f.domoticcontroller.generic.classes.MessageStaticMethods.getMessageAsBytesArray;
 
 public class DeviceViewActivity extends AppCompatActivity {
 
     private static final String TAG = "DeviceViewActivity";
 
-    private enum FragmentType {
-        DEVICE_INFO,
-        DIRECTORY_NAVIGATOR,
-        TORRENT_MANAGER,
-        WOL_MANAGER,
-        SSH_MANAGER,
-        CAMERA_VIEWER
+    //region /*    GESTIONE FRAGMENTS     */
+
+    private CollectionPagerAdapter collectionPagerAdapter;
+
+    private FragmentsCollection fragments = new FragmentsCollection();
+
+    private DeviceInfoFragment deviceInfoFragment;
+    private TorrentViewerFragment torrentViewerFragment;
+    private FileViewerFragment fileViewerFragment;
+    private WakeOnLanFragment wakeOnLanFragment;
+    private DeviceSSHFragment deviceSSHFragment;
+    private String[] cameraNames;
+    private String[] cameraIDs;
+    private int nOfAvailableCameras;
+
+    private int deviceInfoFragmentIndex = 0;
+    private int firstCameraFragmentIndex = 0;
+
+    private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+
+            Log.i(TAG, String.format("ViewPager.OnPageChangeListener.onPageSelected(%d)", position));
+            collectionPagerAdapter.initializeFragmentAction(position);
+
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+    };
+
+    public class CollectionPagerAdapter extends FragmentPagerAdapter {
+
+        CollectionPagerAdapter(FragmentManager fragmentManager) {
+            super(fragmentManager);
+        }
+
+        @Override
+        public Fragment getItem(int i) {
+
+            Log.i(TAG, String.format("getItem(%d)", i));
+            initializeFragmentAction(i);
+            return fragments.getFragment(i);
+
+        }
+
+        @Override
+        public int getCount() {
+
+            return fragments.getFragmentsNumber();
+
+        }
+
+        public void initializeFragmentAction(int fragmentPosition) {
+
+            switch (fragments.getFragmentType(fragmentPosition)) {
+
+                case DEVICE_INFO:
+                    if (deviceInfoFragment != null) {
+                        deviceInfoFragment.refreshView();
+                    }
+                    break;
+
+                case DIRECTORY_NAVIGATOR:
+
+                    if (fileViewerFragment.currentDirName == null) {
+                        // invia al dispositivo remoto la richiesta di conoscere la directory corrente
+                        sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
+                    }
+
+                    break;
+
+                case TORRENT_MANAGER:
+                    requestTorrentsList();
+                    break;
+
+                case WOL_MANAGER:
+                    /* no action */
+                    break;
+
+                case CAMERA_VIEWER:
+                    /*
+                     * Calls
+                     * */
+
+                    VSCameraViewerFragment f = (VSCameraViewerFragment) fragments.getFragment(fragmentPosition);
+                    f.manageLiveBroadcastStatus();
+
+            }
+
+        }
 
     }
+
+    private void initFragments() {
+
+        boolean createDeviceInfoFragment;
+
+        switch (action) {
+
+            case "monitor":
+                createDeviceInfoFragment = false;
+                break;
+
+            default:
+                createDeviceInfoFragment = true;
+
+        }
+
+        deviceInfoFragmentIndex = -1;
+        firstCameraFragmentIndex = -1;
+
+        int count = 0;
+
+        fragments.clearFragments();
+
+        /*
+        inizializza i fragment
+         */
+
+        // WakeOnLanFragment
+        if (remoteDeviceWakeOnLan) {
+
+            wakeOnLanFragment = new WakeOnLanFragment();
+            wakeOnLanFragment.parent = this;
+
+            fragments.add(count, wakeOnLanFragment, WOL_MANAGER, "Wake-On-Lan");
+            count++;
+
+        }
+
+        // TorrentViewerFragment
+        if (remoteDeviceTorrent) {
+
+            torrentViewerFragment = new TorrentViewerFragment();
+            torrentViewerFragment.parent = this;
+
+            fragments.add(count, torrentViewerFragment, TORRENT_MANAGER, "Transmission controller");
+            count++;
+
+        }
+
+        // FileViewerFragment
+        if (remoteDeviceDirNavi) {
+
+            fileViewerFragment = new FileViewerFragment();
+            fileViewerFragment.parent = this;
+
+            fragments.add(count, fileViewerFragment, DIRECTORY_NAVIGATOR, "Directory Navigator");
+            count++;
+
+        }
+
+        // DeviceInfoFragment
+        if (createDeviceInfoFragment) {
+
+            deviceInfoFragment = new DeviceInfoFragment();
+            deviceInfoFragment.setParent(this);
+
+            fragments.add(count, deviceInfoFragment, DEVICE_INFO, "Device info");
+            deviceInfoFragmentIndex = count;
+
+            count++;
+
+        }
+
+        // VideoSurveillanceCameraListFragment
+        if (remoteDeviceVideoSurveillance) {
+
+            for (int i = 0; i < nOfAvailableCameras; i++) {
+
+                VSCameraViewerFragment temp;
+                temp = new VSCameraViewerFragment();
+                temp.setCameraID(cameraIDs[i]);
+                temp.setCameraName(cameraNames[i]);
+                temp.setParent(this);
+
+                fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraIDs[i]);
+
+                if (i==0) {
+                    firstCameraFragmentIndex = count;
+                }
+
+                count++;
+
+            }
+
+        }
+
+    }
+
+    // endregion
 
     /*
     ************************************************************************************************
@@ -76,7 +274,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void run() {
 
             // imposta lo stato del dispositivo come offline
-            String deviceNode = DefaultValues.GROUPNODE + "/" + groupName + "/" + DefaultValues.DEVICENODE + "/" + thisDevice;
+            String deviceNode = DefaultValues.GROUPNODE + "/" + groupName + "/" + DefaultValues.DEVICENODE + "/" + remoteDeviceName;
             FirebaseDatabase.getInstance().getReference(deviceNode).child("online").setValue(false, new DatabaseReference.CompletionListener() {
                 @Override
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -100,10 +298,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private DeviceNotRespondingAction deviceNotRespondingAction = null;
 
-    /*
-    ************************************************************************************************
-    TCP Connection Interface
-     */
+    //region /*    TCP Connection Interface     */
 
     private TCPComm tcpComm;
     private boolean isTCPCommInterfaceAvailable = false;
@@ -272,7 +467,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             }
             Log.d(TAG, "TCP data received: " + logData);
 
-            final Message inCmd = getCommandFromBytesArray(data);
+            final Message inCmd = createMessageFromBytesArray(data);
             if (!inCmd.getHeader().equals("")) {
                 runOnUiThread(new Runnable() {
                     @Override
@@ -421,8 +616,12 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     public String getCurrentTCPAddress() {
+
         return deviceInfoFragment.getCurrentAddress();
+
     }
+
+    //endregion
 
     /*
     ************************************************************************************************
@@ -496,7 +695,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
-
     // Firebase Database
     private DatabaseReference incomingMessagesRef;
 
@@ -512,124 +710,6 @@ public class DeviceViewActivity extends AppCompatActivity {
     public String groupName;
 
     private Handler handler;
-
-    private CollectionPagerAdapter collectionPagerAdapter;
-    private ViewPager viewPager;
-
-    /* Fragments */
-    private DeviceInfoFragment deviceInfoFragment;
-    private TorrentViewerFragment torrentViewerFragment;
-    private FileViewerFragment fileViewerFragment;
-    private WakeOnLanFragment wakeOnLanFragment;
-    private DeviceSSHFragment deviceSSHFragment;
-    private VSCameraViewerFragment[] cameraViewFragment;
-    private String[] cameraNames;
-    private String[] cameraIDs;
-    private int nOfAvailableCameras;
-    private int homeFragment;
-
-    int deviceInfoFragmentIndex = 0;
-    int firstCameraFragmentIndex = 0;
-
-    private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-
-            Log.i(TAG, String.format("ViewPager.OnPageChangeListener.onPageSelected(%d)", position));
-            collectionPagerAdapter.initializeFragmentAction(position);
-
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-
-        }
-    };
-
-    public class CollectionPagerAdapter extends FragmentPagerAdapter {
-
-        private Fragment[] fragments;
-        private String[] pageTitle;
-        private FragmentType[] fragmentTypes;
-
-        CollectionPagerAdapter(
-                FragmentManager fm,
-                Fragment[] fragments,
-                String[] titles,
-                FragmentType[] types
-        ) {
-            super(fm);
-
-            this.fragments = fragments;
-            this.pageTitle = titles;
-            this.fragmentTypes = types;
-
-        }
-
-        @Override
-        public Fragment getItem(int i) {
-
-            Log.i(TAG, String.format("getItem(%d)", i));
-            initializeFragmentAction(i);
-            return fragments[i];
-
-        }
-
-        @Override
-        public int getCount() {
-            return fragments.length;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-
-            return pageTitle[position];
-
-        }
-
-        public void initializeFragmentAction(int fragmentPosition) {
-
-            switch (fragmentTypes[fragmentPosition]) {
-
-                case DEVICE_INFO:
-                    // nessuna azione
-                    break;
-
-                case DIRECTORY_NAVIGATOR:
-
-                    if (fileViewerFragment.currentDirName == null) {
-                        // invia al dispositivo remoto la richiesta di conoscere la directory corrente
-                        sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
-                    }
-
-                    break;
-
-                case TORRENT_MANAGER:
-                    requestTorrentsList();
-                    break;
-
-                case WOL_MANAGER:
-                    /* no action */
-                    break;
-
-                case CAMERA_VIEWER:
-                    /*
-                     * Calls
-                     * */
-
-                    VSCameraViewerFragment f = (VSCameraViewerFragment) fragments[fragmentPosition];
-                    f.manageLiveBroadcastStatus();
-
-            }
-
-        }
-
-    }
 
     /*
     Listener per nuovi record nel nodo dei messaggi in ingresso.
@@ -761,7 +841,11 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        initView();
+        // inizializza i fragments
+        initFragments();
+
+        // crea il CollectionPagerAdapter
+        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
     }
 
@@ -769,6 +853,19 @@ public class DeviceViewActivity extends AppCompatActivity {
     protected void onResume() {
 
         super.onResume();
+
+        // imposta il ViewPager per la gestione dei fragment
+        ViewPager viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
+        viewPager.setAdapter(collectionPagerAdapter);
+        viewPager.addOnPageChangeListener(onPageChangeListener);
+
+        // se l'azione specificata non è "monitor", posiziona il ViewPager sul fragment deviceInfoFragment
+
+        if(action!="monitor") {
+
+            viewPager.setCurrentItem(deviceInfoFragmentIndex);
+
+        }
 
         // attiva il ciclo di richieste
         handler = new Handler();
@@ -781,8 +878,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
         FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
-
-
 
         setIsTCPCommIntefaceAvailable(false);
 
@@ -822,21 +917,10 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
         // rimuove l'OnPageChangeListener al ViewPager
-        if (viewPager != null)
-            viewPager.removeOnPageChangeListener(onPageChangeListener);
+        ViewPager viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
+        viewPager.removeOnPageChangeListener(onPageChangeListener);
 
         handler = null;
-
-    }
-
-    private void initView() {
-
-        initFragments();
-
-        viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
-        viewPager.setAdapter(collectionPagerAdapter);
-        viewPager.addOnPageChangeListener(onPageChangeListener);
-        viewPager.setCurrentItem(homeFragment);
 
     }
 
@@ -970,7 +1054,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                 String frameData = decodedBody.substring(7);
 
                 int cameraIndex = Integer.parseInt(frameCameraID);
-                VSCameraViewerFragment fragment = (VSCameraViewerFragment) getAvailableFragments()[firstCameraFragmentIndex + cameraIndex - 1];
+                VSCameraViewerFragment fragment = (VSCameraViewerFragment) fragments.getFragment(firstCameraFragmentIndex + cameraIndex - 1);
 
                 try {
                     fragment.refreshFrame((decompress(Base64.decode(frameData, Base64.DEFAULT))));
@@ -993,7 +1077,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         if (isTCPCommInterfaceAvailable) {
 
-            tcpComm.sendData(getCommandAsByteArray(command));
+            tcpComm.sendData(getMessageAsBytesArray(command));
 
         } else {
 
@@ -1251,264 +1335,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                     deviceSSHFragment.addCharacterToBuffer(event.getUnicodeChar(event.getMetaState()));
 
                 return super.onKeyDown(keyCode, event);
-
-        }
-
-    }
-
-    private Fragment[] getAvailableFragments() {
-        /*
-        Restituisce un array di Fragment, contenente le varie pagine video
-         */
-        List<Fragment> result = new ArrayList<>();
-
-        deviceInfoFragmentIndex = 0;
-        firstCameraFragmentIndex = 0;
-
-        int count = 0;
-
-        if (wakeOnLanFragment != null) {
-            result.add(wakeOnLanFragment);
-            count++;
-        }
-
-        if (torrentViewerFragment != null) {
-            result.add(torrentViewerFragment);
-            count++;
-        }
-
-        if (fileViewerFragment != null) {
-            result.add(fileViewerFragment);
-            count++;
-        }
-
-        if (deviceInfoFragment != null) {
-            result.add(deviceInfoFragment);
-            deviceInfoFragmentIndex = count;
-            count++;
-        }
-
-        for (int i = 0; i < nOfAvailableCameras; i++) {
-            result.add(cameraViewFragment[i]);
-            if (i == 0) {
-                firstCameraFragmentIndex = count;
-            }
-            count++;
-        }
-
-        switch (action) {
-            case "monitor":
-                homeFragment = firstCameraFragmentIndex;
-                break;
-
-            default:
-                homeFragment = deviceInfoFragmentIndex;
-
-        }
-
-        return result.toArray(new Fragment[0]);
-
-    }
-
-    private String[] getAvailableFragmentTitles() {
-
-        List<String> result = new ArrayList<String>();
-
-        if (wakeOnLanFragment != null) {
-            result.add("Wake-on-lan");
-        }
-
-        if (torrentViewerFragment != null) {
-            result.add("Torrent manager");
-        }
-
-        if (fileViewerFragment != null) {
-            result.add("File manager");
-        }
-
-        if (deviceInfoFragment != null) {
-            result.add("Remote device info");
-
-        }
-
-        for (int i = 0; i < nOfAvailableCameras; i++) {
-            result.add(String.format("Videosurveillance camera: %s", cameraIDs[i]));
-        }
-
-        return result.toArray(new String[0]);
-
-    }
-
-    private FragmentType[] getAvailableFragmentTypes() {
-
-        List<FragmentType> result = new ArrayList<FragmentType>();
-
-        if (wakeOnLanFragment != null) {
-            result.add(FragmentType.WOL_MANAGER);
-        }
-
-        if (torrentViewerFragment != null) {
-            result.add(FragmentType.TORRENT_MANAGER);
-        }
-
-        if (fileViewerFragment != null) {
-            result.add(FragmentType.DIRECTORY_NAVIGATOR);
-        }
-
-        if (deviceInfoFragment != null) {
-            result.add(FragmentType.DEVICE_INFO);
-
-        }
-
-        for (int i = 0; i < nOfAvailableCameras; i++) {
-            result.add(FragmentType.CAMERA_VIEWER);
-        }
-
-        return result.toArray(new FragmentType[0]);
-    }
-
-    private void initFragments() {
-        /* inizializza i fragment */
-
-        boolean createDeviceInfoFragment=(action=="monitor");
-
-        switch (action) {
-
-            case "monitor":
-                createDeviceInfoFragment = false;
-                break;
-
-            default:
-                createDeviceInfoFragment = true;
-
-        }
-
-        //
-        // DeviceInfoFragment
-
-        if (createDeviceInfoFragment /*&& deviceInfoFragment==null*/) {
-
-            deviceInfoFragment = new DeviceInfoFragment();
-            deviceInfoFragment.setParent(this);
-        }
-
-        //
-        // VideoSurveillanceCameraListFragment
-        if (remoteDeviceVideoSurveillance) {
-
-            // crea una query per calcolare il numero di videocamere disponibili
-            // inizializza l'array
-            cameraViewFragment = new VSCameraViewerFragment[nOfAvailableCameras];
-
-            for (int i = 0; i < nOfAvailableCameras; i++) {
-
-                VSCameraViewerFragment temp;
-                temp = new VSCameraViewerFragment();
-                temp.setCameraID(cameraIDs[i]);
-                temp.setCameraName(cameraNames[i]);
-                temp.setParent(this);
-
-                cameraViewFragment[i] = temp;
-
-            }
-
-        }
-
-        //
-        // FileViewerFragment
-        if (remoteDeviceDirNavi) {
-            fileViewerFragment = new FileViewerFragment();
-            fileViewerFragment.parent = this;
-        }
-
-        //
-        // TorrentViewerFragment
-        if (remoteDeviceTorrent) {
-            torrentViewerFragment = new TorrentViewerFragment();
-            torrentViewerFragment.parent = this;
-        }
-
-        //
-        // WakeOnLanFragment
-        if (remoteDeviceWakeOnLan) {
-            wakeOnLanFragment = new WakeOnLanFragment();
-            wakeOnLanFragment.parent = this;
-        }
-
-        // crea il CollectionPagerAdapter con le pagine video
-        collectionPagerAdapter =
-                new CollectionPagerAdapter(
-                        getSupportFragmentManager(),
-                        getAvailableFragments(),
-                        getAvailableFragmentTitles(),
-                        getAvailableFragmentTypes()
-                );
-    }
-
-
-    private byte[] getCommandAsByteArray(Message command) {
-        return String.format("@COMMAND?header=%s&body=%s\n", command.getHeader(), command.getBody()).getBytes();
-    }
-
-    private Message getCommandFromBytesArray(byte[] rawData) {
-
-        Message message = new Message("", "", "");
-        String rawString = "";
-        try {
-
-            rawString = new String(rawData, "UTF-8");
-
-        } catch (UnsupportedEncodingException e) {
-
-            return message;
-
-        }
-
-        String[] mainLine = rawString.split("[?]");
-        if (mainLine.length != 2) {
-            return message;
-        }
-
-        String[] lines = mainLine[1].split("[&]");
-
-        if (lines.length != 3) {
-
-            return message;
-
-        } else {
-
-            String header = "";
-            String body = "";
-            String replyto = "";
-
-            for (String l : lines) {
-
-                String[] struct = l.split("[=]");
-
-                if (struct.length != 2) {
-
-                    return message;
-
-                } else {
-
-                    switch (struct[0]) {
-                        case "header":
-                            header = struct[1];
-                            break;
-                        case "body":
-                            body = struct[1];
-                            break;
-                        case "replyto":
-                            replyto = struct[1];
-                            break;
-
-                    }
-
-                }
-
-            }
-
-            return new Message(header, body, replyto);
 
         }
 

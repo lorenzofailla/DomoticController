@@ -11,7 +11,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
-import com.apps.lore_f.domoticcontroller.Message;
+import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.apps.lore_f.domoticcontroller.R;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
@@ -30,51 +30,14 @@ public class DeviceInfoFragment extends Fragment {
     public boolean viewCreated = false;
     private View fragmentView;
 
-    private String[] hostAddresses;
-
-    public String[] getHostAddresses(){
-        return hostAddresses;
-    }
-
-    public String getAddress(int index){
-
-        try{
-            return hostAddresses[index];
-        } catch (IndexOutOfBoundsException e) {
-            return "";
-        }
-
-    }
-
-    public String getCurrentAddress(){
-
-        return getAddress(currentHostAddrIndex);
-
-    }
-
-    public int getNOfHostAddresses(){
-        return hostAddresses.length;
-    }
-
-    private int currentHostAddrIndex=-1;
-
-    public int getCurrentHostAddrIndex(){
-        return currentHostAddrIndex;
-    }
-
-    public void increaseCurrentHostAddrIndex(){
-        currentHostAddrIndex++;
-    }
-
-    public void resetCurrentHostAddrIndex(){
-        currentHostAddrIndex=-1;
-
-    }
-
     private DeviceViewActivity parent;
-    public void setParent(DeviceViewActivity p){
+
+    public void setParent(DeviceViewActivity p) {
         parent = p;
     }
+
+    private RemoteDevGeneralStatus remoteDevGeneralStatus=null;
+    private RemoteDevNetworkStatus remoteDevNetworkStatus=null;
 
     // VPN management
     private boolean isVPNConnected;
@@ -131,7 +94,7 @@ public class DeviceInfoFragment extends Fragment {
 
                 case R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_TCP:
 
-                    if(parent.getTCPCommInterfaceStatus()){
+                    if (parent.getTCPCommInterfaceStatus()) {
                         // device is connected to remote host via TCP.
                         // TCP Comm interface will be disconnected.
 
@@ -188,6 +151,8 @@ public class DeviceInfoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        Log.d(TAG, "DeviceInfoFragment onCreateView.");
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_device_info, container, false);
 
@@ -201,7 +166,7 @@ public class DeviceInfoFragment extends Fragment {
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_TCP).setOnClickListener(onClickListener);
 
-        DatabaseReference vpnStatusNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Devices/%s/VPNStatus",parent.groupName, parent.remoteDeviceName));
+        DatabaseReference vpnStatusNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Devices/%s/VPNStatus", parent.groupName, parent.remoteDeviceName));
         vpnStatusNode.addValueEventListener(vpnStatusValueEventListener);
 
         setHostAddresses(new String[0]);
@@ -234,6 +199,8 @@ public class DeviceInfoFragment extends Fragment {
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___SHUTDOWN).setOnClickListener(null);
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN).setOnClickListener(null);
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_TCP).setOnClickListener(null);
+
+        Log.d(TAG, "DeviceInfoFragment onDetach.");
 
     }
 
@@ -281,67 +248,50 @@ public class DeviceInfoFragment extends Fragment {
 
     }
 
-    public void setGeneralStatus(RemoteDevGeneralStatus status){
+    public void setGeneralStatus(RemoteDevGeneralStatus status) {
 
-        if(fragmentView!=null){
+        remoteDevGeneralStatus = status;
 
-            TextView systemLoadTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___SYSLOAD_VALUE);
-            TextView diskStatusTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___DISKSTATUS_VALUE);
-            TextView runningSinceTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___RUNNINGSINCE_VALUE);
-            TextView lastUpdateTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___LASTUPDATE_VALUE);
+        refreshView();
 
-            systemLoadTextView.setText(status.getSystemLoad());
-            diskStatusTextView.setText(status.getDiskStatus());
-            runningSinceTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(status.getRunningSince(), getContext()));
-            lastUpdateTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(status.getLastUpdate(), getContext()));
+    }
 
-        } else {
-            Log.d(TAG, "View of the fragment is null.");
-        }
+    public void setNetworkStatus(RemoteDevNetworkStatus status) {
 
-    };
-
-    public void setNetworkStatus(RemoteDevNetworkStatus status){
-
+        remoteDevNetworkStatus = status;
         setHostAddresses(status.getHostAddresses());
 
-        if(fragmentView!=null){
+        refreshView();
 
-            TextView publicIPTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___PUBLICIP_VALUE);
-            TextView localIPTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___PRIVATEIP_VALUE);
+    }
 
-            publicIPTextView.setText(status.getPublicIP());
-            localIPTextView .setText(status.getLocalIP());
+    ;
 
-        }
+    private void setHostAddresses(String[] addresses) {
 
-    };
+        hostAddresses = addresses;
 
-    private void setHostAddresses(String[] addresses){
+        int visibility = View.GONE;
 
-        hostAddresses=addresses;
-
-        int visibility=View.GONE;
-
-        if(hostAddresses.length>1){
+        if (hostAddresses.length > 1) {
             visibility = View.VISIBLE;
         }
 
-        if(fragmentView!=null){
+        if (fragmentView != null) {
             fragmentView.findViewById(R.id.CLA___DEVICEINFOFRAGMENT___MANAGE_TCP).setVisibility(visibility);
         }
 
     }
 
-    public void updateTCPStatus(){
+    public void updateTCPStatus() {
 
-        if(fragmentView!=null) {
+        if (fragmentView != null) {
             // inizializza la visualizzazione dello stato della connessione TCP
             String labelToShow = getString(R.string.GENERIC_PLACEHOLDER_WAITING);
 
-            if (currentHostAddrIndex>0 && parent.getTCPCommInterfaceStatus()) {
+            if (currentHostAddrIndex > 0 && parent.getTCPCommInterfaceStatus()) {
 
-                labelToShow = getString(R.string.DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED) + " to: " +getCurrentAddress();
+                labelToShow = getString(R.string.DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED) + " to: " + getCurrentAddress();
 
             } else {
 
@@ -356,5 +306,41 @@ public class DeviceInfoFragment extends Fragment {
 
     }
 
+    public void refreshView() {
+
+        if (fragmentView != null) {
+
+            if (remoteDevGeneralStatus != null) {
+
+                TextView systemLoadTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___SYSLOAD_VALUE);
+                TextView diskStatusTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___DISKSTATUS_VALUE);
+                TextView runningSinceTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___RUNNINGSINCE_VALUE);
+                TextView lastUpdateTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___LASTUPDATE_VALUE);
+
+                systemLoadTextView.setText(remoteDevGeneralStatus.getSystemLoad());
+                diskStatusTextView.setText(remoteDevGeneralStatus.getDiskStatus());
+                runningSinceTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(remoteDevGeneralStatus.getRunningSince(), getContext()));
+                lastUpdateTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(remoteDevGeneralStatus.getLastUpdate(), getContext()));
+
+            }
+
+            if (remoteDevNetworkStatus != null) {
+
+                TextView publicIPTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___PUBLICIP_VALUE);
+                TextView localIPTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___PRIVATEIP_VALUE);
+
+                publicIPTextView.setText(remoteDevNetworkStatus.getPublicIP());
+                localIPTextView.setText(remoteDevNetworkStatus.getLocalIP());
+            }
+
+        } else {
+
+            Log.d(TAG, "View of the fragment is null.");
+
+        }
+
+        updateTCPStatus();
+
+    }
 
 }

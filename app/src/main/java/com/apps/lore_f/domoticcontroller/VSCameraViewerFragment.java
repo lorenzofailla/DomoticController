@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.activities.LiveCamViewActivity;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.VSShotPicture;
+import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;

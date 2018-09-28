@@ -4,36 +4,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.method.KeyListener;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 
 import static android.content.ContentValues.TAG;
 

@@ -1,4 +1,4 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.generic.classes;
 
 /**
  * Created by lore_f on 20/08/2017.
