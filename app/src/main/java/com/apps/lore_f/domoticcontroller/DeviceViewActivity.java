@@ -318,8 +318,13 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     private int currentTCPHostAddrIndex=-1;
+
+    public int getCurrentTCPHostAddrIndex(){
+        return currentTCPHostAddrIndex;
+    }
+
     private String[] tcpHostAddresses;
-    private String getCurrentTCPHostAddress(){
+    public String getCurrentTCPHostAddress(){
 
         // returns the IP address in form of String relative to the current index value.
         // if index value exceed the hosts IP address String[] array, an empty string is returned.
@@ -685,6 +690,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 logData = dataSnapshot.toString();
                 RemoteDevNetworkStatus status = dataSnapshot.getValue(RemoteDevNetworkStatus.class);
+
+                tcpHostAddresses = status.getHostAddresses();
 
                 if (deviceInfoFragment != null) {
                     deviceInfoFragment.setNetworkStatus(status);

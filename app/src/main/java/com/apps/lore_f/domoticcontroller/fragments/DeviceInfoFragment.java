@@ -3,18 +3,25 @@ package com.apps.lore_f.domoticcontroller.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.DeviceSelectionActivity;
 import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.LogEntry;
 import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.apps.lore_f.domoticcontroller.R;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,6 +45,27 @@ public class DeviceInfoFragment extends Fragment {
 
     private RemoteDevGeneralStatus remoteDevGeneralStatus=null;
     private RemoteDevNetworkStatus remoteDevNetworkStatus=null;
+
+    public RecyclerView logsRecyclerView;
+    public LinearLayoutManager linearLayoutManager;
+    public FirebaseRecyclerAdapter<LogEntry, LogsHolder> firebaseAdapter;
+
+    public static class LogsHolder extends RecyclerView.ViewHolder {
+
+        public TextView logTimeStamp;
+        public TextView logInfo;
+        public TextView logDescription;
+
+        public LogsHolder(View v) {
+            super(v);
+
+            logTimeStamp = (TextView) itemView.findViewById(R.id.TXV___LOG___TIMESTAMP);
+            logInfo = (TextView) itemView.findViewById(R.id.TXV___LOG___INFO);
+            logDescription = (TextView) itemView.findViewById(R.id.TXV___LOG___DESCRIPTION);
+
+        }
+
+    }
 
     // VPN management
     private boolean isVPNConnected;
@@ -169,8 +197,6 @@ public class DeviceInfoFragment extends Fragment {
         DatabaseReference vpnStatusNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Devices/%s/VPNStatus", parent.groupName, parent.remoteDeviceName));
         vpnStatusNode.addValueEventListener(vpnStatusValueEventListener);
 
-        setHostAddresses(new String[0]);
-
         // aggiorna il flag e effettua il trigger del metodo nel listener
         viewCreated = true;
 
@@ -259,27 +285,8 @@ public class DeviceInfoFragment extends Fragment {
     public void setNetworkStatus(RemoteDevNetworkStatus status) {
 
         remoteDevNetworkStatus = status;
-        setHostAddresses(status.getHostAddresses());
 
         refreshView();
-
-    }
-
-    ;
-
-    private void setHostAddresses(String[] addresses) {
-
-        hostAddresses = addresses;
-
-        int visibility = View.GONE;
-
-        if (hostAddresses.length > 1) {
-            visibility = View.VISIBLE;
-        }
-
-        if (fragmentView != null) {
-            fragmentView.findViewById(R.id.CLA___DEVICEINFOFRAGMENT___MANAGE_TCP).setVisibility(visibility);
-        }
 
     }
 
@@ -289,9 +296,9 @@ public class DeviceInfoFragment extends Fragment {
             // inizializza la visualizzazione dello stato della connessione TCP
             String labelToShow = getString(R.string.GENERIC_PLACEHOLDER_WAITING);
 
-            if (currentHostAddrIndex > 0 && parent.getTCPCommInterfaceStatus()) {
+            if (parent.getCurrentTCPHostAddrIndex() > 0 && parent.getTCPCommInterfaceStatus()) {
 
-                labelToShow = getString(R.string.DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED) + " to: " + getCurrentAddress();
+                labelToShow = getString(R.string.DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED) + " to: " + parent.getCurrentTCPHostAddress();
 
             } else {
 
