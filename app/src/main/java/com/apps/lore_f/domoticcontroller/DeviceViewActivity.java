@@ -317,6 +317,24 @@ public class DeviceViewActivity extends AppCompatActivity {
         return isTCPCommInterfaceAvailable;
     }
 
+    private int currentTCPHostAddrIndex=-1;
+    private String[] tcpHostAddresses;
+    private String getCurrentTCPHostAddress(){
+
+        // returns the IP address in form of String relative to the current index value.
+        // if index value exceed the hosts IP address String[] array, an empty string is returned.
+
+        String result="";
+        try{
+            result=tcpHostAddresses[currentTCPHostAddrIndex];
+        } catch (IndexOutOfBoundsException e) {
+
+        } finally {
+            return result;
+        }
+
+    }
+
     public void setIsTCPCommIntefaceAvailable(boolean value) {
 
         this.isTCPCommInterfaceAvailable = value;
@@ -324,7 +342,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         if (deviceInfoFragment != null) {
 
             if (!isTCPCommInterfaceAvailable) {
-                deviceInfoFragment.resetCurrentHostAddrIndex();
+                currentTCPHostAddrIndex=-1;
             }
 
             deviceInfoFragment.updateTCPStatus();
@@ -384,14 +402,13 @@ public class DeviceViewActivity extends AppCompatActivity {
                         */
 
                         // incrementa l'indice di indirizzo IP da testare
-                        deviceInfoFragment.increaseCurrentHostAddrIndex();
+                        currentTCPHostAddrIndex++;
 
-                        if (!deviceInfoFragment.getCurrentAddress().equals("")) {
+                        if (!getCurrentTCPHostAddress().equals("")) {
 
                             // distrugge l'interfaccia TCP
-                            tcpComm.setRemoteAddress(deviceInfoFragment.getCurrentAddress());
-
-                            setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
+                            tcpComm.setRemoteAddress(getCurrentTCPHostAddress());
+                            setTCPConnectionAlertDialogMessage(getCurrentTCPHostAddress());
 
                         } else {
 
@@ -410,6 +427,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                         setIsTCPCommIntefaceAvailable(false);
 
                     }
+
                 }
 
 
@@ -576,9 +594,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         if (deviceInfoFragment != null) {
 
-            deviceInfoFragment.increaseCurrentHostAddrIndex();
+            currentTCPHostAddrIndex++;
 
-            if (!deviceInfoFragment.getCurrentAddress().equals("")) {
+            if (!getCurrentTCPHostAddress().equals("")) {
 
                 // crea l'AlertDialog
                 connectingToDeviceAlertDialog = new AlertDialog.Builder(this)
@@ -603,21 +621,15 @@ public class DeviceViewActivity extends AppCompatActivity {
                 connectingToDeviceAlertDialog.show();
 
                 // inizializza l'interfaccia TCP
-                tcpComm = new TCPComm(deviceInfoFragment.getCurrentAddress());
+                tcpComm = new TCPComm(getCurrentTCPHostAddress());
                 tcpComm.setListener(tcpCommListener);
                 tcpComm.init();
 
-                setTCPConnectionAlertDialogMessage(deviceInfoFragment.getCurrentAddress());
+                setTCPConnectionAlertDialogMessage(getCurrentTCPHostAddress());
 
             }
 
         }
-
-    }
-
-    public String getCurrentTCPAddress() {
-
-        return deviceInfoFragment.getCurrentAddress();
 
     }
 
