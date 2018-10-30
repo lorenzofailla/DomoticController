@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.DefaultValues;
 import com.apps.lore_f.domoticcontroller.DeviceSelectionActivity;
 import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
@@ -27,6 +28,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
 
 import apps.android.loref.GeneralUtilitiesLibrary;
 
@@ -49,6 +52,7 @@ public class DeviceInfoFragment extends Fragment {
     public RecyclerView logsRecyclerView;
     public LinearLayoutManager linearLayoutManager;
     public FirebaseRecyclerAdapter<LogEntry, LogsHolder> firebaseAdapter;
+    private DatabaseReference logsNode;
 
     public static class LogsHolder extends RecyclerView.ViewHolder {
 
@@ -66,6 +70,73 @@ public class DeviceInfoFragment extends Fragment {
         }
 
     }
+
+    private void refreshLogsAdapter() {
+
+        linearLayoutManager = new LinearLayoutManager(getContext());
+        linearLayoutManager.setStackFromEnd(false);
+
+        firebaseAdapter = new FirebaseRecyclerAdapter<LogEntry, LogsHolder>(
+                LogEntry.class,
+                R.layout.row_holder_log_element,
+                LogsHolder.class,
+                logsNode) {
+
+            @Override
+            protected void populateViewHolder(LogsHolder holder, LogEntry log, int position) {
+
+                holder.logTimeStamp.setText(
+                        GeneralUtilitiesLibrary.getTimeElapsed(
+                                Long.parseLong(
+                                        log.getDatetime()
+                                ), getContext()
+                        )
+                );
+
+                holder.logDescription.setText(log.getLogdesc());
+                holder.logInfo.setText(log.getLogtype());
+
+            }
+
+        };
+
+        firebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                int mediaCount = firebaseAdapter.getItemCount();
+                int lastVisiblePosition = linearLayoutManager.findLastCompletelyVisibleItemPosition();
+                // If the recycler view is initially being loaded or the user is at the bottom of the list, scroll
+                // to the bottom of the list to show the newly added message.
+                if (lastVisiblePosition == -1 ||
+                        (positionStart >= (mediaCount - 1) && lastVisiblePosition == (positionStart - 1))) {
+                    logsRecyclerView.scrollToPosition(positionStart);
+                }
+
+            }
+
+        });
+
+        logsRecyclerView.setLayoutManager(linearLayoutManager);
+        logsRecyclerView.setAdapter(firebaseAdapter);
+
+    }
+
+    private ValueEventListener logsValueEventLister = new ValueEventListener() {
+
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+
+            refreshLogsAdapter();
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+
+    };
 
     // VPN management
     private boolean isVPNConnected;
@@ -87,6 +158,9 @@ public class DeviceInfoFragment extends Fragment {
                     break;
 
                 case R.id.BTN___DEVICEINFOFRAGMENT___CLEARLOG:
+
+                    DatabaseReference logs = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Logs/%s", parent.groupName, parent.remoteDeviceName));
+                    logs.removeValue();
 
                     break;
 
@@ -197,6 +271,9 @@ public class DeviceInfoFragment extends Fragment {
         DatabaseReference vpnStatusNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Devices/%s/VPNStatus", parent.groupName, parent.remoteDeviceName));
         vpnStatusNode.addValueEventListener(vpnStatusValueEventListener);
 
+        logsNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Logs/%s", parent.groupName, parent.remoteDeviceName));
+        logsNode.addValueEventListener(logsValueEventLister);
+
         // aggiorna il flag e effettua il trigger del metodo nel listener
         viewCreated = true;
 
@@ -218,6 +295,8 @@ public class DeviceInfoFragment extends Fragment {
         // rimuove il ValueEventListener dal nodo del Database di Firebase
         DatabaseReference vpnStatusNode = FirebaseDatabase.getInstance().getReference("/Groups/%s/devices/%s/VPNStatus");
         vpnStatusNode.removeEventListener(vpnStatusValueEventListener);
+
+        logsNode.removeEventListener(logsValueEventLister);
 
         // rimuove l'OnClickListener ai pulsanti
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___CLEARLOG).setOnClickListener(null);
