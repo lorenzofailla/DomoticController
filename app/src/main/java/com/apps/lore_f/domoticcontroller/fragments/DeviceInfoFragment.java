@@ -127,7 +127,11 @@ public class DeviceInfoFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            refreshLogsAdapter();
+            if(fragmentView!=null) {
+
+                refreshLogsAdapter();
+
+            }
 
         }
 
@@ -270,6 +274,8 @@ public class DeviceInfoFragment extends Fragment {
 
         DatabaseReference vpnStatusNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Devices/%s/VPNStatus", parent.groupName, parent.remoteDeviceName));
         vpnStatusNode.addValueEventListener(vpnStatusValueEventListener);
+
+        logsRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___DEVICEINFOFRAGMENT___LOG);
 
         logsNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Logs/%s", parent.groupName, parent.remoteDeviceName));
         logsNode.addValueEventListener(logsValueEventLister);

@@ -84,7 +84,7 @@ public class VSCameraViewerFragment extends Fragment {
                     if (parent.getTCPCommInterfaceStatus()) {
 
                         Intent intent = new Intent(getContext(), LiveCamViewActivity.class);
-                        intent.putExtra("__URL_TO_VIEW", "http://"+parent.getCurrentTCPAddress()+":"+cameraStreamPort);
+                        intent.putExtra("__URL_TO_VIEW", "http://"+parent.getCurrentTCPHostAddress()+":"+cameraStreamPort);
 
                         startActivity(intent);
 
