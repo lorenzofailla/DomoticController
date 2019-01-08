@@ -9,6 +9,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/AndroidShapes" />
             <option value="$PROJECT_DIR$/AndroidTCPComm" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/generalutilitieslibrary" />

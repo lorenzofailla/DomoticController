@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.apps.lore_f.domoticcontroller.RoundRect
+    <loref.android.apps.androidshapes.RoundRect
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:RR_forecolor="#FF000000"
@@ -17,9 +17,9 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-    </com.apps.lore_f.domoticcontroller.RoundRect>
+    </loref.android.apps.androidshapes.RoundRect>
 
-    <com.apps.lore_f.domoticcontroller.BlankRect
+    <loref.android.apps.androidshapes.BlankRect
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@id/SPC___VSCAMERADEVICE___TOP_LEFT"

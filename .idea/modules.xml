@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/AndroidShapes/AndroidShapes.iml" filepath="$PROJECT_DIR$/AndroidShapes/AndroidShapes.iml" />
       <module fileurl="file://$PROJECT_DIR$/AndroidTCPComm/AndroidTCPComm.iml" filepath="$PROJECT_DIR$/AndroidTCPComm/AndroidTCPComm.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../../lore_f/AndroidStudioProjects/IMTest/DomoticController.iml" filepath="$PROJECT_DIR$/../../../lore_f/AndroidStudioProjects/IMTest/DomoticController.iml" />
+      <module fileurl="file://C:\Users\lore_f\AndroidStudioProjects\IMTest\DomoticController.iml" filepath="C:\Users\lore_f\AndroidStudioProjects\IMTest\DomoticController.iml" />
       <module fileurl="file://$PROJECT_DIR$/IMTest.iml" filepath="$PROJECT_DIR$/IMTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/generalutilitieslibrary/generalutilitieslibrary.iml" filepath="$PROJECT_DIR$/generalutilitieslibrary/generalutilitieslibrary.iml" />

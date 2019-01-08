@@ -4,24 +4,25 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <ImageView
+        android:id="@+id/TXV___LOG___IMAGE"
+        android:layout_width="@dimen/very_small_button_width"
+        android:layout_height="@dimen/very_small_button_height"
+        />
+
     <TextView
         android:id="@+id/TXV___LOG___TIMESTAMP"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
-
-    <TextView
-        android:id="@+id/TXV___LOG___INFO"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/TXV___LOG___TIMESTAMP"
-        android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        app:layout_constraintLeft_toRightOf="@id/TXV___LOG___IMAGE"/>
 
     <TextView
         android:id="@+id/TXV___LOG___DESCRIPTION"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/TXV___LOG___INFO"
-        android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        android:textSize="10sp"
+        app:layout_constraintTop_toBottomOf="@+id/TXV___LOG___TIMESTAMP" />
 
 </android.support.constraint.ConstraintLayout>

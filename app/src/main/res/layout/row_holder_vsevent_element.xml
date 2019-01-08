@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.apps.lore_f.domoticcontroller.RoundRect
+    <loref.android.apps.androidshapes.RoundRect
         android:id="@+id/RRE___VSEVENTROW___CONTAINER"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -28,7 +28,7 @@
         android:layout_height="@dimen/spacer_square_dim"
         app:layout_constraintLeft_toRightOf="@id/SPC___VSEVENTROW___TOP_LEFT" />
 
-    <com.apps.lore_f.domoticcontroller.BlankRect
+    <loref.android.apps.androidshapes.BlankRect
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/SPC___VSEVENTROW___TOP_LEFT"

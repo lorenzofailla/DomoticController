@@ -57,15 +57,18 @@ public class DeviceInfoFragment extends Fragment {
     public static class LogsHolder extends RecyclerView.ViewHolder {
 
         public TextView logTimeStamp;
-        public TextView logInfo;
         public TextView logDescription;
+        public ImageView logImage;
 
         public LogsHolder(View v) {
+
+            // call the superclass constructor
             super(v);
 
+            // initialize the handler to the drawables
             logTimeStamp = (TextView) itemView.findViewById(R.id.TXV___LOG___TIMESTAMP);
-            logInfo = (TextView) itemView.findViewById(R.id.TXV___LOG___INFO);
             logDescription = (TextView) itemView.findViewById(R.id.TXV___LOG___DESCRIPTION);
+            logImage = (ImageView) itemView.findViewById(R.id.TXV___LOG___IMAGE);
 
         }
 
@@ -85,16 +88,30 @@ public class DeviceInfoFragment extends Fragment {
             @Override
             protected void populateViewHolder(LogsHolder holder, LogEntry log, int position) {
 
-                holder.logTimeStamp.setText(
-                        GeneralUtilitiesLibrary.getTimeElapsed(
-                                Long.parseLong(
-                                        log.getDatetime()
-                                ), getContext()
-                        )
+                String logTime = GeneralUtilitiesLibrary.getTimeElapsed(
+                        Long.parseLong(
+                                log.getDatetime()
+                        ), getContext()
                 );
 
+                holder.logTimeStamp.setText(logTime);
+
                 holder.logDescription.setText(log.getLogdesc());
-                holder.logInfo.setText(log.getLogtype());
+
+                int logImageResId;
+                switch (log.getLogtype()){
+
+                    case "INET_OUT":
+                        logImageResId = R.drawable.log_ok;
+
+                    case "INET_IN":
+                        logImageResId = R.drawable.log_ko;
+
+                    default:
+                        logImageResId = R.drawable.info;
+                }
+
+                holder.logImage.setImageResource(logImageResId);
 
             }
 

@@ -10,7 +10,13 @@ import android.util.Base64;
 
 import com.example.generalutilitieslibrary.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
@@ -27,12 +33,38 @@ public class GeneralUtilitiesLibrary {
     private static final long MONTH_MS = 2419200000L;
     private static final long YEAR_MS = 29030400000L;
 
+    public static HashMap<String, Object> parseJSON(String code) {
+
+        HashMap<String, Object> result = new HashMap<>();
+        JSONObject input = null;
+
+        try {
+
+            input = new JSONObject(code);
+
+            Iterator<String> keys = input.keys();
+            while (keys.hasNext()) {
+
+                result.put(keys.next(), input.getString(keys.next()));
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        return result;
+
+    }
+
     public static String decode(String rawData) {
 
         try {
-            return new String(decompress(Base64.decode(rawData, Base64.DEFAULT)), "UTF-8");
 
-        } catch (IOException | DataFormatException e) {
+            return new String(Base64.decode(rawData, Base64.DEFAULT), "UTF-8");
+
+        } catch (IOException e) {
 
             return e.getMessage();
 

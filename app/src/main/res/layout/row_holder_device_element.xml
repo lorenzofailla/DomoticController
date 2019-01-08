@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.apps.lore_f.domoticcontroller.RoundRect
+    <loref.android.apps.androidshapes.RoundRect
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@id/SPC___ROWDEVICE___BOTTOM_LEFT"
@@ -13,9 +13,10 @@
         app:layout_constraintRight_toRightOf="parent"
         app:RR_radius="15dp"
         app:RR_padding="12dp"
-        app:RR_line_thickness="2dp"/>
+        app:RR_line_thickness="2dp"
+    />
 
-    <com.apps.lore_f.domoticcontroller.BlankRect
+    <loref.android.apps.androidshapes.BlankRect
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintLeft_toLeftOf="@+id/linearLayout"

@@ -1,1 +1,1 @@
-include ':app', ':generalutilitieslibrary', ':AndroidTCPComm'
+include ':app', ':generalutilitieslibrary', ':AndroidTCPComm', ':AndroidShapes'

@@ -30,10 +30,10 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     /*
-                androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-                    exclude group: 'com.android.support', module: 'support-annotations'
-                })
-                */
+                    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+                        exclude group: 'com.android.support', module: 'support-annotations'
+                    })
+                    */
     // Firebase Auth
     // Firebase Cloud Messaging
     implementation 'com.google.firebase:firebase-auth:11.0.2'
@@ -50,6 +50,7 @@ dependencies {
     implementation project(':generalutilitieslibrary')
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation project(':AndroidTCPComm')
+    implementation project(':AndroidShapes')
 }
 
 

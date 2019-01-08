@@ -1,4 +1,4 @@
-package com.apps.lore_f.domoticcontroller;
+package loref.android.apps.androidshapes;
 
 import android.content.Context;
 import android.content.res.TypedArray;
