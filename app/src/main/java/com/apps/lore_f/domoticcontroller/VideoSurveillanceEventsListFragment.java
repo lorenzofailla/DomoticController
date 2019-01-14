@@ -276,6 +276,11 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                 }
 
+                // gestisce la visualizzazione dei pulsanti di opzione
+
+                holder.eventLabels.setVisibility(VISIBLE);
+                holder.eventOptions.setVisibility(GONE);
+
                 // se è un nuovo evento, mostra l'immagine newItemImage
                 if (event.isNewItem().equals("true")) {
 
