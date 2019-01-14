@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
+import loref.android.apps.androidshapes.RoundRect;
+
 import static android.content.ContentValues.TAG;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -614,7 +616,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         // lancia il video
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoFullPath));
-        intent.setDataAndType(Uri.parse(videoFullPath), "video/*");
+        intent.setDataAndType(Uri.parse(videoFullPath), "video/avi");
         startActivity(intent);
 
     }
@@ -627,7 +629,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         shareIntent.setAction(Intent.ACTION_SEND);
         shareIntent.putExtra(Intent.EXTRA_TEXT, "Text");
         shareIntent.putExtra(Intent.EXTRA_STREAM, uriPath);
-        shareIntent.setType("video/*");
+        shareIntent.setType("video/avi");
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, "send"));
 
