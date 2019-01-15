@@ -65,8 +65,6 @@ public class TorrentViewerFragment extends Fragment {
 
     }
 
-
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -78,7 +76,6 @@ public class TorrentViewerFragment extends Fragment {
         super.onDetach();
 
     }
-
 
     public void updateContent(){
 
@@ -94,7 +91,7 @@ public class TorrentViewerFragment extends Fragment {
             torrentsListView.setVisibility(View.VISIBLE);
 
             // aggiorna l'intestazione
-            mainInfoTextView.setText(String.format("%s: %d",getString(R.string.TORRENTSMANAGER_LABEL_AVAILABLETORRENTS), torrents.size()));
+            mainInfoTextView.setText(String.format("%s %d",getString(R.string.TORRENTSMANAGER_LABEL_AVAILABLETORRENTS), torrents.size()));
 
         } else {
 

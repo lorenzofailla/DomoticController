@@ -5,53 +5,71 @@
     android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/RLA___TORRENTSLISTROW___TORRENTDATA"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <TextView
         android:id="@+id/TXV___TORRENTSLISTROW___TORRENTNAME"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:ems="10"
-        android:text="{torrent_name}"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     <TextView
         android:id="@+id/TXV___TORRENTSLISTROW___TORRENTSTATUS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/TXV___TORRENTSLISTROW___TORRENTNAME"
-        android:text="{torrent_status}"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TXV___TORRENTSLISTROW___TORRENTNAME"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
         android:textSize="14sp" />
+
+    <ImageButton
+        android:id="@+id/BTN___TORRENTSLISTROW___REMOVETORRENT"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:src="@drawable/delete2" />
 
     <ImageButton
         android:id="@+id/BTN___TORRENTSLISTROW___DELETETORRENT"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
+        app:layout_constraintTop_toBottomOf="@+id/BTN___TORRENTSLISTROW___REMOVETORRENT"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_below ="@+id/BTN___TORRENTSLISTROW___REMOVETORRENT"
         android:src="@drawable/delete" />
 
     <ImageButton
         android:id="@+id/BTN___TORRENTSLISTROW___SWITCHSTATUS"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/BTN___TORRENTSLISTROW___DELETETORRENT"
-        android:layout_toStartOf="@+id/BTN___TORRENTSLISTROW___DELETETORRENT"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/BTN___TORRENTSLISTROW___REMOVETORRENT"
+
         app:srcCompat="@drawable/play" />
 
     <TextView
         android:id="@+id/TXV___TORRENTSLISTROW___TORRENTHAVE"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        android:layout_below="@+id/TXV___TORRENTSLISTROW___TORRENTNAME"
-        android:layout_toRightOf="@+id/TXV___TORRENTSLISTROW___TORRENTSTATUS"
-        android:layout_toEndOf="@+id/TXV___TORRENTSLISTROW___TORRENTSTATUS" />
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TXV___TORRENTSLISTROW___TORRENTSTATUS" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/RLA___TORRENTSLISTROW___TORRENTDATA"
+        style="?android:attr/progressBarStyleHorizontal" />
 
 
 </RelativeLayout>

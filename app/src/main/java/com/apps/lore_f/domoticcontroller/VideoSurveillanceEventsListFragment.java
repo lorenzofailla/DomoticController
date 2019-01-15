@@ -136,15 +136,15 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             deleteEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___DELETEEVENT);
             lockEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___LOCKEVENT);
 
-            progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
+            progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);eventContainer = (RoundRect) v.findViewById(R.id.RRE___VSEVENTROW___CONTAINER);
+            eventLabels = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
+            eventOptions = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
 
             eventPreviewImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
             newItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___NEWITEM);
             lockedItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___LOCKEDITEM);
 
-            eventContainer = (RoundRect) v.findViewById(R.id.RRE___VSEVENTROW___CONTAINER);
-            eventLabels = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
-            eventOptions = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
+
 
         }
 

@@ -41,7 +41,7 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
         TextView torrentHaveTXV = (TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTHAVE);
 
         ImageButton switchStatusBtn = (ImageButton) convertView.findViewById(R.id.BTN___TORRENTSLISTROW___SWITCHSTATUS);
-        ImageButton removeTorrentBtn = (ImageButton) convertView.findViewById(R.id.BTN___TORRENTSLISTROW___DELETETORRENT);
+        ImageButton removeTorrentBtn = (ImageButton) convertView.findViewById(R.id.BTN___TORRENTSLISTROW___REMOVETORRENT);
 
         final TorrentInfo torrentInfo = getItem(position);
 

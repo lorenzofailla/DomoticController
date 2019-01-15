@@ -73,10 +73,11 @@
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/CLA___VSEVENTROW___EVENTDATA"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toRightOf="@id/SPC___VSEVENTROW___TOP_LEFT"
-        app:layout_constraintTop_toBottomOf="@id/SPC___VSEVENTROW___TOP_LEFT">
+        app:layout_constraintTop_toBottomOf="@id/SPC___VSEVENTROW___TOP_LEFT"
+        app:layout_constraintRight_toLeftOf="@id/SPC___VSEVENTROW___TOP_RIGHT">
 
         <ImageView
             android:id="@+id/IVW___VSEVENTROW___EVENTPREVIEW"
@@ -119,46 +120,48 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/LLA___VSEVENTROW___OPTIONS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:orientation="vertical"
+            android:padding="0dp"
+            android:visibility="visible"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/BTN___VSEVENTROW___DELETEEVENT"
+                android:layout_width="@dimen/mediumsmall_button_width"
+                android:layout_height="@dimen/mediumsmall_button_height"
+                android:src="@drawable/delete" />
+
+            <ImageButton
+                android:id="@+id/BTN___VSEVENTROW___SHAREEVENT"
+                android:layout_width="@dimen/mediumsmall_button_width"
+                android:layout_height="@dimen/mediumsmall_button_height"
+                android:src="@drawable/share" />
+
+            <ImageButton
+                android:id="@+id/BTN___VSEVENTROW___LOCKEVENT"
+                android:layout_width="@dimen/mediumsmall_button_width"
+                android:layout_height="@dimen/mediumsmall_button_height"
+                android:src="@drawable/lock" />
+
+        </LinearLayout>
+
     </android.support.constraint.ConstraintLayout>
-
-    <LinearLayout
-        android:id="@+id/LLA___VSEVENTROW___OPTIONS"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="0dp"
-        android:orientation="vertical"
-        android:padding="0dp"
-        android:visibility="visible"
-        app:layout_constraintRight_toLeftOf="@id/SPC___VSEVENTROW___TOP_RIGHT2"
-        app:layout_constraintTop_toBottomOf="@id/SPC___VSEVENTROW___TOP_RIGHT2">
-
-        <ImageButton
-            android:id="@+id/BTN___VSEVENTROW___DELETEEVENT"
-            android:layout_width="@dimen/mediumsmall_button_width"
-            android:layout_height="@dimen/mediumsmall_button_height"
-            android:src="@drawable/delete" />
-
-        <ImageButton
-            android:id="@+id/BTN___VSEVENTROW___SHAREEVENT"
-            android:layout_width="@dimen/mediumsmall_button_width"
-            android:layout_height="@dimen/mediumsmall_button_height"
-            android:src="@drawable/share" />
-
-        <ImageButton
-            android:id="@+id/BTN___VSEVENTROW___LOCKEVENT"
-            android:layout_width="@dimen/mediumsmall_button_width"
-            android:layout_height="@dimen/mediumsmall_button_height"
-            android:src="@drawable/lock" />
-
-    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/PBR___VSEVENTROW___DOWNLOADPROGRESS"
         style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="15dp"
         android:layout_centerHorizontal="true"
-        android:visibility="gone"
+        android:visibility="visible"
+        app:layout_constraintLeft_toRightOf="@id/SPC___VSEVENTROW___BOTTOM_LEFT"
+        app:layout_constraintRight_toLeftOf="@id/SPC___VSEVENTROW___TOP_RIGHT"
         app:layout_constraintTop_toBottomOf="@id/CLA___VSEVENTROW___EVENTDATA" />
 
     <Space
