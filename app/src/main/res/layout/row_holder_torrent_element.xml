@@ -66,6 +66,7 @@
     </android.support.constraint.ConstraintLayout>
 
     <ProgressBar
+        android:id="@+id/PBR___TORRENTSLISTROW___TORRENTCOMPLETIONPERC"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/RLA___TORRENTSLISTROW___TORRENTDATA"

@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.TorrentInfo;
@@ -33,7 +34,7 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
     public View getView(int position, View convertView, ViewGroup parent){
 
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        convertView = inflater.inflate(R.layout.torrents_list_row, null);
+        convertView = inflater.inflate(R.layout.row_holder_torrent_element, null);
 
         /* inizializza l'handler ai vari controlli */
         TextView torrentNameTXV=(TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTNAME);
@@ -43,13 +44,24 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
         ImageButton switchStatusBtn = (ImageButton) convertView.findViewById(R.id.BTN___TORRENTSLISTROW___SWITCHSTATUS);
         ImageButton removeTorrentBtn = (ImageButton) convertView.findViewById(R.id.BTN___TORRENTSLISTROW___REMOVETORRENT);
 
+        ProgressBar progressBar = (ProgressBar) convertView.findViewById(R.id.PBR___TORRENTSLISTROW___TORRENTCOMPLETIONPERC);
+
         final TorrentInfo torrentInfo = getItem(position);
 
+        // imposta la visualizzazione degli elementi
         torrentNameTXV.setText(torrentInfo.getName());
         torrentStatusTXV.setText(torrentInfo.getStatusString());
-        torrentHaveTXV.setText(torrentInfo.getDone() + " - " + torrentInfo.getHave());
 
-        /* imposta l'immagine del pulsante ImageButton switchStatusBtn in funzione dello stato */
+        String torrentData = new StringBuilder().append(torrentInfo.getDone())
+                .append(" - ")
+                .append(torrentInfo.getHave())
+                .append(" (")
+                .append(torrentInfo.getEta())
+                .append(").")
+                .toString();
+        torrentHaveTXV.setText(torrentData);
+
+        // imposta l'immagine del pulsante ImageButton switchStatusBtn in funzione dello stato
         if (torrentInfo.getStatus()== TorrentInfo.TorrentStatus.STOPPED){
 
             // torrent fermo, assegna l'immagine play
@@ -62,7 +74,7 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
         }
 
 
-        /* assegna i listener ai pulsanti ImageButton */
+        // assegna i listener ai pulsanti ImageButton
         switchStatusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -85,7 +85,7 @@ public class TorrentViewerFragment extends Fragment {
         if(rawTorrentDataLines!=null) {
             torrents = getTorrentsList(rawTorrentDataLines);
 
-            torrentsListAdapter = new TorrentsListAdapter(getContext(), R.layout.torrents_list_row, torrents, parent);
+            torrentsListAdapter = new TorrentsListAdapter(getContext(), R.layout.row_holder_torrent_element, torrents, parent);
 
             torrentsListView.setAdapter(torrentsListAdapter);
             torrentsListView.setVisibility(View.VISIBLE);

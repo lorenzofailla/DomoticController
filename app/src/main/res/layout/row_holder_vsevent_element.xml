@@ -159,7 +159,7 @@
         android:layout_width="0dp"
         android:layout_height="15dp"
         android:layout_centerHorizontal="true"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintLeft_toRightOf="@id/SPC___VSEVENTROW___BOTTOM_LEFT"
         app:layout_constraintRight_toLeftOf="@id/SPC___VSEVENTROW___TOP_RIGHT"
         app:layout_constraintTop_toBottomOf="@id/CLA___VSEVENTROW___EVENTDATA" />

@@ -268,6 +268,13 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 });
 
+                holder.connectToDeviceBtn.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        return false;
+                    }
+                });
+
                 // aggiorna la label con l'informazione sull'ultimo update
 
                 HashMap<String, Object> deviceStatus = device.getStatus();
@@ -342,6 +349,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             String cameraIDs) {
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
+        intent.putExtra("__CONNECTION_METHOD", DeviceViewActivity.CONNECTIONMETHOD_FIREBASE);
+        intent.putExtra("__SESSION_MODE", DeviceViewActivity.SESSIONMODE_NEW);
         intent.putExtra("__DEVICE_TO_CONNECT", deviceName);
         intent.putExtra("__HAS_TORRENT_MANAGEMENT", torrent);
         intent.putExtra("__HAS_DIRECTORY_NAVIGATION", dirNavi);
@@ -350,6 +359,16 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         intent.putExtra("__CAMERA_NAMES", cameraNames);
         intent.putExtra("__CAMERA_IDS", cameraIDs);
 
+        startActivity(intent);
+
+    }
+
+    private void connectToDeviceTCP(
+            String ipAddressesList) {
+
+        Intent intent = new Intent(this, DeviceViewActivity.class);
+        intent.putExtra(DeviceViewActivity.CONNECTIONMETHOD_TAG, DeviceViewActivity.CONNECTIONMETHOD_TCP);
+        intent.putExtra(DeviceViewActivity.SESSIONMODE_TAG, DeviceViewActivity.SESSIONMODE_NEW);
 
         startActivity(intent);
 

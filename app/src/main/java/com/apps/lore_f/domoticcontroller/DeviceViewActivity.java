@@ -57,6 +57,26 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private static final String TAG = "DeviceViewActivity";
 
+    public static final String SESSIONMODE_TAG="__SESSION_MODE";
+    public static final int SESSIONMODE_NEW = 1;
+    public static final int SESSIONMODE_RETRIEVE  = 2;
+
+    public static final String CONNECTIONMETHOD_TAG="__CONNECTION_METHOD";
+    public static final int CONNECTIONMETHOD_FIREBASE = 1;
+    public static final int CONNECTIONMETHOD_TCP = 2;
+
+    public static final String ACTIONTYPE_TAG="__ACTION_TYPE";
+    public static final int ACTIONTYPE_VIEWALL = 1;
+    public static final int ACTIONTYPE_CAMERAMONITOR = 2;
+
+    public static final String IPADDRESSESLIST_TAG="__IP_ADDRESSES_LIST";
+
+    private int sessionMode=-1;
+    private int connectionType=-1;
+    private int viewType=-1;
+
+
+
     //region /*    GESTIONE FRAGMENTS     */
 
     private CollectionPagerAdapter collectionPagerAdapter;
@@ -788,7 +808,38 @@ public class DeviceViewActivity extends AppCompatActivity {
         // ottiene il nome del dispositivo remoto e altri parametri
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
+
         if (extras != null) {
+            // extras presenti:
+
+            // controlla che ci sia la voce SESSIONMODE_TAG
+            if (extras.containsKey(SESSIONMODE_TAG)) {
+                // voce presente:
+
+                // recupera il tipo di sessione
+                sessionMode=extras.getInt(SESSIONMODE_TAG);
+
+                // controlla il tipo di sessione
+                if(sessionMode==SESSIONMODE_NEW){
+                    // nuova sessione:
+
+                    // controlla che ci sia la voce CONNECTIONMETHOD_TAG
+                    if (extras.containsKey(CONNECTIONMETHOD_TAG)) {
+                        // voce presente:
+
+                        // recupera la modalità di connessione
+                        connectionType=extras.getInt(CONNECTIONMETHOD_TAG);
+
+                    }
+
+                } else if (sessionMode==SESSIONMODE_RETRIEVE){
+                    // recupero di  una sessione salvata:
+
+                    //TODO implementare
+
+                }
+
+            }
 
             // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
             Context context = getApplicationContext();
