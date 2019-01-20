@@ -464,7 +464,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                 } else {
 
-                    holder.eventPreviewImage.setImageResource(R.drawable.ic_image_black_24dp);
+                    holder.eventPreviewImage.setImageResource(R.drawable.image);
 
                 }
 

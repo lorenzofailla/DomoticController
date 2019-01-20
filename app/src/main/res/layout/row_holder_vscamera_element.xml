@@ -63,7 +63,7 @@
             android:id="@+id/IVW___VSCAMERADEVICE___PREVIEW"
             android:layout_width="96dp"
             android:layout_height="72dp"
-            android:src="@drawable/ic_image_black_24dp" />
+            android:src="@drawable/image" />
 
         <TextView
             android:id="@+id/TXV___VSCAMERADEVICE___DEVICENAME"

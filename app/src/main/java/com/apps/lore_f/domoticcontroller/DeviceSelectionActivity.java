@@ -3,6 +3,7 @@ package com.apps.lore_f.domoticcontroller;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,7 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
-import com.apps.lore_f.domoticcontroller.generic.DeviceDataParser;
+import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,8 +24,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
-
-import java.util.HashMap;
 
 import apps.android.loref.GeneralUtilitiesLibrary;
 
@@ -82,6 +81,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         public TextView deviceRunningSinceTxv;
         public TextView deviceLastUpdateTxv;
 
+        public ConstraintLayout deviceLastUpdateData;
+
         public DevicesHolder(View v) {
             super(v);
             deviceNameTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___DEVICENAME);
@@ -93,6 +94,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             wakeOnLanImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___WAKEONLAN);
             deviceLastUpdateTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_LASTUPDATE);
             deviceRunningSinceTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_RUNNINGSINCE);
+
+            deviceLastUpdateData = (ConstraintLayout) itemView.findViewById(R.id.CLA___ROWDEVICE___LASTUPDATE);
 
         }
 
@@ -191,7 +194,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         // cerca i dispositivi online nel database
         DatabaseReference userNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s", groupName));
 
-        onlineDevices = userNode.child("Devices").orderByChild("online").equalTo(true);
+        onlineDevices = userNode.child("Devices").orderByChild("Online").equalTo(true);
         onlineDevices.addValueEventListener(valueEventListener);
 
     }
@@ -226,7 +229,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                 holder.deviceNameTxv.setText(device.getDeviceName());
 
                 DeviceDataParser deviceData = new DeviceDataParser(device.getStatusData(), device.getNetworkData(), device.getStaticData());
-
+                Log.d(TAG, "Device data parsing: " + deviceData.isDataValidated());
 
                 // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
                 //
@@ -294,11 +297,11 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                     String message = getString(R.string.DEVICEELEMENT_LABEL_LAST_UPDATE) + GeneralUtilitiesLibrary.getTimeElapsed(lastUpdate, getApplicationContext(), false);
                     holder.deviceLastUpdateTxv.setText(message);
-                    holder.deviceLastUpdateTxv.setVisibility(View.VISIBLE);
+                    holder.deviceLastUpdateData.setVisibility(View.VISIBLE);
 
                 } else {
 
-                    holder.deviceLastUpdateTxv.setVisibility(View.GONE);
+                    holder.deviceLastUpdateData.setVisibility(View.GONE);
 
                 }
 

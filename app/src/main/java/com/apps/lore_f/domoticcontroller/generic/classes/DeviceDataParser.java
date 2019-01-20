@@ -1,8 +1,6 @@
-package com.apps.lore_f.domoticcontroller.generic;
+package com.apps.lore_f.domoticcontroller.generic.classes;
 
 import android.util.Log;
-
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,8 +67,8 @@ public class DeviceDataParser {
 
     private double totalDiskSpace = 0.0;
     private double availableDiskSpace = 0.0;
-    private long runningSince = 0L;
-    private long lastUpdate = 0L;
+    private long runningSince = -1L;
+    private long lastUpdate = -1L;
     private String uptimeMessage = "";
 
     private boolean hasTorrent = false;
@@ -87,8 +85,8 @@ public class DeviceDataParser {
         try {
 
             this.statusDataJSON = new JSONObject(statusDataJSON);
-            this.networkDataJSON = new JSONObject(statusDataJSON);
-            this.staticDataJSON = new JSONObject(statusDataJSON);
+            this.networkDataJSON = new JSONObject(networkDataJSON);
+            this.staticDataJSON = new JSONObject(staticDataJSON);
             dataValidated = this.validateData();
 
         } catch (JSONException e) {

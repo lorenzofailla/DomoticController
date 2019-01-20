@@ -194,13 +194,13 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
 
                     } else {
 
-                        holder.imagePreviewIWV.setImageResource(R.drawable.ic_image_black_24dp);
+                        holder.imagePreviewIWV.setImageResource(R.drawable.image);
 
                     }
 
                 } else {
 
-                    holder.imagePreviewIWV.setImageResource(R.drawable.ic_image_black_24dp);
+                    holder.imagePreviewIWV.setImageResource(R.drawable.image);
 
                 }
 
