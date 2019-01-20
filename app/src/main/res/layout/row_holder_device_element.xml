@@ -101,6 +101,7 @@
             android:visibility="gone">
 
             <TextView
+                android:id="@+id/TXV___ROWDEVICE___STATUS_RUNNINGSINCE"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
