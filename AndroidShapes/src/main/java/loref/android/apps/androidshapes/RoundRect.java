@@ -52,8 +52,8 @@ public class RoundRect extends View {
 
         super.onDraw(canvas);
 
-        int width = getWidth();
-        int height = getHeight();
+        int width = getMeasuredWidth();
+        int height = getMeasuredHeight();
 
         canvas.drawRoundRect(new RectF(padding, padding, width - padding, height - padding), radius, radius, paint);
 
