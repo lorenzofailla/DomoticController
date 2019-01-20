@@ -57,25 +57,23 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private static final String TAG = "DeviceViewActivity";
 
-    public static final String SESSIONMODE_TAG="__SESSION_MODE";
+    public static final String SESSIONMODE_TAG = "__SESSION_MODE";
     public static final int SESSIONMODE_NEW = 1;
-    public static final int SESSIONMODE_RETRIEVE  = 2;
+    public static final int SESSIONMODE_RETRIEVE = 2;
 
-    public static final String CONNECTIONMETHOD_TAG="__CONNECTION_METHOD";
+    public static final String CONNECTIONMETHOD_TAG = "__CONNECTION_METHOD";
     public static final int CONNECTIONMETHOD_FIREBASE = 1;
     public static final int CONNECTIONMETHOD_TCP = 2;
 
-    public static final String ACTIONTYPE_TAG="__ACTION_TYPE";
+    public static final String ACTIONTYPE_TAG = "__ACTION_TYPE";
     public static final int ACTIONTYPE_VIEWALL = 1;
     public static final int ACTIONTYPE_CAMERAMONITOR = 2;
 
-    public static final String IPADDRESSESLIST_TAG="__IP_ADDRESSES_LIST";
+    public static final String IPADDRESSESLIST_TAG = "__IP_ADDRESSES_LIST";
 
-    private int sessionMode=-1;
-    private int connectionType=-1;
-    private int viewType=-1;
-
-
+    private int sessionMode = -1;
+    private int connectionType = -1;
+    private int viewType = -1;
 
     //region /*    GESTIONE FRAGMENTS     */
 
@@ -264,7 +262,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraIDs[i]);
 
-                if (i==0) {
+                if (i == 0) {
                     firstCameraFragmentIndex = count;
                 }
 
@@ -337,21 +335,22 @@ public class DeviceViewActivity extends AppCompatActivity {
         return isTCPCommInterfaceAvailable;
     }
 
-    private int currentTCPHostAddrIndex=-1;
+    private int currentTCPHostAddrIndex = -1;
 
-    public int getCurrentTCPHostAddrIndex(){
+    public int getCurrentTCPHostAddrIndex() {
         return currentTCPHostAddrIndex;
     }
 
     private String[] tcpHostAddresses;
-    public String getCurrentTCPHostAddress(){
+
+    public String getCurrentTCPHostAddress() {
 
         // returns the IP address in form of String relative to the current index value.
         // if index value exceed the hosts IP address String[] array, an empty string is returned.
 
-        String result="";
-        try{
-            result=tcpHostAddresses[currentTCPHostAddrIndex];
+        String result = "";
+        try {
+            result = tcpHostAddresses[currentTCPHostAddrIndex];
         } catch (IndexOutOfBoundsException e) {
 
         } finally {
@@ -367,7 +366,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         if (deviceInfoFragment != null) {
 
             if (!isTCPCommInterfaceAvailable) {
-                currentTCPHostAddrIndex=-1;
+                currentTCPHostAddrIndex = -1;
             }
 
             deviceInfoFragment.updateTCPStatus();
@@ -600,7 +599,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         TextView remoteHostName = (TextView) findViewById(R.id.TXV___DEVICEVIEW___HOSTNAME);
         remoteHostName.setText(R.string.GENERIC_PLACEHOLDER_WAITING);
 
-
         sendCommandToDevice(
                 new Message("__update_status",
                         "general",
@@ -817,10 +815,10 @@ public class DeviceViewActivity extends AppCompatActivity {
                 // voce presente:
 
                 // recupera il tipo di sessione
-                sessionMode=extras.getInt(SESSIONMODE_TAG);
+                sessionMode = extras.getInt(SESSIONMODE_TAG);
 
                 // controlla il tipo di sessione
-                if(sessionMode==SESSIONMODE_NEW){
+                if (sessionMode == SESSIONMODE_NEW) {
                     // nuova sessione:
 
                     // controlla che ci sia la voce CONNECTIONMETHOD_TAG
@@ -828,11 +826,18 @@ public class DeviceViewActivity extends AppCompatActivity {
                         // voce presente:
 
                         // recupera la modalità di connessione
-                        connectionType=extras.getInt(CONNECTIONMETHOD_TAG);
+                        connectionType = extras.getInt(CONNECTIONMETHOD_TAG);
+
+                        if(connectionType==CONNECTIONMETHOD_TCP && extras.containsKey(IPADDRESSESLIST_TAG)){
+
+                            // recupera la lista degli indirizzi IP
+
+
+                        }
 
                     }
 
-                } else if (sessionMode==SESSIONMODE_RETRIEVE){
+                } else if (sessionMode == SESSIONMODE_RETRIEVE) {
                     // recupero di  una sessione salvata:
 
                     //TODO implementare
@@ -840,6 +845,10 @@ public class DeviceViewActivity extends AppCompatActivity {
                 }
 
             }
+        }
+
+
+            /*
 
             // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
             Context context = getApplicationContext();
@@ -850,9 +859,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             if (groupName == null) {
 
-            /*
-            questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
-             */
+            //  questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
 
                 // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
                 startActivity(new Intent(this, GroupSelection.class));
@@ -916,6 +923,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // crea il CollectionPagerAdapter
         collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
+        */
 
     }
 
@@ -924,6 +932,15 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onResume();
 
+        if(connectionType==CONNECTIONMETHOD_FIREBASE){
+            // imposta il metodo di comunicazione via Firebase DB
+
+            startFirebaseDBConnectionHandshake();
+
+        }
+
+        /*
+
         // imposta il ViewPager per la gestione dei fragment
         ViewPager viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
         viewPager.setAdapter(collectionPagerAdapter);
@@ -931,7 +948,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // se l'azione specificata non è "monitor", posiziona il ViewPager sul fragment deviceInfoFragment
 
-        if(action!="monitor") {
+        if (action != "monitor") {
 
             viewPager.setCurrentItem(deviceInfoFragmentIndex);
 
@@ -950,6 +967,43 @@ public class DeviceViewActivity extends AppCompatActivity {
         FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
 
         setIsTCPCommIntefaceAvailable(false);
+
+        */
+
+    }
+
+    private void startFirebaseDBConnectionHandshake(){
+
+        // inizializza i riferimenti ai nodi del db Firebase
+        String incomingMessagesNode = new StringBuilder()
+                .append("/Groups/")
+                .append(groupName)
+                .append("/Devices/")
+                .append(thisDevice)
+                .append("/IncomingCommands")
+                .toString();
+
+        // definisce il nodo dei messaggi in ingresso
+        incomingMessagesRef = FirebaseDatabase.getInstance().getReference(incomingMessagesNode);
+
+        // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
+        incomingMessagesRef.addChildEventListener(newCommandsToProcess);
+
+        // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
+        sendCommandToDevice(
+                new Message("__requestWelcomeMessage",
+                        "-",
+                        thisDevice)
+        );
+
+        // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
+
+        if (deviceNotRespondingAction != null) {
+            handler.removeCallbacks(deviceNotRespondingAction);
+        }
+
+        deviceNotRespondingAction = new DeviceNotRespondingAction();
+        handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
 
     }
 
@@ -1150,7 +1204,6 @@ public class DeviceViewActivity extends AppCompatActivity {
             tcpComm.sendData(getMessageAsBytesArray(command));
 
         } else {
-
 
             // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo remoto selezionato
             DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices");

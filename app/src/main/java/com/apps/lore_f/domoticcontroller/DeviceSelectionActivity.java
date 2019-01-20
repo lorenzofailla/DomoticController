@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
+import com.apps.lore_f.domoticcontroller.generic.DeviceDataParser;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -121,8 +122,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             long availableDevicesNumber = dataSnapshot.getChildrenCount();
             String message;
 
-            if(availableDevicesNumber>0){
-                message = String.format(getString(R.string.DEVICESELECTION_LABEL_SELECT_DEVICE),availableDevicesNumber);
+            if (availableDevicesNumber > 0) {
+                message = String.format(getString(R.string.DEVICESELECTION_LABEL_SELECT_DEVICE), availableDevicesNumber);
             } else {
                 message = getString(R.string.DEVICESELECTION_LABEL_NO_DEVICE);
             }
@@ -224,49 +225,58 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 holder.deviceNameTxv.setText(device.getDeviceName());
 
+                DeviceDataParser deviceData = new DeviceDataParser(device.getStatusData(), device.getNetworkData(), device.getStaticData());
+
+
                 // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
                 //
-                if (device.getHasTorrentManagement()) {
+                if (deviceData.isHasTorrent()) {
                     //
                     holder.torrentImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if (device.getHasDirectoryNavigation()) {
+                if (deviceData.isHasFileManager()) {
                     //
                     holder.directoryNaviImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if (device.getHasVideoSurveillance()) {
+                if (deviceData.isHasVideoSurveillance()) {
                     //
                     holder.videoSurveillanceImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if (device.getHasWakeOnLan()) {
+                if (deviceData.isHasWakeOnLan()) {
                     //
                     holder.wakeOnLanImg.setVisibility(View.VISIBLE);
 
                 }
 
-                holder.connectToDeviceBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
+                if (device.getOnline()) {
 
-                        connectToDevice(
-                                device.getDeviceName(),
-                                device.getHasTorrentManagement(),
-                                device.getHasDirectoryNavigation(),
-                                device.getHasWakeOnLan(),
-                                device.getHasVideoSurveillance(),
-                                device.getCameraNames(),
-                                device.getCameraIDs()
-                        );
+                    holder.connectToDeviceBtn.setEnabled(true);
 
-                    }
+                    holder.connectToDeviceBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
 
-                });
+                            connectToDevice(
+                                    device.getDeviceName(),
+                                    device.getStaticData()
+                            );
+
+                        }
+
+                    });
+
+                } else {
+
+                    holder.connectToDeviceBtn.setEnabled(false);
+                    holder.connectToDeviceBtn.setImageResource(R.drawable.shutdown);
+
+                }
 
                 holder.connectToDeviceBtn.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
@@ -277,15 +287,10 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 // aggiorna la label con l'informazione sull'ultimo update
 
-                HashMap<String, Object> deviceStatus = device.getStatus();
-                long lastUpdate;
-                if (deviceStatus.containsKey("LastUpdate")) {
-                    lastUpdate = (long) deviceStatus.get("LastUpdate");
-                } else {
-                    lastUpdate = -1;
-                }
 
-                if(lastUpdate!=-1 && ((System.currentTimeMillis()-lastUpdate)>DefaultValues.LAST_UPDATE_TOO_FAR)){
+                long lastUpdate = deviceData.getLastUpdate();
+
+                if (lastUpdate != -1 && ((System.currentTimeMillis() - lastUpdate) > DefaultValues.LAST_UPDATE_TOO_FAR)) {
 
                     String message = getString(R.string.DEVICEELEMENT_LABEL_LAST_UPDATE) + GeneralUtilitiesLibrary.getTimeElapsed(lastUpdate, getApplicationContext(), false);
                     holder.deviceLastUpdateTxv.setText(message);
@@ -299,14 +304,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 // aggiorna la label con l'informazione sul tempo di funzionamento del server
 
-                long runningSince;
-                if (deviceStatus.containsKey("RunningSince")) {
-                    runningSince = (long) deviceStatus.get("RunningSince");
-                } else {
-                    runningSince = -1;
-                }
+                long runningSince = deviceData.getRunningSince();;
 
-                if(runningSince!=-1){
+                if (runningSince != -1) {
 
                     String message = getString(R.string.DEVICEELEMENT_LABEL_RUNNING_SINCE) + GeneralUtilitiesLibrary.getTimeElapsed(runningSince, getApplicationContext(), false);
                     holder.deviceRunningSinceTxv.setText(message);
@@ -341,23 +341,14 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     private void connectToDevice(
             String deviceName,
-            boolean torrent,
-            boolean dirNavi,
-            boolean wakeOnLan,
-            boolean videoSurveillance,
-            String cameraNames,
-            String cameraIDs) {
+            String staticData
+    ) {
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
         intent.putExtra("__CONNECTION_METHOD", DeviceViewActivity.CONNECTIONMETHOD_FIREBASE);
         intent.putExtra("__SESSION_MODE", DeviceViewActivity.SESSIONMODE_NEW);
         intent.putExtra("__DEVICE_TO_CONNECT", deviceName);
-        intent.putExtra("__HAS_TORRENT_MANAGEMENT", torrent);
-        intent.putExtra("__HAS_DIRECTORY_NAVIGATION", dirNavi);
-        intent.putExtra("__HAS_WAKEONLAN", wakeOnLan);
-        intent.putExtra("__HAS_VIDEOSURVEILLANCE", videoSurveillance);
-        intent.putExtra("__CAMERA_NAMES", cameraNames);
-        intent.putExtra("__CAMERA_IDS", cameraIDs);
+        intent.putExtra("__STATICDATA_JSON", staticData);
 
         startActivity(intent);
 

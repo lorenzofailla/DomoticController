@@ -1,5 +1,10 @@
 package com.apps.lore_f.domoticcontroller.firebase.dataobjects;
 
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 
 /**
@@ -8,47 +13,53 @@ import java.util.HashMap;
 
 public class DeviceToConnect {
 
-    private String deviceName;
-    private String location;
-    private boolean isUnix;
-    private boolean hasDirectoryNavigation;
-    private boolean hasTorrentManagement;
-    private boolean hasVideoSurveillance;
-    private boolean hasWakeOnLan;
-    private String cameraNames;
-    private String cameraIDs;
-    private HashMap<String,Object> Status;
+    private final static String TAG=DeviceToConnect.class.getName();
 
+    private String DeviceName;
+    private boolean Online;
+    private String StaticData;
+    private String NetworkData;
+    private String StatusData;
+
+    private JSONObject dataJSON;
 
     // empty constructor
     public DeviceToConnect() {
     }
 
+    public DeviceToConnect(String data) {
+
+        try {
+
+            this.dataJSON = new JSONObject(data);
+
+        } catch (JSONException e) {
+
+            Log.e(TAG, e.getMessage());
+
+        }
+
+    }
+
     public String getDeviceName() {
-        return deviceName;
+        return this.DeviceName;
     }
 
-    public boolean getHasTorrentManagement() {
-        return hasTorrentManagement;
+    public String getStaticData() {
+        return this.StaticData;
     }
 
-    public boolean getHasDirectoryNavigation() {
-        return hasDirectoryNavigation;
+    public String getNetworkData() {
+        return this.NetworkData;
     }
 
-    public boolean getHasWakeOnLan() {
-        return hasWakeOnLan;
+    public String getStatusData() {
+        return this.StatusData;
     }
 
-    public boolean getHasVideoSurveillance() {
-        return hasVideoSurveillance;
+    public boolean getOnline() {
+        return this.Online;
     }
-
-    public String getCameraNames() { return cameraNames; }
-
-    public String getCameraIDs() { return cameraIDs; }
-
-    public HashMap<String,Object> getStatus() { return Status; }
 
 }
 
