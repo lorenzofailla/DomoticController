@@ -19,14 +19,16 @@ public class DeviceDataParser {
     private JSONObject statusDataJSON;
     private JSONObject networkDataJSON;
 
-    private boolean dataValidated = false;
+    private boolean staticDataValidated = false;
+    private boolean statusDataValidated = false;
+    private boolean networkDataValidated = false;
 
     public boolean setStaticDataJSON(String staticDataJSON) {
 
         try {
 
             this.staticDataJSON = new JSONObject(staticDataJSON);
-            return validateData();
+            return validateStaticData();
 
         } catch (JSONException e) {
 
@@ -41,7 +43,7 @@ public class DeviceDataParser {
         try {
 
             this.statusDataJSON = new JSONObject(statusDataJSON);
-            return validateData();
+            return validateStatusData();
 
         } catch (JSONException e) {
 
@@ -55,7 +57,7 @@ public class DeviceDataParser {
         try {
 
             this.networkDataJSON = new JSONObject(networkDataJSON);
-            return validateData();
+            return validateNetworkData();
 
         } catch (JSONException e) {
 
@@ -80,6 +82,8 @@ public class DeviceDataParser {
     private String publicIPAddress;
     private String vpnIPAddress;
 
+    public DeviceDataParser(){};
+
     public DeviceDataParser(String statusDataJSON, String networkDataJSON, String staticDataJSON) {
 
         try {
@@ -87,26 +91,26 @@ public class DeviceDataParser {
             this.statusDataJSON = new JSONObject(statusDataJSON);
             this.networkDataJSON = new JSONObject(networkDataJSON);
             this.staticDataJSON = new JSONObject(staticDataJSON);
-            dataValidated = this.validateData();
+            statusDataValidated = this.validateStatusData();
+            networkDataValidated = this.validateNetworkData();
+            staticDataValidated = this.validateStaticData();
 
         } catch (JSONException e) {
 
             Log.e(TAG, e.getMessage());
-            dataValidated = false;
+            statusDataValidated = false;
+            networkDataValidated = false;
+            staticDataValidated = false;
 
         }
 
     }
 
-    private boolean validateData() {
+    private boolean validateStatusData() {
 
         try {
 
             JSONObject generalStatus = statusDataJSON.getJSONObject("GeneralStatus");
-            JSONObject enabledInterfaces = staticDataJSON.getJSONObject("EnabledInterfaces");
-            JSONObject videoSurveillance = staticDataJSON.getJSONObject("VideoSurveillance");
-            JSONObject wakeOnLan = staticDataJSON.getJSONObject("WakeOnLan");
-            JSONObject network = networkDataJSON.getJSONObject("NetworkStatus");
 
             totalDiskSpace = generalStatus.getDouble("TotalSpace");
             availableDiskSpace = generalStatus.getDouble("FreeSpace");
@@ -115,10 +119,22 @@ public class DeviceDataParser {
             lastUpdate = generalStatus.getLong("LastUpdate");
             uptimeMessage = generalStatus.getString("Uptime");
 
-            hasTorrent = enabledInterfaces.getBoolean("TorrentManagement");
-            hasVideoSurveillance = enabledInterfaces.getBoolean("VideoSurveillanceManagement");
-            hasWakeOnLan = enabledInterfaces.getBoolean("WakeOnLanManagement");
-            hasFileManager = enabledInterfaces.getBoolean("DirectoryNavigation");
+            return true;
+
+        } catch (JSONException e) {
+
+            Log.e(TAG, e.getMessage());
+            return false;
+
+        }
+
+    }
+
+    private boolean validateNetworkData() {
+
+        try {
+
+            JSONObject network = networkDataJSON.getJSONObject("NetworkStatus");
 
             localIPAddressesList = network.getString("LocalIP");
             publicIPAddress = network.getString("PublicIP");
@@ -128,7 +144,31 @@ public class DeviceDataParser {
 
         } catch (JSONException e) {
 
-            Log.e(TAG, "Cannot retrieve \"LastUpdate\"");
+            Log.e(TAG, e.getMessage());
+            return false;
+
+        }
+
+    }
+
+    private boolean validateStaticData() {
+
+        try {
+
+            JSONObject enabledInterfaces = staticDataJSON.getJSONObject("EnabledInterfaces");
+            JSONObject videoSurveillance = staticDataJSON.getJSONObject("VideoSurveillance");
+            JSONObject wakeOnLan = staticDataJSON.getJSONObject("WakeOnLan");
+
+            hasTorrent = enabledInterfaces.getBoolean("TorrentManagement");
+            hasVideoSurveillance = enabledInterfaces.getBoolean("VideoSurveillanceManagement");
+            hasWakeOnLan = enabledInterfaces.getBoolean("WakeOnLanManagement");
+            hasFileManager = enabledInterfaces.getBoolean("DirectoryNavigation");
+
+            return true;
+
+        } catch (JSONException e) {
+
+            Log.e(TAG, e.getMessage());
             return false;
 
         }
@@ -153,8 +193,16 @@ public class DeviceDataParser {
 
     }
 
-    public boolean isDataValidated() {
-        return dataValidated;
+    public boolean isStaticDataValidated() {
+        return staticDataValidated;
+    }
+
+    public boolean isStatusDataValidated() {
+        return statusDataValidated;
+    }
+
+    public boolean isNetworkDataValidated() {
+        return networkDataValidated;
     }
 
     public double getTotalDiskSpace() {

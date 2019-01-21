@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
 import com.apps.lore_f.domoticcontroller.fragments.DeviceInfoFragment;
+import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;
 import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.FileInfo;
 import com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection;
@@ -64,6 +65,10 @@ public class DeviceViewActivity extends AppCompatActivity {
     public static final String CONNECTIONMETHOD_TAG = "__CONNECTION_METHOD";
     public static final int CONNECTIONMETHOD_FIREBASE = 1;
     public static final int CONNECTIONMETHOD_TCP = 2;
+
+    public static final String FIREBASE_REPLY_NEEDED_TAG = "__FIREBASE_REPLY_NEEDED";
+    public static final String DEVICE_TO_CONNECT_TAG = "__DEVICE_TO_CONNECT";
+    public static final String STATICDATA_JSON_TAG = "__STATICDATA_JSON";
 
     public static final String ACTIONTYPE_TAG = "__ACTION_TYPE";
     public static final int ACTIONTYPE_VIEWALL = 1;
@@ -177,7 +182,14 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void initFragments() {
+    private void initFragments(String staticDataJSON) {
+
+        DeviceDataParser deviceData = new DeviceDataParser();
+
+        if(!deviceData.setStaticDataJSON(staticDataJSON)){
+            finish();
+            return;
+        }
 
         boolean createDeviceInfoFragment;
 
@@ -199,12 +211,10 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         fragments.clearFragments();
 
-        /*
-        inizializza i fragment
-         */
+        //inizializza i fragment
 
         // WakeOnLanFragment
-        if (remoteDeviceWakeOnLan) {
+        if (deviceData.isHasWakeOnLan()) {
 
             wakeOnLanFragment = new WakeOnLanFragment();
             wakeOnLanFragment.parent = this;
@@ -215,7 +225,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
         // TorrentViewerFragment
-        if (remoteDeviceTorrent) {
+        if (deviceData.isHasTorrent()) {
 
             torrentViewerFragment = new TorrentViewerFragment();
             torrentViewerFragment.parent = this;
@@ -226,7 +236,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
         // FileViewerFragment
-        if (remoteDeviceDirNavi) {
+        if (deviceData.isHasFileManager()) {
 
             fileViewerFragment = new FileViewerFragment();
             fileViewerFragment.parent = this;
@@ -249,28 +259,28 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-        // VideoSurveillanceCameraListFragment
-        if (remoteDeviceVideoSurveillance) {
-
-            for (int i = 0; i < nOfAvailableCameras; i++) {
-
-                VSCameraViewerFragment temp;
-                temp = new VSCameraViewerFragment();
-                temp.setCameraID(cameraIDs[i]);
-                temp.setCameraName(cameraNames[i]);
-                temp.setParent(this);
-
-                fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraIDs[i]);
-
-                if (i == 0) {
-                    firstCameraFragmentIndex = count;
-                }
-
-                count++;
-
-            }
-
-        }
+//        // VideoSurveillanceCameraListFragment
+//        if (remoteDeviceVideoSurveillance) {
+//
+//            for (int i = 0; i < nOfAvailableCameras; i++) {
+//
+//                VSCameraViewerFragment temp;
+//                temp = new VSCameraViewerFragment();
+//                temp.setCameraID(cameraIDs[i]);
+//                temp.setCameraName(cameraNames[i]);
+//                temp.setParent(this);
+//
+//                fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraIDs[i]);
+//
+//                if (i == 0) {
+//                    firstCameraFragmentIndex = count;
+//                }
+//
+//                count++;
+//
+//            }
+//
+//        }
 
     }
 
@@ -810,12 +820,37 @@ public class DeviceViewActivity extends AppCompatActivity {
         if (extras != null) {
             // extras presenti:
 
-            // controlla che ci sia la voce SESSIONMODE_TAG
-            if (extras.containsKey(SESSIONMODE_TAG)) {
+            // controlla che ci sia la voce CONNECTIONMETHOD_TAG
+            if (extras.containsKey(CONNECTIONMETHOD_TAG)) {
                 // voce presente:
 
-                // recupera il tipo di sessione
-                sessionMode = extras.getInt(SESSIONMODE_TAG);
+                // recupera la modalità di connessione
+                connectionType = extras.getInt(CONNECTIONMETHOD_TAG);
+
+                // controlla la modalità di connessione
+                if (connectionType == CONNECTIONMETHOD_FIREBASE) {
+                    // connessione tramite Firebase
+
+                    if (extras.containsKey(FIREBASE_REPLY_NEEDED_TAG)) {
+
+                        boolean getFirebaseReply = extras.getBoolean(FIREBASE_REPLY_NEEDED_TAG);
+
+                        if (!getFirebaseReply) {
+
+                            if (extras.containsKey(STATICDATA_JSON_TAG)) {
+
+                                String staticDataJSON = extras.getString(STATICDATA_JSON_TAG);
+                                initFragments(staticDataJSON);
+
+                            }
+
+
+                        }
+
+                    }
+
+
+                }
 
                 // controlla il tipo di sessione
                 if (sessionMode == SESSIONMODE_NEW) {
@@ -828,7 +863,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                         // recupera la modalità di connessione
                         connectionType = extras.getInt(CONNECTIONMETHOD_TAG);
 
-                        if(connectionType==CONNECTIONMETHOD_TCP && extras.containsKey(IPADDRESSESLIST_TAG)){
+                        if (connectionType == CONNECTIONMETHOD_TCP && extras.containsKey(IPADDRESSESLIST_TAG)) {
 
                             // recupera la lista degli indirizzi IP
 
@@ -845,8 +880,8 @@ public class DeviceViewActivity extends AppCompatActivity {
                 }
 
             }
-        }
 
+        }
 
             /*
 
@@ -932,7 +967,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onResume();
 
-        if(connectionType==CONNECTIONMETHOD_FIREBASE){
+        if (connectionType == CONNECTIONMETHOD_FIREBASE) {
             // imposta il metodo di comunicazione via Firebase DB
 
             startFirebaseDBConnectionHandshake();
@@ -972,7 +1007,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void startFirebaseDBConnectionHandshake(){
+    private void startFirebaseDBConnectionHandshake() {
 
         // inizializza i riferimenti ai nodi del db Firebase
         String incomingMessagesNode = new StringBuilder()

@@ -229,7 +229,6 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                 holder.deviceNameTxv.setText(device.getDeviceName());
 
                 DeviceDataParser deviceData = new DeviceDataParser(device.getStatusData(), device.getNetworkData(), device.getStaticData());
-                Log.d(TAG, "Device data parsing: " + deviceData.isDataValidated());
 
                 // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
                 //
@@ -348,10 +347,10 @@ public class DeviceSelectionActivity extends AppCompatActivity {
     ) {
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
-        intent.putExtra("__CONNECTION_METHOD", DeviceViewActivity.CONNECTIONMETHOD_FIREBASE);
-        intent.putExtra("__SESSION_MODE", DeviceViewActivity.SESSIONMODE_NEW);
-        intent.putExtra("__DEVICE_TO_CONNECT", deviceName);
-        intent.putExtra("__STATICDATA_JSON", staticData);
+        intent.putExtra(DeviceViewActivity.CONNECTIONMETHOD_TAG, DeviceViewActivity.CONNECTIONMETHOD_FIREBASE);
+        intent.putExtra(DeviceViewActivity.FIREBASE_REPLY_NEEDED_TAG, DeviceViewActivity.CONNECTIONMETHOD_FIREBASE);
+        intent.putExtra(DeviceViewActivity.DEVICE_TO_CONNECT_TAG, deviceName);
+        intent.putExtra(DeviceViewActivity.STATICDATA_JSON_TAG, staticData);
 
         startActivity(intent);
 
