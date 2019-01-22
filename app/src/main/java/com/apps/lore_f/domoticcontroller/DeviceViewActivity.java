@@ -195,7 +195,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         switch (action) {
 
-            case "monitor":
+            case ACTIONTYPE_CAMERAMONITOR:
                 createDeviceInfoFragment = false;
                 break;
 
@@ -751,7 +751,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private boolean remoteDeviceWakeOnLan;
     private boolean remoteDeviceVideoSurveillance;
 
-    private String action;
+    private int action;
 
     public String thisDevice = "lorenzofailla-g3";
     public String groupName;
@@ -806,6 +806,11 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
+    private void terminate(){
+        finish();
+        return;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -819,6 +824,25 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         if (extras != null) {
             // extras presenti:
+
+            if (intent.hasExtra(ACTIONTYPE_TAG)) {
+
+                action = intent.getIntExtra(ACTIONTYPE_TAG,ACTIONTYPE_VIEWALL);
+
+            } else {
+
+                action = ACTIONTYPE_VIEWALL;
+            }
+
+            if(intent.hasExtra(DEVICE_TO_CONNECT_TAG)){
+
+                remoteDeviceName=intent.getStringExtra(DEVICE_TO_CONNECT_TAG);
+
+            } else {
+
+                terminate();
+
+            }
 
             // controlla che ci sia la voce CONNECTIONMETHOD_TAG
             if (extras.containsKey(CONNECTIONMETHOD_TAG)) {
@@ -935,14 +959,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             }
 
-            if (intent.hasExtra("__ACTION")) {
 
-                action = intent.getStringExtra("__ACTION");
-
-            } else {
-
-                action = "default";
-            }
 
         } else {
 

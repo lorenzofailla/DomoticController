@@ -71,7 +71,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
     public static class DevicesHolder extends RecyclerView.ViewHolder {
 
         public TextView deviceNameTxv;
+
         public ImageButton connectToDeviceBtn;
+        public ImageButton buttonShowAdditionalData;
 
         public ImageView torrentImg;
         public ImageView directoryNaviImg;
@@ -82,8 +84,12 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         public TextView deviceLastUpdateTxv;
 
         public ConstraintLayout deviceLastUpdateData;
+        public ConstraintLayout deviceAdditionalData;
+
+        public boolean showAdditionalData = false;
 
         public DevicesHolder(View v) {
+
             super(v);
             deviceNameTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___DEVICENAME);
 
@@ -96,7 +102,40 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             deviceRunningSinceTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_RUNNINGSINCE);
 
             deviceLastUpdateData = (ConstraintLayout) itemView.findViewById(R.id.CLA___ROWDEVICE___LASTUPDATE);
+            deviceAdditionalData = (ConstraintLayout) itemView.findViewById(R.id.CLA___ROWDEVICE___ADDITIONALDATA);
+            buttonShowAdditionalData = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___EXPANDDATA);
 
+            buttonShowAdditionalData.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    setShowAdditionalData(!DevicesHolder.this.showAdditionalData);
+
+                }
+
+            });
+
+        }
+
+        public void setShowAdditionalData(boolean value){
+            this.showAdditionalData=value;
+
+            if(this.showAdditionalData){
+
+                deviceAdditionalData.setVisibility(View.VISIBLE);
+                buttonShowAdditionalData.setImageResource(R.drawable.less);
+
+            } else {
+
+                deviceAdditionalData.setVisibility(View.GONE);
+                buttonShowAdditionalData.setImageResource(R.drawable.more);
+
+            }
+
+        }
+
+        public boolean getShowAdditionalData(){
+            return this.showAdditionalData;
         }
 
     }
