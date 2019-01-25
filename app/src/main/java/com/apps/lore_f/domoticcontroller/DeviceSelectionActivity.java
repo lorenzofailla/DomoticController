@@ -117,10 +117,10 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         }
 
-        public void setShowAdditionalData(boolean value){
-            this.showAdditionalData=value;
+        public void setShowAdditionalData(boolean value) {
+            this.showAdditionalData = value;
 
-            if(this.showAdditionalData){
+            if (this.showAdditionalData) {
 
                 deviceAdditionalData.setVisibility(View.VISIBLE);
                 buttonShowAdditionalData.setImageResource(R.drawable.less);
@@ -134,7 +134,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         }
 
-        public boolean getShowAdditionalData(){
+        public boolean getShowAdditionalData() {
             return this.showAdditionalData;
         }
 
@@ -267,7 +267,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 holder.deviceNameTxv.setText(device.getDeviceName());
 
-                DeviceDataParser deviceData = new DeviceDataParser(device.getStatusData(), device.getNetworkData(), device.getStaticData());
+                final DeviceDataParser deviceData = new DeviceDataParser(device.getStatusData(), device.getNetworkData(), device.getStaticData());
 
                 // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
                 //
@@ -305,7 +305,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                             connectToDevice(
                                     device.getDeviceName(),
-                                    device.getStaticData()
+                                    device.getStaticData(),
+                                    deviceData.getLastUpdate() != -1 && ((System.currentTimeMillis() - deviceData.getLastUpdate()) > DefaultValues.LAST_UPDATE_TOO_FAR)
                             );
 
                         }
@@ -328,12 +329,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 // aggiorna la label con l'informazione sull'ultimo update
 
+                if (deviceData.getLastUpdate() != -1 && ((System.currentTimeMillis() - deviceData.getLastUpdate()) > DefaultValues.LAST_UPDATE_TOO_FAR)) {
 
-                long lastUpdate = deviceData.getLastUpdate();
-
-                if (lastUpdate != -1 && ((System.currentTimeMillis() - lastUpdate) > DefaultValues.LAST_UPDATE_TOO_FAR)) {
-
-                    String message = getString(R.string.DEVICEELEMENT_LABEL_LAST_UPDATE) + GeneralUtilitiesLibrary.getTimeElapsed(lastUpdate, getApplicationContext(), false);
+                    String message = getString(R.string.DEVICEELEMENT_LABEL_LAST_UPDATE) + GeneralUtilitiesLibrary.getTimeElapsed(deviceData.getLastUpdate(), getApplicationContext(), false);
                     holder.deviceLastUpdateTxv.setText(message);
                     holder.deviceLastUpdateData.setVisibility(View.VISIBLE);
 
@@ -345,7 +343,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                 // aggiorna la label con l'informazione sul tempo di funzionamento del server
 
-                long runningSince = deviceData.getRunningSince();;
+                long runningSince = deviceData.getRunningSince();
+                ;
 
                 if (runningSince != -1) {
 
@@ -382,12 +381,17 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     private void connectToDevice(
             String deviceName,
-            String staticData
+            String staticData,
+            boolean criticalConnection
     ) {
 
         Intent intent = new Intent(this, DeviceViewActivity.class);
-        intent.putExtra(DeviceViewActivity.CONNECTIONMETHOD_TAG, DeviceViewActivity.CONNECTIONMETHOD_FIREBASE);
-        intent.putExtra(DeviceViewActivity.FIREBASE_REPLY_NEEDED_TAG, DeviceViewActivity.CONNECTIONMETHOD_FIREBASE);
+
+        if (criticalConnection) {
+            intent.putExtra(DeviceViewActivity.CONNECTIONMETHOD_TAG, DeviceViewActivity.CONNECTIONMETHOD_FIREBASE_CRITICAL);
+        } else {
+            intent.putExtra(DeviceViewActivity.CONNECTIONMETHOD_TAG, DeviceViewActivity.CONNECTIONMETHOD_FIREBASE);
+        }
         intent.putExtra(DeviceViewActivity.DEVICE_TO_CONNECT_TAG, deviceName);
         intent.putExtra(DeviceViewActivity.STATICDATA_JSON_TAG, staticData);
 

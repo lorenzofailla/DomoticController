@@ -1,10 +1,8 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.app.Notification;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -46,7 +44,6 @@ import static apps.android.loref.GeneralUtilitiesLibrary.decode;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
 import static com.apps.lore_f.domoticcontroller.DefaultValues.*;
-import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.CAMERA_VIEWER;
 import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.DEVICE_INFO;
 import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.DIRECTORY_NAVIGATOR;
 import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.TORRENT_MANAGER;
@@ -58,27 +55,32 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private static final String TAG = "DeviceViewActivity";
 
+    private static final int UNSPECIFIED_INT_VALUE = -1;
+    private static final String UNSPECIFIED_STRING_VALUE = "_unspecified_";
+
     public static final String SESSIONMODE_TAG = "__SESSION_MODE";
     public static final int SESSIONMODE_NEW = 1;
     public static final int SESSIONMODE_RETRIEVE = 2;
 
     public static final String CONNECTIONMETHOD_TAG = "__CONNECTION_METHOD";
     public static final int CONNECTIONMETHOD_FIREBASE = 1;
-    public static final int CONNECTIONMETHOD_TCP = 2;
+    public static final int CONNECTIONMETHOD_FIREBASE_CRITICAL = 2;
 
-    public static final String FIREBASE_REPLY_NEEDED_TAG = "__FIREBASE_REPLY_NEEDED";
+    public static final int CONNECTIONMETHOD_TCP = 3;
+
     public static final String DEVICE_TO_CONNECT_TAG = "__DEVICE_TO_CONNECT";
     public static final String STATICDATA_JSON_TAG = "__STATICDATA_JSON";
 
     public static final String ACTIONTYPE_TAG = "__ACTION_TYPE";
+    public static final int ACTIONTYPE_NOTSPECIFIED = -1;
     public static final int ACTIONTYPE_VIEWALL = 1;
     public static final int ACTIONTYPE_CAMERAMONITOR = 2;
 
     public static final String IPADDRESSESLIST_TAG = "__IP_ADDRESSES_LIST";
 
-    private int sessionMode = -1;
-    private int connectionType = -1;
-    private int viewType = -1;
+    private int sessionMode = UNSPECIFIED_INT_VALUE;
+    private int connectionType = UNSPECIFIED_INT_VALUE;
+    private int viewType = UNSPECIFIED_INT_VALUE;
 
     //region /*    GESTIONE FRAGMENTS     */
 
@@ -161,7 +163,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                     break;
 
                 case TORRENT_MANAGER:
-                    requestTorrentsList();
+                    requestTorrentsData();
                     break;
 
                 case WOL_MANAGER:
@@ -186,7 +188,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         DeviceDataParser deviceData = new DeviceDataParser();
 
-        if(!deviceData.setStaticDataJSON(staticDataJSON)){
+        if (!deviceData.setStaticDataJSON(staticDataJSON)) {
             finish();
             return;
         }
@@ -806,7 +808,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     };
 
-    private void terminate(){
+    private void terminate() {
         finish();
         return;
     }
@@ -818,94 +820,22 @@ public class DeviceViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_device_view);
 
         // recupera l'extra dall'intent,
-        // ottiene il nome del dispositivo remoto e altri parametri
+
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
 
-        if (extras != null) {
-            // extras presenti:
+        action = intent.getIntExtra(ACTIONTYPE_TAG, UNSPECIFIED_INT_VALUE);
+        remoteDeviceName = intent.getStringExtra(DEVICE_TO_CONNECT_TAG);
 
-            if (intent.hasExtra(ACTIONTYPE_TAG)) {
+        // recupera la modalità di connessione
+        connectionType = extras.getInt(CONNECTIONMETHOD_TAG);
 
-                action = intent.getIntExtra(ACTIONTYPE_TAG,ACTIONTYPE_VIEWALL);
+        String staticDataJSON = extras.getString(STATICDATA_JSON_TAG);
 
-            } else {
+        initFragments(staticDataJSON);
 
-                action = ACTIONTYPE_VIEWALL;
-            }
-
-            if(intent.hasExtra(DEVICE_TO_CONNECT_TAG)){
-
-                remoteDeviceName=intent.getStringExtra(DEVICE_TO_CONNECT_TAG);
-
-            } else {
-
-                terminate();
-
-            }
-
-            // controlla che ci sia la voce CONNECTIONMETHOD_TAG
-            if (extras.containsKey(CONNECTIONMETHOD_TAG)) {
-                // voce presente:
-
-                // recupera la modalità di connessione
-                connectionType = extras.getInt(CONNECTIONMETHOD_TAG);
-
-                // controlla la modalità di connessione
-                if (connectionType == CONNECTIONMETHOD_FIREBASE) {
-                    // connessione tramite Firebase
-
-                    if (extras.containsKey(FIREBASE_REPLY_NEEDED_TAG)) {
-
-                        boolean getFirebaseReply = extras.getBoolean(FIREBASE_REPLY_NEEDED_TAG);
-
-                        if (!getFirebaseReply) {
-
-                            if (extras.containsKey(STATICDATA_JSON_TAG)) {
-
-                                String staticDataJSON = extras.getString(STATICDATA_JSON_TAG);
-                                initFragments(staticDataJSON);
-
-                            }
-
-
-                        }
-
-                    }
-
-
-                }
-
-                // controlla il tipo di sessione
-                if (sessionMode == SESSIONMODE_NEW) {
-                    // nuova sessione:
-
-                    // controlla che ci sia la voce CONNECTIONMETHOD_TAG
-                    if (extras.containsKey(CONNECTIONMETHOD_TAG)) {
-                        // voce presente:
-
-                        // recupera la modalità di connessione
-                        connectionType = extras.getInt(CONNECTIONMETHOD_TAG);
-
-                        if (connectionType == CONNECTIONMETHOD_TCP && extras.containsKey(IPADDRESSESLIST_TAG)) {
-
-                            // recupera la lista degli indirizzi IP
-
-
-                        }
-
-                    }
-
-                } else if (sessionMode == SESSIONMODE_RETRIEVE) {
-                    // recupero di  una sessione salvata:
-
-                    //TODO implementare
-
-                }
-
-            }
-
-        }
+        // crea il CollectionPagerAdapter
+        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
             /*
 
@@ -984,14 +914,30 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         super.onResume();
 
-        if (connectionType == CONNECTIONMETHOD_FIREBASE) {
+        if (connectionType == CONNECTIONMETHOD_FIREBASE || connectionType == CONNECTIONMETHOD_FIREBASE_CRITICAL) {
             // imposta il metodo di comunicazione via Firebase DB
 
-            startFirebaseDBConnectionHandshake();
+            attachFirebaseIncomingCommandsListener();
+
+            if (connectionType == CONNECTIONMETHOD_FIREBASE_CRITICAL) {
+                // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
+                sendCommandToDevice(
+                        new Message("__requestWelcomeMessage",
+                                "-",
+                                thisDevice)
+                );
+
+                // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
+
+                if (deviceNotRespondingAction != null) {
+                    handler.removeCallbacks(deviceNotRespondingAction);
+                }
+
+                deviceNotRespondingAction = new DeviceNotRespondingAction();
+                handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
+            }
 
         }
-
-        /*
 
         // imposta il ViewPager per la gestione dei fragment
         ViewPager viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
@@ -1000,12 +946,12 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         // se l'azione specificata non è "monitor", posiziona il ViewPager sul fragment deviceInfoFragment
 
-        if (action != "monitor") {
+        if (action != ACTIONTYPE_CAMERAMONITOR) {
 
             viewPager.setCurrentItem(deviceInfoFragmentIndex);
 
         }
-
+/*
         // attiva il ciclo di richieste
         handler = new Handler();
 
@@ -1024,7 +970,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void startFirebaseDBConnectionHandshake() {
+    private void attachFirebaseIncomingCommandsListener() {
 
         // inizializza i riferimenti ai nodi del db Firebase
         String incomingMessagesNode = new StringBuilder()
@@ -1041,21 +987,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessagesRef.addChildEventListener(newCommandsToProcess);
 
-        // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
-        sendCommandToDevice(
-                new Message("__requestWelcomeMessage",
-                        "-",
-                        thisDevice)
-        );
-
-        // inizializza e pianifica l'azione da intraprendere nel caso in cui la risposta non arrivi entro il timeout prefissato
-
-        if (deviceNotRespondingAction != null) {
-            handler.removeCallbacks(deviceNotRespondingAction);
-        }
-
-        deviceNotRespondingAction = new DeviceNotRespondingAction();
-        handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
 
     }
 
@@ -1279,6 +1210,14 @@ public class DeviceViewActivity extends AppCompatActivity {
         deviceIncomingCommands.child(thisDevice).child("IncomingCommands").child(id).removeValue();
 
     }
+
+    private void requestTorrentsData() {
+
+        // invia un instant message con la richiesta della lista dei torrents
+        sendCommandToDevice(new Message("__get_torrent_data_json", "null", thisDevice));
+
+    }
+
 
     private void requestTorrentsList() {
 
