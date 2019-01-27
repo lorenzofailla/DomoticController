@@ -39,6 +39,27 @@ public class DeviceDataParser {
 
     }
 
+    public String getStaticData(){
+
+        return this.staticDataJSON.toString();
+
+    }
+
+    public String getWOLData(){
+
+        try {
+
+            return staticDataJSON.getJSONObject("WakeOnLan").toString();
+
+        } catch (JSONException e) {
+
+            Log.e(TAG, "Unable to retrieve \"WakeOnLan\" JSONObject.");
+            return "";
+
+        }
+
+    }
+
     public boolean setStatusDataJSON(String statusDataJSON) {
         try {
 
@@ -51,9 +72,17 @@ public class DeviceDataParser {
             return false;
 
         }
+
+    }
+
+    public String getStatusData(){
+
+        return this.statusDataJSON.toString();
+
     }
 
     public boolean setNetworkDataJSON(String networkDataJSON) {
+
         try {
 
             this.networkDataJSON = new JSONObject(networkDataJSON);
@@ -65,13 +94,22 @@ public class DeviceDataParser {
             return false;
 
         }
+
     }
 
-    private double totalDiskSpace = 0.0;
-    private double availableDiskSpace = 0.0;
+    public String getNetworkData(){
+
+        return this.networkDataJSON.toString();
+
+    }
+
+    private double totalDiskSpace = -9999.0;
+    private double availableDiskSpace = -9999.0;
     private long runningSince = -1L;
     private long lastUpdate = -1L;
     private String uptimeMessage = "";
+    private int averageLoad=-1;
+    private int connectedUsers=-1;
 
     private boolean hasTorrent = false;
     private boolean hasVideoSurveillance = false;
@@ -119,10 +157,21 @@ public class DeviceDataParser {
             lastUpdate = generalStatus.getLong("LastUpdate");
             uptimeMessage = generalStatus.getString("Uptime");
 
+            String[] data = uptimeMessage.split(",  ");
+
+            if(data.length==3) {
+
+                connectedUsers = Integer.parseInt(data[1].split(" ")[0]);
+                averageLoad = (int) (Double.parseDouble(data[2].substring(13).split(", ")[0].replaceAll(",", ".")) * 100.0);
+
+            }
+
+            statusDataValidated=true;
             return true;
 
         } catch (JSONException e) {
 
+            statusDataValidated=false;
             Log.e(TAG, e.getMessage());
             return false;
 
@@ -140,10 +189,12 @@ public class DeviceDataParser {
             publicIPAddress = network.getString("PublicIP");
             vpnIPAddress = network.getString("VPN");
 
+            networkDataValidated=true;
             return true;
 
         } catch (JSONException e) {
 
+            networkDataValidated=false;
             Log.e(TAG, e.getMessage());
             return false;
 
@@ -157,17 +208,19 @@ public class DeviceDataParser {
 
             JSONObject enabledInterfaces = staticDataJSON.getJSONObject("EnabledInterfaces");
             JSONObject videoSurveillance = staticDataJSON.getJSONObject("VideoSurveillance");
-            JSONObject wakeOnLan = staticDataJSON.getJSONObject("WakeOnLan");
+
 
             hasTorrent = enabledInterfaces.getBoolean("TorrentManagement");
             hasVideoSurveillance = enabledInterfaces.getBoolean("VideoSurveillanceManagement");
             hasWakeOnLan = enabledInterfaces.getBoolean("WakeOnLanManagement");
             hasFileManager = enabledInterfaces.getBoolean("DirectoryNavigation");
 
+            staticDataValidated=true;
             return true;
 
         } catch (JSONException e) {
 
+            staticDataValidated=false;
             Log.e(TAG, e.getMessage());
             return false;
 
@@ -251,6 +304,22 @@ public class DeviceDataParser {
 
     public String getVpnIPAddress() {
         return vpnIPAddress;
+    }
+
+    public int getAverageLoad(){
+
+        return this.averageLoad;
+
+    }
+
+    public int getConnectedUsers(){
+        return this.connectedUsers;
+    }
+
+    public String getDiskStatus(){
+
+        return String.format("%.1f MiB (%.1f %%)", this.availableDiskSpace, 100.0*this.availableDiskSpace/this.totalDiskSpace);
+
     }
 
 }

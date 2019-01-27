@@ -6,8 +6,8 @@ public class DefaultValues {
 
     public static final String GROUPNODE="Groups";
     public static final String DEVICENODE="Devices";
-    public static final String GENERALSTATUSNODE="Status";
-    public static final String NETWORKSTATUSNODE="NetworkStatus";
+    public static final String GENERALSTATUSNODE="StatusData";
+    public static final String NETWORKSTATUSNODE="NetworkData";
     public static final String VIDEOSURVEILLANCENODE="VideoSurveillance";
     public static final String AVAILABLECAMSNODE="AvailableCameras";
 

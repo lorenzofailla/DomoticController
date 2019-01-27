@@ -1,8 +1,10 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.app.Notification;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,9 +20,9 @@ import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
 import com.apps.lore_f.domoticcontroller.fragments.DeviceInfoFragment;
+import com.apps.lore_f.domoticcontroller.fragments.TorrentViewerFragment;
+import com.apps.lore_f.domoticcontroller.fragments.WakeOnLanFragment;
 import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;
 import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.FileInfo;
@@ -82,10 +84,9 @@ public class DeviceViewActivity extends AppCompatActivity {
     private int connectionType = UNSPECIFIED_INT_VALUE;
     private int viewType = UNSPECIFIED_INT_VALUE;
 
-    //region /*    GESTIONE FRAGMENTS     */
+    //region GESTIONE FRAGMENTS
 
     private CollectionPagerAdapter collectionPagerAdapter;
-
     private FragmentsCollection fragments = new FragmentsCollection();
 
     private DeviceInfoFragment deviceInfoFragment;
@@ -99,6 +100,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     private int deviceInfoFragmentIndex = 0;
     private int firstCameraFragmentIndex = 0;
+
+    private String staticDataJSON;
 
     private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
 
@@ -167,7 +170,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                     break;
 
                 case WOL_MANAGER:
-                    /* no action */
+                    // no action
                     break;
 
                 case CAMERA_VIEWER:
@@ -184,7 +187,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void initFragments(String staticDataJSON) {
+    private void initFragments() {
 
         DeviceDataParser deviceData = new DeviceDataParser();
 
@@ -286,7 +289,19 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
+    public void updateWOLFragment() {
+
+        if (this.wakeOnLanFragment != null) {
+
+            this.wakeOnLanFragment.updateContent(staticDataJSON);
+
+        }
+
+    }
+
     // endregion
+
+
 
     /*
     ************************************************************************************************
@@ -381,7 +396,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                 currentTCPHostAddrIndex = -1;
             }
 
-            deviceInfoFragment.updateTCPStatus();
+            //deviceInfoFragment.updateTCPStatus();
 
         }
 
@@ -679,25 +694,24 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            String logData;
             if (dataSnapshot != null) {
 
-                logData = dataSnapshot.toString();
-                RemoteDevGeneralStatus status = dataSnapshot.getValue(RemoteDevGeneralStatus.class);
+                String generalStatusJSON = dataSnapshot.getValue().toString();
 
                 if (deviceInfoFragment != null) {
-                    deviceInfoFragment.setGeneralStatus(status);
-                } else {
+
+                    if (deviceInfoFragment.getDeviceData().setStatusDataJSON(generalStatusJSON))
+                        deviceInfoFragment.refreshView();
 
                 }
 
             } else {
 
+                String logData;
                 logData = LOG_FIREBASEDB_NODATA;
+                Log.d(TAG, "generalStatusValueEventListener - " + logData);
 
             }
-
-            Log.d(TAG, logData);
 
         }
 
@@ -715,25 +729,24 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            String logData;
             if (dataSnapshot != null) {
 
-                logData = dataSnapshot.toString();
-                RemoteDevNetworkStatus status = dataSnapshot.getValue(RemoteDevNetworkStatus.class);
-
-                tcpHostAddresses = status.getHostAddresses();
+                String networkStatusJSON = dataSnapshot.getValue().toString();
 
                 if (deviceInfoFragment != null) {
-                    deviceInfoFragment.setNetworkStatus(status);
+
+                    if (deviceInfoFragment.getDeviceData().setNetworkDataJSON(networkStatusJSON)) ;
+                    deviceInfoFragment.refreshView();
+
                 }
 
             } else {
 
+                String logData;
                 logData = LOG_FIREBASEDB_NODATA;
+                Log.d(TAG, "networkStatusValueEventListener - " + logData);
 
             }
-
-            Log.d(TAG, logData);
 
         }
 
@@ -817,7 +830,26 @@ public class DeviceViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_device_view);
+
+        // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
+        Context context = getApplicationContext();
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                getString(R.string.data_file_key), Context.MODE_PRIVATE);
+
+        groupName = sharedPref.getString(getString(R.string.data_group_name), null);
+
+        if (groupName == null) {
+
+            //  questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
+
+            // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
+            startActivity(new Intent(this, GroupSelection.class));
+
+            // termina l'Activity corrente
+            finish();
+            return;
+
+        }
 
         // recupera l'extra dall'intent,
 
@@ -830,34 +862,19 @@ public class DeviceViewActivity extends AppCompatActivity {
         // recupera la modalità di connessione
         connectionType = extras.getInt(CONNECTIONMETHOD_TAG);
 
-        String staticDataJSON = extras.getString(STATICDATA_JSON_TAG);
+        staticDataJSON = extras.getString(STATICDATA_JSON_TAG);
 
-        initFragments(staticDataJSON);
+        initFragments();
 
         // crea il CollectionPagerAdapter
         collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
+        setContentView(R.layout.activity_device_view);
+
+
             /*
 
-            // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
-            Context context = getApplicationContext();
-            SharedPreferences sharedPref = context.getSharedPreferences(
-                    getString(R.string.data_file_key), Context.MODE_PRIVATE);
 
-            groupName = sharedPref.getString(getString(R.string.data_group_name), null);
-
-            if (groupName == null) {
-
-            //  questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
-
-                // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
-                startActivity(new Intent(this, GroupSelection.class));
-
-                // termina l'Activity corrente
-                finish();
-                return;
-
-            }
 
             remoteDeviceName = extras.getString("__DEVICE_TO_CONNECT");
 
@@ -917,7 +934,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         if (connectionType == CONNECTIONMETHOD_FIREBASE || connectionType == CONNECTIONMETHOD_FIREBASE_CRITICAL) {
             // imposta il metodo di comunicazione via Firebase DB
 
-            attachFirebaseIncomingCommandsListener();
+            attachFirebaseListeners();
 
             if (connectionType == CONNECTIONMETHOD_FIREBASE_CRITICAL) {
                 // invia un messaggio al dispositivo remoto con la richiesta del nome del dispositivo
@@ -935,7 +952,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 deviceNotRespondingAction = new DeviceNotRespondingAction();
                 handler.postDelayed(deviceNotRespondingAction, DEFAULT_FIRST_RESPONSE_TIMEOUT);
+
             }
+
 
         }
 
@@ -957,20 +976,13 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         isPausing = false;
 
-        // aggancia i listener ai nodi
-        String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
-        String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
-
-        FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
-        FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
-
         setIsTCPCommIntefaceAvailable(false);
 
         */
 
     }
 
-    private void attachFirebaseIncomingCommandsListener() {
+    private void attachFirebaseListeners() {
 
         // inizializza i riferimenti ai nodi del db Firebase
         String incomingMessagesNode = new StringBuilder()
@@ -987,6 +999,25 @@ public class DeviceViewActivity extends AppCompatActivity {
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessagesRef.addChildEventListener(newCommandsToProcess);
 
+        // rimuove i listener dai nodi
+        String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
+        String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
+
+        FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
+        FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
+
+    }
+
+    private void detachFirebaseListeners() {
+        // rimuove i ChildEventListener dai nodi del db di Firebase
+        incomingMessagesRef.removeEventListener(newCommandsToProcess);
+
+        // rimuove i listener dai nodi
+        String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
+        String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
+
+        FirebaseDatabase.getInstance().getReference(generalStatusNode).removeEventListener(generalStatusValueEventListener);
+        FirebaseDatabase.getInstance().getReference(networkStatusNode).removeEventListener(networkStatusValueEventListener);
 
     }
 
@@ -1006,17 +1037,8 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         } else {
 
-            // rimuove i ChildEventListener dai nodi del db di Firebase
-            incomingMessagesRef.removeEventListener(newCommandsToProcess);
-
+            detachFirebaseListeners();
         }
-
-        // rimuove i listener dai nodi
-        String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
-        String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
-
-        FirebaseDatabase.getInstance().getReference(generalStatusNode).removeEventListener(generalStatusValueEventListener);
-        FirebaseDatabase.getInstance().getReference(networkStatusNode).removeEventListener(networkStatusValueEventListener);
 
         // se attivo, rimuove l'handler all'azione posticipata per gestire la mancata risposta dal server
         if (deviceNotRespondingAction != null) {
@@ -1069,32 +1091,14 @@ public class DeviceViewActivity extends AppCompatActivity {
             case "TORRENT_ADDED":
 
                 // invia un instant message con la richiesta della lista dei torrents
-                requestTorrentsList();
+                requestTorrentsData();
 
                 break;
 
-            case "TORRENTS_LIST":
-
-                if (torrentViewerFragment == null) {
-                    break;
-                }
-
-                // imposta i parametri di visualizzazione del fragment
-                torrentViewerFragment.nOfTorrents = decodedBody.split("\n").length - 2;
-
-                if (torrentViewerFragment.nOfTorrents > 0) {
-
-                    torrentViewerFragment.rawTorrentDataLines = decodedBody.split("\n");
-
-                } else {
-
-                    torrentViewerFragment.nOfTorrents = 0;
-                    torrentViewerFragment.rawTorrentDataLines = null;
-
-                }
+            case "TORRENT_DATA":
 
                 if (torrentViewerFragment.viewCreated)
-                    torrentViewerFragment.updateContent();
+                    torrentViewerFragment.updateContent(decodedBody);
 
                 break;
 
@@ -1211,18 +1215,10 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void requestTorrentsData() {
+    public void requestTorrentsData() {
 
         // invia un instant message con la richiesta della lista dei torrents
         sendCommandToDevice(new Message("__get_torrent_data_json", "null", thisDevice));
-
-    }
-
-
-    private void requestTorrentsList() {
-
-        // invia un instant message con la richiesta della lista dei torrents
-        sendCommandToDevice(new Message("__listTorrents", "null", thisDevice));
 
     }
 
@@ -1287,7 +1283,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    private void removeTorrent(final int id) {
+    private void removeTorrent(final String id) {
 
         new AlertDialog.Builder(this)
                 .setMessage(R.string.ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL)
@@ -1295,7 +1291,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        sendCommandToDevice(new Message("__remove_torrent", "" + id, thisDevice));
+                        sendCommandToDevice(new Message("__remove_torrent", id, thisDevice));
 
                     }
                 })
@@ -1338,20 +1334,20 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    public void torrentStartRequest(int torrentID) {
+    public void torrentStartRequest(String torrentID) {
 
         // invia il commando all'host remoto
-        sendCommandToDevice(new Message("__start_torrent", "" + torrentID, thisDevice));
+        sendCommandToDevice(new Message("__start_torrent", torrentID, thisDevice));
 
     }
 
-    public void torrentStopRequest(int torrentID) {
+    public void torrentStopRequest(String torrentID) {
 
         // invia il commando all'host remoto
-        sendCommandToDevice(new Message("__stop_torrent", "" + torrentID, thisDevice));
+        sendCommandToDevice(new Message("__stop_torrent", torrentID, thisDevice));
     }
 
-    public void torrentRemoveRequest(final int torrentID) {
+    public void torrentRemoveRequest(String torrentID) {
 
         removeTorrent(torrentID);
 

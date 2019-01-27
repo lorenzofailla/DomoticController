@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,23 +12,17 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.apps.lore_f.domoticcontroller.DefaultValues;
-import com.apps.lore_f.domoticcontroller.DeviceSelectionActivity;
 import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.LogEntry;
+import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;
 import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.apps.lore_f.domoticcontroller.R;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevGeneralStatus;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.RemoteDevNetworkStatus;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.HashMap;
 
 import apps.android.loref.GeneralUtilitiesLibrary;
 
@@ -46,8 +39,11 @@ public class DeviceInfoFragment extends Fragment {
         parent = p;
     }
 
-    private RemoteDevGeneralStatus remoteDevGeneralStatus=null;
-    private RemoteDevNetworkStatus remoteDevNetworkStatus=null;
+    private DeviceDataParser deviceData = new DeviceDataParser();
+
+    public DeviceDataParser getDeviceData() {
+        return this.deviceData;
+    }
 
     public RecyclerView logsRecyclerView;
     public LinearLayoutManager linearLayoutManager;
@@ -99,7 +95,7 @@ public class DeviceInfoFragment extends Fragment {
                 holder.logDescription.setText(log.getLogdesc());
 
                 int logImageResId;
-                switch (log.getLogtype()){
+                switch (log.getLogtype()) {
 
                     case "INET_OUT":
                         logImageResId = R.drawable.log_ok;
@@ -144,7 +140,7 @@ public class DeviceInfoFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            if(fragmentView!=null) {
+            if (fragmentView != null) {
 
                 refreshLogsAdapter();
 
@@ -187,7 +183,7 @@ public class DeviceInfoFragment extends Fragment {
 
                 case R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN:
 
-                    if (isVPNConnected) {
+                    if (deviceData.isConnectedToVPN()) {
                         // il dispositivo remoto è connesso alla VPN.
                         // richiede all'Activity parent di mandare un comando per disconnettere dalla VPN
 
@@ -213,22 +209,6 @@ public class DeviceInfoFragment extends Fragment {
                         );
 
                     }
-                    break;
-
-                case R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_TCP:
-
-                    if (parent.getTCPCommInterfaceStatus()) {
-                        // device is connected to remote host via TCP.
-                        // TCP Comm interface will be disconnected.
-
-                        parent.getTcpComm().disconnect();
-
-                    } else {
-                        // device is not connected to remote host via TCP.
-                        // start the TCP Comm interface connection
-
-                        parent.startTCPInterfaceTest();
-                    }
 
                     break;
 
@@ -238,43 +218,20 @@ public class DeviceInfoFragment extends Fragment {
 
     };
 
-    private ValueEventListener vpnStatusValueEventListener = new ValueEventListener() {
-
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-
-            if (dataSnapshot != null)
-                if (dataSnapshot.getValue() != null)
-                    manageVPNStatus(dataSnapshot.getValue().toString());
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-
-    };
-
-
     public DeviceInfoFragment() {
         // Required empty public constructor
-        Log.d(TAG, "DeviceInfoFragment constructor call.");
 
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "DeviceInfoFragment onCreate.");
 
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        Log.d(TAG, "DeviceInfoFragment onCreateView.");
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_device_info, container, false);
@@ -287,10 +244,6 @@ public class DeviceInfoFragment extends Fragment {
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___REBOOT).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___SHUTDOWN).setOnClickListener(onClickListener);
         view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN).setOnClickListener(onClickListener);
-        view.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_TCP).setOnClickListener(onClickListener);
-
-        DatabaseReference vpnStatusNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/Devices/%s/VPNStatus", parent.groupName, parent.remoteDeviceName));
-        vpnStatusNode.addValueEventListener(vpnStatusValueEventListener);
 
         logsRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___DEVICEINFOFRAGMENT___LOG);
 
@@ -308,7 +261,6 @@ public class DeviceInfoFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        Log.d(TAG, "DeviceInfoFragment onAttach.");
     }
 
     @Override
@@ -317,7 +269,6 @@ public class DeviceInfoFragment extends Fragment {
 
         // rimuove il ValueEventListener dal nodo del Database di Firebase
         DatabaseReference vpnStatusNode = FirebaseDatabase.getInstance().getReference("/Groups/%s/devices/%s/VPNStatus");
-        vpnStatusNode.removeEventListener(vpnStatusValueEventListener);
 
         logsNode.removeEventListener(logsValueEventLister);
 
@@ -326,9 +277,6 @@ public class DeviceInfoFragment extends Fragment {
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___REBOOT).setOnClickListener(null);
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___SHUTDOWN).setOnClickListener(null);
         fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN).setOnClickListener(null);
-        fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_TCP).setOnClickListener(null);
-
-        Log.d(TAG, "DeviceInfoFragment onDetach.");
 
     }
 
@@ -338,80 +286,6 @@ public class DeviceInfoFragment extends Fragment {
             return;
         }
 
-        int drawableToShow;
-        String textToShow;
-        boolean switchButtonEnabled;
-
-        switch (status) {
-
-            case "<not-available>":
-
-                // vpn is not available
-                drawableToShow = R.drawable.broken;
-                textToShow = getString(R.string.DEVICEVIEW_LABEL_VPN_STATUS_NOT_AVAILABLE);
-                switchButtonEnabled = false;
-                break;
-
-            case "<not-connected>":
-                drawableToShow = R.drawable.vpn_black;
-                textToShow = getString(R.string.DEVICEVIEW_LABEL_VPN_STATUS_NOT_CONNECTED);
-                switchButtonEnabled = true;
-                isVPNConnected = false;
-                break;
-
-            default:
-                drawableToShow = R.drawable.vpn_green;
-                textToShow = String.format("%s IP: %s.", getString(R.string.DEVICEVIEW_LABEL_VPN_STATUS_CONNECTED), status);
-                switchButtonEnabled = true;
-                isVPNConnected = true;
-                break;
-        }
-
-        ImageButton switchButton = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN);
-        TextView vpnStatusTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___VPN_STATUS_VALUE);
-
-        switchButton.setEnabled(switchButtonEnabled);
-        switchButton.setImageResource(drawableToShow);
-        vpnStatusTextView.setText(textToShow);
-
-    }
-
-    public void setGeneralStatus(RemoteDevGeneralStatus status) {
-
-        remoteDevGeneralStatus = status;
-
-        refreshView();
-
-    }
-
-    public void setNetworkStatus(RemoteDevNetworkStatus status) {
-
-        remoteDevNetworkStatus = status;
-
-        refreshView();
-
-    }
-
-    public void updateTCPStatus() {
-
-        if (fragmentView != null) {
-            // inizializza la visualizzazione dello stato della connessione TCP
-            String labelToShow = getString(R.string.GENERIC_PLACEHOLDER_WAITING);
-
-            if (parent.getCurrentTCPHostAddrIndex() > 0 && parent.getTCPCommInterfaceStatus()) {
-
-                labelToShow = getString(R.string.DEVICEVIEW_LABEL_TCP_STATUS_CONNECTED) + " to: " + parent.getCurrentTCPHostAddress();
-
-            } else {
-
-                labelToShow = getString(R.string.DEVICEVIEW_LABEL_TCP_STATUS_NOT_CONNECTED);
-
-            }
-
-            TextView tcpConnectionStatusLabel = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___TCP_STATUS_VALUE);
-            tcpConnectionStatusLabel.setText(labelToShow);
-
-        }
 
     }
 
@@ -419,36 +293,67 @@ public class DeviceInfoFragment extends Fragment {
 
         if (fragmentView != null) {
 
-            if (remoteDevGeneralStatus != null) {
+            if (deviceData.isStatusDataValidated()) {
 
                 TextView systemLoadTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___SYSLOAD_VALUE);
                 TextView diskStatusTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___DISKSTATUS_VALUE);
                 TextView runningSinceTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___RUNNINGSINCE_VALUE);
                 TextView lastUpdateTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___LASTUPDATE_VALUE);
 
-                systemLoadTextView.setText(remoteDevGeneralStatus.getSystemLoad());
-                diskStatusTextView.setText(remoteDevGeneralStatus.getDiskStatus());
-                runningSinceTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(remoteDevGeneralStatus.getRunningSince(), getContext()));
-                lastUpdateTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(remoteDevGeneralStatus.getLastUpdate(), getContext()));
+                systemLoadTextView.setText(String.format("%d %%", deviceData.getAverageLoad()));
+                diskStatusTextView.setText(deviceData.getDiskStatus());
+                runningSinceTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(deviceData.getRunningSince(), getContext()));
+                lastUpdateTextView.setText(GeneralUtilitiesLibrary.getTimeElapsed(deviceData.getLastUpdate(), getContext()));
 
             }
 
-            if (remoteDevNetworkStatus != null) {
+            if (deviceData.isNetworkDataValidated()) {
 
                 TextView publicIPTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___PUBLICIP_VALUE);
                 TextView localIPTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___PRIVATEIP_VALUE);
 
-                publicIPTextView.setText(remoteDevNetworkStatus.getPublicIP());
-                localIPTextView.setText(remoteDevNetworkStatus.getLocalIP());
+                publicIPTextView.setText(deviceData.getPublicIPAddress());
+                localIPTextView.setText(deviceData.getLocalIPAddressesList());
+
+                int drawableToShow;
+                String textToShow;
+                boolean switchButtonEnabled;
+
+                switch (deviceData.getVpnIPAddress()) {
+
+                    case "<not-available>":
+
+                        // vpn is not available
+                        drawableToShow = R.drawable.broken;
+                        textToShow = getString(R.string.DEVICEVIEW_LABEL_VPN_STATUS_NOT_AVAILABLE);
+                        switchButtonEnabled = false;
+                        break;
+
+                    case "<not-connected>":
+                        drawableToShow = R.drawable.vpn_black;
+                        textToShow = getString(R.string.DEVICEVIEW_LABEL_VPN_STATUS_NOT_CONNECTED);
+                        switchButtonEnabled = true;
+                        isVPNConnected = false;
+                        break;
+
+                    default:
+                        drawableToShow = R.drawable.vpn_green;
+                        textToShow = String.format("%s IP: %s.", getString(R.string.DEVICEVIEW_LABEL_VPN_STATUS_CONNECTED), deviceData.getVpnIPAddress());
+                        switchButtonEnabled = true;
+                        isVPNConnected = true;
+                        break;
+                }
+
+                ImageButton switchButton = (ImageButton) fragmentView.findViewById(R.id.BTN___DEVICEINFOFRAGMENT___MANAGE_VPN);
+                TextView vpnStatusTextView = (TextView) fragmentView.findViewById(R.id.TXV___DEVICEINFOFRAGMENT___VPN_STATUS_VALUE);
+
+                switchButton.setEnabled(switchButtonEnabled);
+                switchButton.setImageResource(drawableToShow);
+                vpnStatusTextView.setText(textToShow);
+
             }
 
-        } else {
-
-            Log.d(TAG, "View of the fragment is null.");
-
         }
-
-        updateTCPStatus();
 
     }
 

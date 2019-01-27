@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.apps.lore_f.domoticcontroller.WakeOnLanFragment">
+    tools:context="com.apps.lore_f.domoticcontroller.fragments.WakeOnLanFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -16,8 +16,8 @@
             android:text="@string/WOL_DEVICES_LABEL_SELECT_DEVICE"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/RWV___WOLDEVICESFRAGMENT___DEVICES"
+        <ListView
+            android:id="@+id/LWV___WOLDEVICESFRAGMENT___DEVICES"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentBottom="true"

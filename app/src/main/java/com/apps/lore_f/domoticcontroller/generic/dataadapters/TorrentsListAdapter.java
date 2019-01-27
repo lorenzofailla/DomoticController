@@ -1,8 +1,9 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.generic.dataadapters;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,8 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
+import com.apps.lore_f.domoticcontroller.R;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.TorrentInfo;
 
 import java.util.List;
@@ -20,6 +23,8 @@ import java.util.List;
  */
 
 public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
+
+    private static final String TAG="TorrentsListAdapter";
 
     public TorrentsListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<TorrentInfo> objects, final DeviceViewActivity parentDeviceViewActivity) {
         super(context, resource, objects);
@@ -50,7 +55,7 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
 
         // imposta la visualizzazione degli elementi
         torrentNameTXV.setText(torrentInfo.getName());
-        torrentStatusTXV.setText(torrentInfo.getStatusString());
+        torrentStatusTXV.setText(torrentInfo.getStatus());
 
         String torrentData = new StringBuilder().append(torrentInfo.getDone())
                 .append(" - ")
@@ -62,7 +67,7 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
         torrentHaveTXV.setText(torrentData);
 
         // imposta l'immagine del pulsante ImageButton switchStatusBtn in funzione dello stato
-        if (torrentInfo.getStatus()== TorrentInfo.TorrentStatus.STOPPED){
+        if (torrentInfo.getStatus().equals(TorrentInfo.STATUS_STOPPED)){
 
             // torrent fermo, assegna l'immagine play
             switchStatusBtn.setImageResource(R.drawable.play);
@@ -73,19 +78,18 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
             switchStatusBtn.setImageResource(R.drawable.pause);
         }
 
-
         // assegna i listener ai pulsanti ImageButton
         switchStatusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if (torrentInfo.getStatus()== TorrentInfo.TorrentStatus.STOPPED){
+                if (torrentInfo.getStatus().equals(TorrentInfo.STATUS_STOPPED)){
 
-                    parentDVA.torrentStartRequest(torrentInfo.getID());
+                    parentDVA.torrentStartRequest(torrentInfo.getId());
 
                 } else{
 
-                    parentDVA.torrentStopRequest(torrentInfo.getID());
+                    parentDVA.torrentStopRequest(torrentInfo.getId());
 
                 }
 
@@ -97,7 +101,7 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
             @Override
             public void onClick(View v) {
 
-                parentDVA.torrentRemoveRequest(torrentInfo.getID());
+                parentDVA.torrentRemoveRequest(torrentInfo.getId());
 
             }
 

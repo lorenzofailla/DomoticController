@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.apps.lore_f.domoticcontroller.TorrentViewerFragment">
+    tools:context="com.apps.lore_f.domoticcontroller.fragments.TorrentViewerFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,11 +17,24 @@
             android:padding="3dp"
             android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/BTN___TORRENTSVIEWER_REFRESH"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/reboot" />
+
         <ImageButton
             android:id="@+id/BTN___TORRENTSVIEWER_ADDTORRENT"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/add_new" />
+
+    </LinearLayout>
 
         <ListView
             android:id="@+id/LVW___TORRENTSLIST___MAIN"

@@ -1,110 +1,85 @@
 package com.apps.lore_f.domoticcontroller.generic.dataobjects;
 
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by 105053228 on 30/mar/2017.
  */
 
 public class TorrentInfo {
 
-    private String IDString;
-    public String getIDString() {
-        return IDString;
-    }
-    public void setIDString(String ID) {
-        this.IDString = ID;
+    private static final String TAG="TorrentInfo";
+
+    public static final String STATUS_STOPPED="Stopped";
+
+    private String id="";
+    private String done="";
+    private String have="";
+    private String eta="";
+    private double up=-9999.0;
+    private double down=-9999.0;
+    private String ratio="";
+    private String status="";
+    private String name="";
+
+    public TorrentInfo(String dataJSON){
+
+        try {
+
+            JSONObject info = new JSONObject(dataJSON);
+
+            id=info.getString("ID");
+            done=info.getString("Done");
+            have=info.getString("Have");
+            eta=info.getString("ETA");
+            up=info.getDouble("Up");
+            down=info.getDouble("Down");
+            ratio=info.getString("Ratio");
+            status=info.getString("Status");
+            name=info.getString("Name");
+
+        } catch (JSONException e) {
+            Log.e(TAG, "Unable to parse json data: " + dataJSON);
+        }
+
     }
 
-    private String statusString;
-    public String getStatusString() {
-        return statusString;
-    }
-    public void setStatusString(String statusString) {
-        this.statusString = statusString;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public TorrentStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TorrentStatus status) {
-        this.status= status;
-    }
-
-    public String getEta() {
-        return eta;
-    }
-
-    public void setEta(String eta) {
-        this.eta = eta;
+    public String getId() {
+        return id;
     }
 
     public String getDone() {
         return done;
     }
 
-    public void setDone(String done) {
-        this.done = done;
-    }
-
     public String getHave() {
         return have;
     }
 
-    public void setHave(String have) {
-        this.have = have;
+    public String getEta() {
+        return eta;
     }
 
-    public TorrentInfo(String rawServerResponseLine){
-
-        IDString=rawServerResponseLine.substring(0,4);
-        ID=Integer.parseInt(IDString.replace(" ",""));
-
-        name=rawServerResponseLine.substring(70,rawServerResponseLine.length()-1);
-        statusString=rawServerResponseLine.substring(57,70);
-        eta=  rawServerResponseLine.substring(24,34);
-        done=rawServerResponseLine.substring(7,11);
-        have=rawServerResponseLine.substring(11,22);
-
-        if (statusString.replace(" ", "").equals("Stopped")){
-
-            status = TorrentStatus.STOPPED;
-
-        } else {
-
-            status = TorrentStatus.NOT_STOPPED;
-        }
-
+    public double getUp() {
+        return up;
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
+    public double getDown() {
+        return down;
     }
 
-    public int getID() {
-        return ID;
+    public String getRatio() {
+        return ratio;
     }
 
-
-    private int ID;
-    private String name;
-
-    private TorrentStatus status;
-    private String eta;
-    private String done;
-    private String have;
-
-    public static enum TorrentStatus{
-
-        STOPPED,NOT_STOPPED;
-
+    public String getStatus() {
+        return status;
     }
 
+    public String getName() {
+        return name;
+    }
 }
