@@ -110,30 +110,32 @@ public int nOfTorrents;
             return;
 
         List<TorrentInfo> torrents = new ArrayList<TorrentInfo>();
+        String infoMessage;
 
         try {
 
             JSONObject data = new JSONObject(dataJSON);
 
             JSONObject generalData = data.getJSONObject("TorrentData");
-            JSONArray torrentsData = generalData.getJSONArray("Torrents");
 
-            List<TorrentInfo> torrentsList = new ArrayList<TorrentInfo>();
+            if(generalData.has("Torrents")) {
 
-            for (int i=0; i< torrentsData.length(); i++){
-                torrentsList.add(new TorrentInfo(torrentsData.getString(i)));
-            }
+                JSONArray torrentsData = generalData.getJSONArray("Torrents");
 
-            TorrentsListAdapter adapter = new TorrentsListAdapter(getContext(), R.layout.row_holder_torrent_element, torrentsList, this.parent);
-            torrentsListView.setAdapter(adapter);
+                for (int i = 0; i < torrentsData.length(); i++) {
+                    torrents.add(new TorrentInfo(torrentsData.getString(i)));
+                }
 
-            String infoMessage;
+                infoMessage = getString(R.string.TORRENTSMANAGER_LABEL_AVAILABLETORRENTS) + " " + torrents.size();
 
-            if(torrentsList.size()>0){
-                infoMessage = getString(R.string.TORRENTSMANAGER_LABEL_AVAILABLETORRENTS) + " " + torrentsList.size();
             } else {
+
                 infoMessage = getString(R.string.TORRENTSMANAGER_LABEL_NOTORRENTS);
+
             }
+
+            TorrentsListAdapter adapter = new TorrentsListAdapter(getContext(), R.layout.row_holder_torrent_element, torrents, this.parent);
+            torrentsListView.setAdapter(adapter);
 
             mainInfoTextView.setText(infoMessage);
 

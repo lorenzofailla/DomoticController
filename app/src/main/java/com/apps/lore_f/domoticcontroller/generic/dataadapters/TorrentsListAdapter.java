@@ -46,6 +46,9 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
         TextView torrentStatusTXV = (TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTSTATUS);
         TextView torrentHaveTXV = (TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTHAVE);
 
+        TextView upSpeed = (TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___UPSPEED);
+        TextView downSpeed = (TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___DOWNSPEED);
+
         ImageButton switchStatusBtn = (ImageButton) convertView.findViewById(R.id.BTN___TORRENTSLISTROW___SWITCHSTATUS);
         ImageButton removeTorrentBtn = (ImageButton) convertView.findViewById(R.id.BTN___TORRENTSLISTROW___REMOVETORRENT);
 
@@ -64,7 +67,24 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
                 .append(torrentInfo.getEta())
                 .append(").")
                 .toString();
+
+
         torrentHaveTXV.setText(torrentData);
+
+        upSpeed.setText(String.format("%.1f kb/s",torrentInfo.getUp()));
+        downSpeed.setText(String.format("%.1f kb/s",torrentInfo.getDown()));
+
+        try {
+
+            int completed = Integer.parseInt(torrentInfo.getDone().replace("*", "").replace("%", "").trim());
+            progressBar.setIndeterminate(false);
+            progressBar.setProgress(completed);
+
+        } catch (java.lang.NumberFormatException e) {
+
+            progressBar.setIndeterminate(true);
+
+        }
 
         // imposta l'immagine del pulsante ImageButton switchStatusBtn in funzione dello stato
         if (torrentInfo.getStatus().equals(TorrentInfo.STATUS_STOPPED)){
