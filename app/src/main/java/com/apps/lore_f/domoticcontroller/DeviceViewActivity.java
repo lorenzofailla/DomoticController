@@ -35,6 +35,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.zip.DataFormatException;
@@ -264,8 +268,39 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         }
 
-//        // VideoSurveillanceCameraListFragment
-//        if (remoteDeviceVideoSurveillance) {
+        // VideoSurveillanceCameraListFragment
+        if (deviceData.isHasVideoSurveillance()) {
+
+            JSONObject data = deviceData.getVideoSurveillanceJSON();
+
+            try {
+
+                JSONArray cameras = data.getJSONArray("Cameras");
+
+                for (int i = 0; i < cameras.length(); i++) {
+
+                    VSCameraViewerFragment temp;
+                    temp = new VSCameraViewerFragment();
+                    temp.setCameraID(cameras.getJSONObject(i).getString("ID"));
+                    temp.setCameraName(cameras.getJSONObject(i).getString("Name"));
+                    temp.setParent(this);
+
+                    fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraIDs[i]);
+//
+//                if (i == 0) {
+//                    firstCameraFragmentIndex = count;
+//                }
+//
+//                count++;
+
+                }
+
+            } catch (JSONException e) {
+
+                e.printStackTrace();
+
+            }
+
 //
 //            for (int i = 0; i < nOfAvailableCameras; i++) {
 //
@@ -275,15 +310,9 @@ public class DeviceViewActivity extends AppCompatActivity {
 //                temp.setCameraName(cameraNames[i]);
 //                temp.setParent(this);
 //
-//                fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraIDs[i]);
 //
-//                if (i == 0) {
-//                    firstCameraFragmentIndex = count;
-//                }
 //
-//                count++;
-//
-//            }
+        }
 //
 //        }
 
