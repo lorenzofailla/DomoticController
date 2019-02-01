@@ -50,6 +50,7 @@ import static apps.android.loref.GeneralUtilitiesLibrary.decode;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
 import static com.apps.lore_f.domoticcontroller.DefaultValues.*;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.CAMERA_VIEWER;
 import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.DEVICE_INFO;
 import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.DIRECTORY_NAVIGATOR;
 import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.TORRENT_MANAGER;
@@ -280,18 +281,21 @@ public class DeviceViewActivity extends AppCompatActivity {
                 for (int i = 0; i < cameras.length(); i++) {
 
                     VSCameraViewerFragment temp;
+                    String cameraID=cameras.getJSONObject(i).getString("ID");
                     temp = new VSCameraViewerFragment();
-                    temp.setCameraID(cameras.getJSONObject(i).getString("ID"));
+                    temp.setCameraID(cameraID);
                     temp.setCameraName(cameras.getJSONObject(i).getString("Name"));
                     temp.setParent(this);
 
-                    fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraIDs[i]);
-//
-//                if (i == 0) {
-//                    firstCameraFragmentIndex = count;
-//                }
-//
-//                count++;
+                    fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraID);
+
+                    if (i == 0) {
+
+                        firstCameraFragmentIndex = count;
+
+                    }
+
+                    count++;
 
                 }
 
@@ -301,20 +305,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             }
 
-//
-//            for (int i = 0; i < nOfAvailableCameras; i++) {
-//
-//                VSCameraViewerFragment temp;
-//                temp = new VSCameraViewerFragment();
-//                temp.setCameraID(cameraIDs[i]);
-//                temp.setCameraName(cameraNames[i]);
-//                temp.setParent(this);
-//
-//
-//
         }
-//
-//        }
 
     }
 
