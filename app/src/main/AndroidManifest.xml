@@ -28,7 +28,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity android:name=".GoogleSignInActivity" />
-        <activity android:name=".DeviceSelectionActivity" />
+        <activity android:name=".activities.DeviceSelectionActivity" />
         <activity android:name=".DeviceViewActivity" />
         <activity android:name=".CloudStorageActivity" />
         <activity android:name=".VideoSurveillanceActivity" />

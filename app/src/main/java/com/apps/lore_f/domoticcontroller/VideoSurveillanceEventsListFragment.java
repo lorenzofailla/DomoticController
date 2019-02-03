@@ -144,8 +144,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             newItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___NEWITEM);
             lockedItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___LOCKEDITEM);
 
-
-
         }
 
     }
@@ -154,11 +152,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            refreshAdapter();
-
-            /*
-            definisce l'array delle keys dei record contenuti nel dataSnapshot
-             */
+            // definisce l'array delle keys dei record contenuti nel dataSnapshot
 
             if (dataSnapshot != null) {
 
@@ -221,6 +215,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         // innesca l'azione di click sul pulsante filtro ALL
         filterAllButton.callOnClick();
+
+        refreshAdapter();
 
         fragmentView = view;
 

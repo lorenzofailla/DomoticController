@@ -43,25 +43,6 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
     private FirebaseRecyclerAdapter<VSCameraDevice, CamerasHolder> firebaseAdapter;
     private RecyclerView camerasRecyclerView;
 
-    private ValueEventListener valueEventListener = new ValueEventListener() {
-
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-
-            // aggiorna l'adapter
-            if (viewCreated)
-                refreshAdapter();
-
-
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-        }
-
-
-    };
-
     public static class CamerasHolder extends RecyclerView.ViewHolder {
 
         public TextView cameraNameTXV;
@@ -96,7 +77,6 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_videosurveillance_cameralist, container, false);
-
         camerasRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS);
 
         if (deviceName != null) {
@@ -108,7 +88,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
             availableCameras = camerasNode.orderByChild("OwnerDevice");
         }
 
-        availableCameras.addListenerForSingleValueEvent(valueEventListener);
+        refreshAdapter();
 
         viewCreated = true;
         return view;
@@ -124,8 +104,6 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-
-        availableCameras.removeEventListener(valueEventListener);
 
     }
 

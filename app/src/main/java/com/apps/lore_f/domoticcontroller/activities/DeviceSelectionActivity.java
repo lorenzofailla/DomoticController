@@ -1,4 +1,4 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +14,12 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.CloudStorageActivity;
+import com.apps.lore_f.domoticcontroller.DefaultValues;
+import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
+import com.apps.lore_f.domoticcontroller.GroupSelection;
+import com.apps.lore_f.domoticcontroller.R;
+import com.apps.lore_f.domoticcontroller.VideoSurveillanceActivity;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
 import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -106,6 +112,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             buttonShowAdditionalData = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___EXPANDDATA);
 
             buttonShowAdditionalData.setOnClickListener(new View.OnClickListener() {
+
                 @Override
                 public void onClick(View v) {
 
@@ -235,6 +242,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         onlineDevices = userNode.child("Devices").orderByChild("Online").equalTo(true);
         onlineDevices.addValueEventListener(valueEventListener);
+
+        refreshAdapter();
 
     }
 

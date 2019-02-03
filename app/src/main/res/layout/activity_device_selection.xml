@@ -9,7 +9,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.apps.lore_f.domoticcontroller.DeviceSelectionActivity">
+    tools:context="com.apps.lore_f.domoticcontroller.activities.DeviceSelectionActivity">
 
     <TextView
         android:id="@+id/TXV___DEVICE_SELECTION___LABEL"
