@@ -2,6 +2,7 @@ package com.apps.lore_f.domoticcontroller;
 
 public class DefaultValues {
 
+
     public static final String LOG_FIREBASEDB_NODATA = "No data at specified node.";
 
     public static final String GROUPNODE="Groups";

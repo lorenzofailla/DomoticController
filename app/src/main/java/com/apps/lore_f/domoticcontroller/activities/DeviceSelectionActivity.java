@@ -179,8 +179,6 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
             availableDevicesTextView.setText(message);
 
-            // aggiorna l'adapter
-            refreshAdapter();
         }
 
         @Override
@@ -238,9 +236,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         findViewById(R.id.BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE).setOnClickListener(onClickListener);
 
         // cerca i dispositivi online nel database
-        DatabaseReference userNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s", groupName));
+        DatabaseReference userNode = FirebaseDatabase.getInstance().getReference("Devices");
 
-        onlineDevices = userNode.child("Devices").orderByChild("Online").equalTo(true);
+        onlineDevices = userNode.child(groupName).orderByChild("Online").equalTo(true);
         onlineDevices.addValueEventListener(valueEventListener);
 
         refreshAdapter();

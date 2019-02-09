@@ -339,7 +339,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void run() {
 
             // imposta lo stato del dispositivo come offline
-            String deviceNode = DefaultValues.GROUPNODE + "/" + groupName + "/" + DefaultValues.DEVICENODE + "/" + remoteDeviceName;
+            String deviceNode = String.format("Devices/%s/%s",groupName,remoteDeviceName);
             FirebaseDatabase.getInstance().getReference(deviceNode).child("online").setValue(false, new DatabaseReference.CompletionListener() {
                 @Override
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -598,13 +598,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void manageTCPInterfaceStatus() {
 
         // inizializza i riferimenti ai nodi del db Firebase
-        String incomingMessagesNode = new StringBuilder()
-                .append("/Groups/")
-                .append(groupName)
-                .append("/Devices/")
-                .append(thisDevice)
-                .append("/IncomingCommands")
-                .toString(); // todo: riformattare
+        String incomingMessagesNode = String.format("IncomingCommands/%s/%s", groupName, thisDevice);
 
         incomingMessagesRef = FirebaseDatabase.getInstance().getReference(incomingMessagesNode);
 
@@ -1005,13 +999,7 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void attachFirebaseListeners() {
 
         // inizializza i riferimenti ai nodi del db Firebase
-        String incomingMessagesNode = new StringBuilder()
-                .append("/Groups/")
-                .append(groupName)
-                .append("/Devices/")
-                .append(thisDevice)
-                .append("/IncomingCommands")
-                .toString();
+        String incomingMessagesNode = String.format("IncomingCommands/%s/%s", groupName, thisDevice);
 
         // definisce il nodo dei messaggi in ingresso
         incomingMessagesRef = FirebaseDatabase.getInstance().getReference(incomingMessagesNode);
@@ -1020,8 +1008,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         incomingMessagesRef.addChildEventListener(newCommandsToProcess);
 
         // rimuove i listener dai nodi
-        String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
-        String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
+        String generalStatusNode = String.format("Devices/%s/%s/StatusData", groupName, remoteDeviceName);
+        String networkStatusNode = String.format("Devices/%s/%s/NetworkData", groupName, remoteDeviceName);
 
         FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
         FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
@@ -1033,8 +1021,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         incomingMessagesRef.removeEventListener(newCommandsToProcess);
 
         // rimuove i listener dai nodi
-        String generalStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + GENERALSTATUSNODE;
-        String networkStatusNode = GROUPNODE + "/" + groupName + "/" + DEVICENODE + "/" + remoteDeviceName + "/" + NETWORKSTATUSNODE;
+        String generalStatusNode = String.format("Devices/%s/%s/StatusData", groupName, remoteDeviceName);
+        String networkStatusNode = String.format("Devices/%s/%s/NetworkData", groupName, remoteDeviceName);
 
         FirebaseDatabase.getInstance().getReference(generalStatusNode).removeEventListener(generalStatusValueEventListener);
         FirebaseDatabase.getInstance().getReference(networkStatusNode).removeEventListener(networkStatusValueEventListener);
@@ -1213,12 +1201,12 @@ public class DeviceViewActivity extends AppCompatActivity {
         } else {
 
             // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo remoto selezionato
-            DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices");
+            DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("IncomingCommands");
 
             // aggiunge il messaggio al nodo
             deviceIncomingCommands
+                    .child(groupName)
                     .child(remoteDeviceName)
-                    .child("IncomingCommands")
                     .child("" + System.currentTimeMillis())
                     .setValue(command);
         }
@@ -1228,10 +1216,10 @@ public class DeviceViewActivity extends AppCompatActivity {
     private void deleteMessage(String id) {
 
         // ottiene un riferimento al nodo del database che contiene i messaggi in ingresso per il dispositivo locale
-        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("/Groups/" + groupName + "/Devices");
+        DatabaseReference deviceIncomingCommands = FirebaseDatabase.getInstance().getReference("IncomingCommands");
 
         // rimuove il messaggio al nodo
-        deviceIncomingCommands.child(thisDevice).child("IncomingCommands").child(id).removeValue();
+        deviceIncomingCommands.child(groupName).child(thisDevice).child(id).removeValue();
 
     }
 
