@@ -69,6 +69,13 @@ public class VSCameraViewerFragment extends Fragment {
 
     private boolean liveBroadcastRequested;
 
+    private View.OnLongClickListener onLongClickListener = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            return false;
+        }
+    };
+
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -288,13 +295,14 @@ public class VSCameraViewerFragment extends Fragment {
         DatabaseReference youTubeLiveBroadcastStatusNode;
         DatabaseReference youTubeLiveBroadcastAddressNode;
 
+        String videoCamerasRootNode = String.format("VideoCameras/%s/%s-%s/", parent.groupName, parent.remoteDeviceName, cameraID);
 
-        shotNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LastShotData", parent.groupName, parent.remoteDeviceName, cameraID));
-        statusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/MoDetStatus", parent.groupName, parent.remoteDeviceName, cameraID));
-        cameraStreamPortNode = FirebaseDatabase.getInstance().getReference(DefaultValues.GROUPNODE+"/"+parent.groupName+"/"+DefaultValues.VIDEOSURVEILLANCENODE+"/"+DefaultValues.AVAILABLECAMSNODE+"/"+parent.remoteDeviceName+"-"+cameraID+"/"+"StreamPort");
+        shotNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"LastShotData");
+        statusNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"MoDetStatus");
+        cameraStreamPortNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"StreamPort");
 
-        youTubeLiveBroadcastStatusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastStatus", parent.groupName, parent.remoteDeviceName, cameraID));
-        youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastData", parent.groupName, parent.remoteDeviceName, cameraID));
+        youTubeLiveBroadcastStatusNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"LiveStreamingBroadcastStatus");
+        youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"LiveStreamingBroadcastData");
 
         statusNode.addValueEventListener(deviceStatusEventListener);
 
@@ -380,7 +388,7 @@ public class VSCameraViewerFragment extends Fragment {
             );
         } else {
             parent.sendCommandToDevice(
-                    new Message("__request_shot", cameraID, parent.thisDevice)
+                    new Message("__request_shots", cameraID, parent.thisDevice)
             );
         }
 
