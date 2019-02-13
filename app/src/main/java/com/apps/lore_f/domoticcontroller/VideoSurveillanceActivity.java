@@ -7,20 +7,12 @@ import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import com.google.firebase.database.DatabaseReference;
+import com.apps.lore_f.domoticcontroller.activities.GroupSelection;
 import com.google.firebase.database.FirebaseDatabase;
-
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 
 public class VideoSurveillanceActivity extends AppCompatActivity {
 

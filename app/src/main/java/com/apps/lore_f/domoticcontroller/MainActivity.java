@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.apps.lore_f.domoticcontroller.activities.DeviceSelectionActivity;
+import com.apps.lore_f.domoticcontroller.activities.GroupSelection;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;

@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.apps.lore_f.domoticcontroller.CloudStorageActivity;
 import com.apps.lore_f.domoticcontroller.DefaultValues;
 import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
-import com.apps.lore_f.domoticcontroller.GroupSelection;
+import com.apps.lore_f.domoticcontroller.R;
 import com.apps.lore_f.domoticcontroller.VideoSurveillanceActivity;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
 import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;

@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.activities.LiveCamViewActivity;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.VSShotPicture;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.CameraFrame;
 import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -28,12 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.IOException;
-import java.util.zip.DataFormatException;
-
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
 public class VSCameraViewerFragment extends Fragment {
 
@@ -59,9 +55,15 @@ public class VSCameraViewerFragment extends Fragment {
         this.cameraName = value;
     }
 
+    private String cameraFullID;
+
+    public void setCameraFullID(String value) {
+        this.cameraFullID=value;
+    }
+
     private String cameraStatus;
 
-    private String cameraStreamPort="";
+    private String cameraStreamPort = "";
 
     private ImageView shotView;
     private Bitmap shotImage;
@@ -97,7 +99,7 @@ public class VSCameraViewerFragment extends Fragment {
                     if (parent.getTCPCommInterfaceStatus()) {
 
                         Intent intent = new Intent(getContext(), LiveCamViewActivity.class);
-                        intent.putExtra("__URL_TO_VIEW", "http://"+parent.getCurrentTCPHostAddress()+":"+cameraStreamPort);
+                        intent.putExtra("__URL_TO_VIEW", "http://" + parent.getCurrentTCPHostAddress() + ":" + cameraStreamPort);
 
                         startActivity(intent);
 
@@ -160,7 +162,7 @@ public class VSCameraViewerFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            if(dataSnapshot!=null){
+            if (dataSnapshot != null) {
 
                 setCameraStreamPort(dataSnapshot.getValue().toString());
 
@@ -186,11 +188,11 @@ public class VSCameraViewerFragment extends Fragment {
 
             if (dataSnapshot != null) {
 
-                VSShotPicture shotData = dataSnapshot.getValue(VSShotPicture.class);
+                CameraFrame shotData = dataSnapshot.getValue(CameraFrame.class);
 
                 if (shotData != null) {
 
-                    StorageReference storageRef = FirebaseStorage.getInstance().getReference("VideoCameras/"+parent.groupName+"/"+cameraName+"/shotview.jpg");
+                    StorageReference storageRef = FirebaseStorage.getInstance().getReference("Videocameras/" + parent.groupName + "/" + cameraFullID + "/shotview.jpg");
                     storageRef.getBytes(MAX_SHOTVIEW_DOWNLOAD_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                         @Override
                         public void onSuccess(byte[] bytes) {
@@ -200,14 +202,11 @@ public class VSCameraViewerFragment extends Fragment {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             shotView.setImageResource(R.drawable.broken);
+
+                            Log.d(TAG,"Videocameras/" + parent.groupName + "/" + cameraFullID + "/shotview.jpg");
+
                         }
                     });
-
-
-                        shotView.setImageResource(R.drawable.broken);
-
-
-
 
                 } else {
 
@@ -308,12 +307,12 @@ public class VSCameraViewerFragment extends Fragment {
 
         String videoCamerasRootNode = String.format("VideoCameras/%s/%s-%s/", parent.groupName, parent.remoteDeviceName, cameraID);
 
-        shotNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"LastShotData");
-        statusNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"MoDetStatus");
-        cameraStreamPortNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"StreamPort");
+        shotNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode + "LastShotData");
+        statusNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode + "MoDetStatus");
+        cameraStreamPortNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode + "StreamPort");
 
-        youTubeLiveBroadcastStatusNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"LiveStreamingBroadcastStatus");
-        youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode+"LiveStreamingBroadcastData");
+        youTubeLiveBroadcastStatusNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode + "LiveStreamingBroadcastStatus");
+        youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(videoCamerasRootNode + "LiveStreamingBroadcastData");
 
         statusNode.addValueEventListener(deviceStatusEventListener);
 
@@ -374,7 +373,7 @@ public class VSCameraViewerFragment extends Fragment {
 
         shotNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LastShotData", parent.groupName, parent.remoteDeviceName, cameraID));
         statusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/MoDetStatus", parent.groupName, parent.remoteDeviceName, cameraID));
-        cameraStreamPortNode = FirebaseDatabase.getInstance().getReference(DefaultValues.GROUPNODE+"/"+parent.groupName+"/"+DefaultValues.VIDEOSURVEILLANCENODE+"/"+DefaultValues.AVAILABLECAMSNODE+"/"+parent.remoteDeviceName+"-"+cameraID+"/"+"StreamPort");
+        cameraStreamPortNode = FirebaseDatabase.getInstance().getReference(DefaultValues.GROUPNODE + "/" + parent.groupName + "/" + DefaultValues.VIDEOSURVEILLANCENODE + "/" + DefaultValues.AVAILABLECAMSNODE + "/" + parent.remoteDeviceName + "-" + cameraID + "/" + "StreamPort");
 
         youTubeLiveBroadcastStatusNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastStatus", parent.groupName, parent.remoteDeviceName, cameraID));
         youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastData", parent.groupName, parent.remoteDeviceName, cameraID));
@@ -399,7 +398,7 @@ public class VSCameraViewerFragment extends Fragment {
             );
         } else {
             parent.sendCommandToDevice(
-                    new Message("__request_shots", cameraID, parent.thisDevice)
+                    new Message("__request_shot", cameraID, parent.thisDevice)
             );
         }
 
@@ -504,8 +503,8 @@ public class VSCameraViewerFragment extends Fragment {
 
     }
 
-    private void setCameraStreamPort(String value){
-        cameraStreamPort=value;
+    private void setCameraStreamPort(String value) {
+        cameraStreamPort = value;
         manageLiveBroadcastStatus();
     }
 
@@ -520,7 +519,7 @@ public class VSCameraViewerFragment extends Fragment {
 
         if (parent.getTCPCommInterfaceStatus()) {
 
-            if(!cameraStreamPort.equals("")){
+            if (!cameraStreamPort.equals("")) {
 
                 drawableToShow = R.drawable.live;
                 liveStreamRequestEnabled = true;

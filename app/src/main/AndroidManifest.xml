@@ -46,7 +46,7 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".GroupSelection" />
+        <activity android:name=".activities.GroupSelection" />
         <activity android:name=".YouTubeLiveViewActivity" />
         <activity android:name=".activities.LiveCamViewActivity" />
     </application>

@@ -1,4 +1,4 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +12,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.GroupToConnect;
+import com.apps.lore_f.domoticcontroller.MainActivity;
+import com.apps.lore_f.domoticcontroller.R;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.Group;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -23,7 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class GroupSelection extends AppCompatActivity {
 
-    private FirebaseRecyclerAdapter<GroupToConnect, GroupsHolder> firebaseAdapter;
+    private FirebaseRecyclerAdapter<Group, GroupsHolder> firebaseAdapter;
     private LinearLayoutManager linearLayoutManager;
     private RecyclerView groupsRVW;
 
@@ -100,7 +102,7 @@ public class GroupSelection extends AppCompatActivity {
 
         super.onResume();
 
-        availableGroups = FirebaseDatabase.getInstance().getReference("Groups").orderByChild(String.format("validUser_%s",firebaseUserID)).equalTo(true);
+        availableGroups = FirebaseDatabase.getInstance().getReference("Groups").orderByChild(String.format("validuser_%s",firebaseUserID)).equalTo(true);
         availableGroups.addValueEventListener(valueEventListener);
 
     }
@@ -118,23 +120,23 @@ public class GroupSelection extends AppCompatActivity {
         linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setStackFromEnd(false);
 
-        firebaseAdapter = new FirebaseRecyclerAdapter<GroupToConnect, GroupsHolder>(
-                GroupToConnect.class,
+        firebaseAdapter = new FirebaseRecyclerAdapter<Group, GroupsHolder>(
+                Group.class,
                 R.layout.row_holder_group_element,
                 GroupsHolder.class,
                 availableGroups) {
 
             @Override
-            protected void populateViewHolder(GroupsHolder holder, final GroupToConnect group, int position) {
+            protected void populateViewHolder(GroupsHolder holder, final Group group, int position) {
 
-                holder.groupNameTXV.setText(group.getGroupName());
-                holder.groupDescriptionTXV.setText(group.getGroupDescription());
+                holder.groupNameTXV.setText(group.getName());
+                holder.groupDescriptionTXV.setText(group.getDescription());
 
                 holder.connectBTN.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
-                        connectToGroup(group.getGroupName());
+                        connectToGroup(group.getName());
 
                     }
                 });

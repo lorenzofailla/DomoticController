@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.activities.GroupSelection;
 import com.apps.lore_f.domoticcontroller.fragments.DeviceInfoFragment;
 import com.apps.lore_f.domoticcontroller.fragments.TorrentViewerFragment;
 import com.apps.lore_f.domoticcontroller.fragments.WakeOnLanFragment;
@@ -285,6 +286,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                     temp = new VSCameraViewerFragment();
                     temp.setCameraID(cameraID);
                     temp.setCameraName(cameras.getJSONObject(i).getString("Name"));
+                    temp.setCameraFullID(cameras.getJSONObject(i).getString("FullID"));
                     temp.setParent(this);
 
                     fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraID);

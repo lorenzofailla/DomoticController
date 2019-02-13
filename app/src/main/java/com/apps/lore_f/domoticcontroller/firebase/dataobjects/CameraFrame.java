@@ -4,15 +4,15 @@ package com.apps.lore_f.domoticcontroller.firebase.dataobjects;
  * Created by lore_f on 04/03/2018.
  */
 
-public class VSShotPicture {
+public class CameraFrame {
 
-    private String Date;
+    private long Date;
     private String Time;
     private String ImgData;
 
-    public VSShotPicture(){};
+    public CameraFrame(){};
 
-    public String getDate() {
+    public long getDate() {
         return Date;
     }
 
