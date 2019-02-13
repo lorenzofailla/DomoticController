@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -17,11 +18,15 @@ import android.widget.TextView;
 import com.apps.lore_f.domoticcontroller.activities.LiveCamViewActivity;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.VSShotPicture;
 import com.apps.lore_f.domoticcontroller.generic.classes.Message;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.util.zip.DataFormatException;
@@ -33,6 +38,7 @@ import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 public class VSCameraViewerFragment extends Fragment {
 
     private final static String TAG = "VSCameraViewerFragment";
+    private final static long MAX_SHOTVIEW_DOWNLOAD_SIZE = 1048576;
 
     public boolean viewCreated = false;
     private DeviceViewActivity parent;
@@ -183,19 +189,24 @@ public class VSCameraViewerFragment extends Fragment {
                 VSShotPicture shotData = dataSnapshot.getValue(VSShotPicture.class);
 
                 if (shotData != null) {
-                    byte[] shotImageData;
-                    try {
 
-                        shotImageData = decompress(Base64.decode(shotData.getImgData(), Base64.DEFAULT));
+                    StorageReference storageRef = FirebaseStorage.getInstance().getReference("VideoCameras/"+parent.groupName+"/"+cameraName+"/shotview.jpg");
+                    storageRef.getBytes(MAX_SHOTVIEW_DOWNLOAD_SIZE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                        @Override
+                        public void onSuccess(byte[] bytes) {
+                            refreshFrame(bytes);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            shotView.setImageResource(R.drawable.broken);
+                        }
+                    });
 
-                        refreshFrame(shotImageData);
-
-
-                    } catch (IOException | DataFormatException e) {
 
                         shotView.setImageResource(R.drawable.broken);
 
-                    }
+
 
 
                 } else {

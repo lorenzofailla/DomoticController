@@ -136,7 +136,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             deleteEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___DELETEEVENT);
             lockEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___LOCKEVENT);
 
-            progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);eventContainer = (RoundRect) v.findViewById(R.id.RRE___VSEVENTROW___CONTAINER);
+            progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
             eventLabels = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
             eventOptions = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
 
@@ -421,19 +421,18 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                             public void onClick(View view) {
 
                                 ViewGroup.LayoutParams imgLayoutParams = holder.eventPreviewImage.getLayoutParams();
-                                Space s = (Space) fragmentView.findViewById(R.id.SPC___VSEVENTROW___BOTTOM_LEFT);
+                                //Space s = (Space) fragmentView.findViewById(R.id.SPC___VSEVENTROW___BOTTOM_LEFT);
 
                                 if (holder.eventLabels.getVisibility() == VISIBLE) {
 
                                     // ingrandisce l'immagine
-                                    holder.eventLabels.setVisibility(GONE);
-                                    holder.eventOptions.setVisibility(VISIBLE);
+                                    //holder.eventLabels.setVisibility(GONE);
+                                    //holder.eventOptions.setVisibility(VISIBLE);
 
-                                    RoundRect container = (RoundRect) fragmentView.findViewById(R.id.RRE___VSEVENTROW___CONTAINER);
-                                    double imgRatio = 1.0 * imgLayoutParams.height / imgLayoutParams.width;
-                                    int w = container.getNetWidth();
-                                    imgLayoutParams.width = w;
-                                    imgLayoutParams.height = (int) (w * imgRatio);
+                                    //double imgRatio = 1.0 * imgLayoutParams.height / imgLayoutParams.width;
+                                    //int w = container.getNetWidth();
+                                    //imgLayoutParams.width = w;
+                                    //imgLayoutParams.height = (int) (w * imgRatio);
 
                                 } else {
 

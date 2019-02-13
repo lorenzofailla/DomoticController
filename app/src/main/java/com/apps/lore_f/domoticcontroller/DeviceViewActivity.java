@@ -321,8 +321,6 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     // endregion
 
-
-
     /*
     ************************************************************************************************
     General purpose flags
