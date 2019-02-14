@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -121,9 +122,9 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         public ImageView newItemImage;
         public ImageView lockedItemImage;
+        public ImageView eventLocationImage;
 
-        public RoundRect eventContainer;
-        public LinearLayout eventLabels;
+        public ConstraintLayout eventLabels;
         public LinearLayout eventOptions;
 
         public EventsHolder(View v) {
@@ -137,12 +138,13 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             lockEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___LOCKEVENT);
 
             progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
-            eventLabels = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
+            eventLabels = (ConstraintLayout) v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
             eventOptions = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
 
             eventPreviewImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
             newItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___NEWITEM);
             lockedItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___LOCKEDITEM);
+            eventLocationImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTLOCATION);
 
         }
 
@@ -200,7 +202,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         this.groupName = bundle.getString(getString(R.string.data_group_name));
 
         // inizializza il nodo del database di Firebase contenente le informazioni sugli eventi
-        eventsNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/Events", groupName));
+        eventsNode = FirebaseDatabase.getInstance().getReference(String.format("MotionEvents/%s", groupName));
 
         // inizializza il riferimento alla directory dove i file dei video saranno scaricati
         downloadDirectoryRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Domotic/VideoSurveillance/DownloadedVideos");
@@ -262,16 +264,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             @Override
             protected void populateViewHolder(final EventsHolder holder, final VSEvent event, final int position) {
 
-                if (position == selectedPosition) {
-
-                    holder.eventContainer.setBackgroundColor(BG_COLOR_SELECTED);
-
-                } else {
-
-                    holder.eventContainer.setBackgroundColor(Color.TRANSPARENT);
-
-                }
-
                 // gestisce la visualizzazione dei pulsanti di opzione
 
                 holder.eventLabels.setVisibility(VISIBLE);
@@ -332,12 +324,13 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                 final String remoteLocation = String.format("Groups/%s/Devices/%s/VideoSurveillance/Events/%s/%s", groupName, event.getDevice(), event.getThreadID(), event.getVideoLink());
 
                 // controlla se il File creato esiste
-                if (videoFile.exists()) {
+                if (videoFile.exists()) { // esiste
+
                     //
-                    // esiste
+                    holder.eventLocationImage.setImageResource(R.drawable.sdcard);
 
                     // imposta l'OnClickListener per lanciare il video tramite un Intent
-                    holder.eventContainer.setOnClickListener(new View.OnClickListener() {
+                    holder.eventLabels.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
 
@@ -363,12 +356,13 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                         }
                     });
 
-                } else {
+                } else { // non esiste
+
                     //
-                    // non esiste
+                    holder.eventLocationImage.setImageResource(R.drawable.cloud);
 
                     // imposta l'OnClickListener per scaricare il video in una cartella locale
-                    holder.eventContainer.setOnClickListener(new View.OnClickListener() {
+                    holder.eventLabels.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
 

@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '28.0.3'
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.apps.lore_f.domoticcontroller"
         minSdkVersion 21
@@ -30,10 +30,10 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     /*
-                    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-                        exclude group: 'com.android.support', module: 'support-annotations'
-                    })
-                    */
+                            androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+                                exclude group: 'com.android.support', module: 'support-annotations'
+                            })
+                            */
     // Firebase Auth
     // Firebase Cloud Messaging
     implementation 'com.google.firebase:firebase-auth:11.0.2'
@@ -48,7 +48,6 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-database:0.4.0'
     //testImplementation 'junit:junit:4.12'
     implementation project(':generalutilitieslibrary')
-    implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation project(':AndroidTCPComm')
     implementation project(':AndroidShapes')
 }

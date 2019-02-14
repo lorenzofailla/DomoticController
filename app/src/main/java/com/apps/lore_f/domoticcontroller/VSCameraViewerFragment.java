@@ -34,7 +34,7 @@ import static android.view.View.VISIBLE;
 public class VSCameraViewerFragment extends Fragment {
 
     private final static String TAG = "VSCameraViewerFragment";
-    private final static long MAX_SHOTVIEW_DOWNLOAD_SIZE = 1048576;
+    private final static long MAX_SHOTVIEW_DOWNLOAD_SIZE = 4194304;
 
     public boolean viewCreated = false;
     private DeviceViewActivity parent;
