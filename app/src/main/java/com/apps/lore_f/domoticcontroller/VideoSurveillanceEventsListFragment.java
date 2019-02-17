@@ -15,7 +15,6 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 
@@ -26,12 +25,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Space;
 import android.widget.TextView;
 
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.VSEvent;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.MotionEvent;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -48,25 +48,24 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.DataFormatException;
-
-import loref.android.apps.androidshapes.RoundRect;
 
 import static android.content.ContentValues.TAG;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 import static apps.android.loref.GeneralUtilitiesLibrary.getTimeElapsed;
 import static apps.android.loref.GeneralUtilitiesLibrary.getTimeMillis;
 
 public class VideoSurveillanceEventsListFragment extends Fragment {
 
     private final static int BG_COLOR_SELECTED = Color.argb(32, 0, 0, 127);
+    private final static long MAX_THUMBNAIL_DOWNLOAD_SIZE = 4194304;
+    private final static String VIDEO_SUBDIR="MotionEventVideos";
+    private final static String THUMB_SUBDIR="Thumbnails";
 
     private View fragmentView;
 
     private LinearLayoutManager linearLayoutManager;
-    private FirebaseRecyclerAdapter<VSEvent, EventsHolder> firebaseAdapter;
+    private FirebaseRecyclerAdapter<MotionEvent, EventsHolder> firebaseAdapter;
 
     private RecyclerView eventsRecyclerView;
     private File downloadDirectoryRoot;
@@ -81,6 +80,9 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     private String childKeyFilter = null;
     private String childValueFilter = null;
 
+    private static int stdPreviewImageWidth;
+    private static int stdPreviewImageHeight;
+
     private View.OnClickListener buttonClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -94,7 +96,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                 case R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY:
                     childValueFilter = "true";
-                    childKeyFilter = "newItem";
+                    childKeyFilter = "NewItem";
 
                     break;
 
@@ -127,6 +129,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         public ConstraintLayout eventLabels;
         public LinearLayout eventOptions;
 
+        public ConstraintLayout eventContainer;
+
         public EventsHolder(View v) {
             super(v);
 
@@ -138,13 +142,15 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
             lockEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___LOCKEVENT);
 
             progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
-            eventLabels = (ConstraintLayout) v.findViewById(R.id.LLA___VSEVENTROW___LABELS);
+            eventLabels = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___LABELS);
             eventOptions = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
 
             eventPreviewImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
             newItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___NEWITEM);
             lockedItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___LOCKEDITEM);
             eventLocationImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTLOCATION);
+
+            eventContainer = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___EVENT);
 
         }
 
@@ -205,7 +211,16 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         eventsNode = FirebaseDatabase.getInstance().getReference(String.format("MotionEvents/%s", groupName));
 
         // inizializza il riferimento alla directory dove i file dei video saranno scaricati
-        downloadDirectoryRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Domotic/VideoSurveillance/DownloadedVideos");
+        downloadDirectoryRoot = new File(Environment.getExternalStorageDirectory(), "Domotic");
+        // crea la directory se non esiste
+        if(!downloadDirectoryRoot.exists()) downloadDirectoryRoot.mkdir();
+
+        File videoDir=new File(downloadDirectoryRoot,VIDEO_SUBDIR);
+        if(!videoDir.exists()) videoDir.mkdir();
+
+        File thumbnailDir=new File(downloadDirectoryRoot,THUMB_SUBDIR);
+        if(!thumbnailDir.exists()) thumbnailDir.mkdir();
+
 
         eventsRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___VSEVENTVIEWERFRAGMENT___EVENTS);
 
@@ -229,6 +244,9 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+
+        stdPreviewImageWidth = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_width);
+        stdPreviewImageHeight = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_height);
 
     }
 
@@ -255,22 +273,17 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setStackFromEnd(false);
 
-        firebaseAdapter = new FirebaseRecyclerAdapter<VSEvent, EventsHolder>(
-                VSEvent.class,
+        firebaseAdapter = new FirebaseRecyclerAdapter<MotionEvent, EventsHolder>(
+                MotionEvent.class,
                 R.layout.row_holder_vsevent_element,
                 EventsHolder.class,
                 eventsQuery) {
 
             @Override
-            protected void populateViewHolder(final EventsHolder holder, final VSEvent event, final int position) {
+            protected void populateViewHolder(final EventsHolder holder, final MotionEvent event, final int position) {
 
-                // gestisce la visualizzazione dei pulsanti di opzione
 
-                holder.eventLabels.setVisibility(VISIBLE);
-                holder.eventOptions.setVisibility(GONE);
-
-                // se è un nuovo evento, mostra l'immagine newItemImage
-                if (event.isNewItem().equals("true")) {
+                if (event.isNewItem().equals("true")) {// se è un nuovo evento, mostra l'immagine newItemImage
 
                     holder.newItemImage.setVisibility(VISIBLE);
 
@@ -320,22 +333,27 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                 holder.eventCameraNameTextView.setText(event.getCameraName());
 
                 // crea il File relativo alla posizione di download locale sul dispositivo
-                final File videoFile = new File(downloadDirectoryRoot, String.format("%s/%s/%s", event.getDevice(), event.getThreadID(), event.getVideoLink()));
-                final String remoteLocation = String.format("Groups/%s/Devices/%s/VideoSurveillance/Events/%s/%s", groupName, event.getDevice(), event.getThreadID(), event.getVideoLink());
+                final File localVideoFile = new File(downloadDirectoryRoot, VIDEO_SUBDIR+"/"+event.getVideoID());
+
+                // crea il File relativo alla posizione di download locale sul dispositivo
+                final File localThumbnailFile = new File(downloadDirectoryRoot, THUMB_SUBDIR+"/"+event.getThumbnailID());
+
+                final String videoFileRemoteLocation = String.format("MotionEvents/%s/%s", groupName, event.getVideoID());
+                final String thumbnailFileRemoteLocation = String.format("MotionEvents/%s/%s", groupName, event.getThumbnailID());
 
                 // controlla se il File creato esiste
-                if (videoFile.exists()) { // esiste
+                if (localVideoFile.exists()) { // esiste
 
-                    //
+                    // imposta l'immagine da visualizzare
                     holder.eventLocationImage.setImageResource(R.drawable.sdcard);
 
                     // imposta l'OnClickListener per lanciare il video tramite un Intent
-                    holder.eventLabels.setOnClickListener(new View.OnClickListener() {
+                    holder.eventPreviewImage.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
 
                             // lancia il video
-                            playVideo(videoFile.getAbsolutePath());
+                            playVideo(localVideoFile.getAbsolutePath());
                             selectedPosition = position;
 
                             // segna l'evento come già letto
@@ -345,20 +363,20 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                     });
 
-                    /*
-                    mostra il pulsante per condividere il video dell'evento
-                     */
+                    // mostra il pulsante per condividere il video dell'evento
                     holder.shareEventButton.setVisibility(VISIBLE);
+
+                    // assegna un listener al pulsante per condividere il video dell'evento
                     holder.shareEventButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            shareVideo(videoFile.getAbsolutePath());
+                            shareVideo(localVideoFile.getAbsolutePath());
                         }
                     });
 
                 } else { // non esiste
 
-                    //
+                    // imposta l'immagine da visualizzare
                     holder.eventLocationImage.setImageResource(R.drawable.cloud);
 
                     // imposta l'OnClickListener per scaricare il video in una cartella locale
@@ -366,11 +384,48 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                         @Override
                         public void onClick(View view) {
 
-                            String localLocation = String.format("Domotic/VideoSurveillance/DownloadedVideos/%s/%s", event.getDevice(), event.getThreadID());
 
-                            new DownloadTask(remoteLocation, localLocation, holder.progressBar, eventKeys[position]).execute();
+                            holder.progressBar.setIndeterminate(true);
 
-                            selectedPosition = position;
+                            FirebaseStorage.getInstance().getReference(videoFileRemoteLocation).getFile(localVideoFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+
+                                    // nasconde la progressbar
+                                    holder.progressBar.setVisibility(GONE);
+
+                                    // esegue il video
+                                    playVideo(localVideoFile.getAbsolutePath());
+
+                                    // segna l'evento come già visto
+                                    markAsRead(eventKeys[position], "false");
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
+                                    // nasconde la progressbar
+                                    holder.progressBar.setVisibility(GONE);
+
+                                }
+
+                            }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+                                @Override
+                                public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
+
+                                    if (holder.progressBar.isIndeterminate())
+                                        holder.progressBar.setIndeterminate(false);
+
+                                    // calcola la percentuale dello scaricamento
+                                    int progress = (int) (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+
+                                    // aggiorna la progressBar di conseguenza
+                                    holder.progressBar.setProgress(progress);
+
+                                }
+
+                            });
 
                         }
 
@@ -387,7 +442,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                     public void onClick(View view) {
 
-                        deleteEvent(videoFile, remoteLocation, eventKeys[position]);
+                        deleteEvent(localVideoFile, videoFileRemoteLocation, thumbnailFileRemoteLocation, eventKeys[position]);
 
                         if (position == selectedPosition) {
                             selectedPosition = -1;
@@ -397,66 +452,32 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
                 });
 
-                // definisce l'immagine dell'evento
-                String eventImageData = event.getEventPictureData();
-                if (eventImageData != null) {
+                // recupera i dati dell'immagine della preview
 
-                    try {
+                // controlla che sia già stata scaricata
+                if(localThumbnailFile.exists()) { // è già stata scaricata
 
-                        // recupera i dati dell'immagine
-                        byte[] imageData = decompress(Base64.decode(eventImageData, Base64.DEFAULT));
-                        Bitmap shotImage = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+                    updateEventPreviewImage(holder.eventPreviewImage,localThumbnailFile.getAbsolutePath());
 
-                        // adatta le dimensioni dell'immagine a quelle disponibili su schermo
-                        holder.eventPreviewImage.setImageBitmap(shotImage);
+                } else { // non è già stata scaricata
 
-                        holder.eventPreviewImage.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
+                    FirebaseStorage.getInstance().getReference(thumbnailFileRemoteLocation).getFile(localThumbnailFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
 
-                                ViewGroup.LayoutParams imgLayoutParams = holder.eventPreviewImage.getLayoutParams();
-                                //Space s = (Space) fragmentView.findViewById(R.id.SPC___VSEVENTROW___BOTTOM_LEFT);
+                            updateEventPreviewImage(holder.eventPreviewImage,localThumbnailFile.getAbsolutePath());
 
-                                if (holder.eventLabels.getVisibility() == VISIBLE) {
+                        }
 
-                                    // ingrandisce l'immagine
-                                    //holder.eventLabels.setVisibility(GONE);
-                                    //holder.eventOptions.setVisibility(VISIBLE);
-
-                                    //double imgRatio = 1.0 * imgLayoutParams.height / imgLayoutParams.width;
-                                    //int w = container.getNetWidth();
-                                    //imgLayoutParams.width = w;
-                                    //imgLayoutParams.height = (int) (w * imgRatio);
-
-                                } else {
-
-                                    // gestisce la visualizzazione dei pulsanti di opzione
-
-                                    holder.eventLabels.setVisibility(VISIBLE);
-                                    holder.eventOptions.setVisibility(GONE);
-
-                                    // riporta l'immagine al valore originale
-                                    imgLayoutParams.width = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_width);
-                                    imgLayoutParams.height = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_height);
-                                }
-
-                            }
-
-                        });
-
-                    } catch (IOException | DataFormatException e) {
-
-                        Log.d(TAG, e.getMessage());
-                        holder.eventPreviewImage.setImageResource(R.drawable.broken);
-
-                    }
-
-                } else {
-
-                    holder.eventPreviewImage.setImageResource(R.drawable.image);
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // adatta le dimensioni dell'immagine a quelle disponibili su schermo
+                            holder.eventPreviewImage.setImageResource(R.drawable.broken);
+                        }
+                    });
 
                 }
-
 
             }
 
@@ -484,125 +505,39 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     }
 
-    private void startCloudDownloadService(ProgressBar p) {
-
-        p.setVisibility(VISIBLE);
-        p.setProgress(50);
-
+    private void updateEventPreviewImage(ImageView image, String imagePath){
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+        image.setImageBitmap(bitmap);
     }
 
-    private void deleteEvent(File localFile, String remoteLocation, String eventKey) {
+    private void deleteEvent(File localFile, String remoteVideoLocation, String remoteThumbnailLocation, String eventKey) {
 
-        /*
-        elimina, se esiste, il file locale
-         */
+        // elimina, se esiste, il file locale
 
         if (localFile.exists()) {
             localFile.delete();
         }
 
-        /*
-        elimina, se esiste, il file remoto
-         */
+        //        elimina, se esiste, il file remoto
 
         // ottiene un riferimento alla posizione di storage sul cloud
-        StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(String.format("gs://domotic-28a5e.appspot.com/%s", remoteLocation));
-        storageRef.delete();
+        FirebaseStorage.getInstance().getReference(remoteVideoLocation).delete();
+        FirebaseStorage.getInstance().getReference(remoteThumbnailLocation).delete();
 
-        /*
-        elimina il nodo del database
-         */
+        //        elimina il nodo del database
         eventsNode.child(eventKey).removeValue();
-
-    }
-
-    private class DownloadTask extends AsyncTask<Void, Float, Void> {
-
-        private String localPath;
-        private String remotePath;
-        private ProgressBar progressBar;
-        private String eventKey;
-
-        public DownloadTask(String remotePath, String localPath, ProgressBar progressBar, String eventKey) {
-            this.localPath = localPath;
-            this.remotePath = remotePath;
-            this.progressBar = progressBar;
-            this.eventKey = eventKey;
-
-            progressBar.setIndeterminate(true);
-            progressBar.setVisibility(VISIBLE);
-        }
-
-        protected Void doInBackground(Void... param) {
-
-            // ottiene un riferimento alla posizione di storage sul cloud
-            StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(String.format("gs://domotic-28a5e.appspot.com/%s", remotePath));
-
-            // inizializza la directory locale per il download, se la directory non esiste la crea
-            File downloadDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), localPath);
-            if (!downloadDirectory.exists()) {
-                Boolean b = downloadDirectory.mkdirs();
-                Log.i(TAG, b.toString());
-            }
-
-            // inizializza il file locale per il download
-            final String localFileUrl = downloadDirectory.getPath() + File.separator + storageRef.getName();
-            File localFile = new File(localFileUrl);
-
-            storageRef.getFile(localFile)
-                    .addOnCompleteListener(new OnCompleteListener<FileDownloadTask.TaskSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<FileDownloadTask.TaskSnapshot> task) {
-                            //
-                            // scaricamento completato
-
-                            // nasconde la progressbar
-                            progressBar.setVisibility(GONE);
-
-                            // esegue il video
-                            playVideo(localFileUrl);
-
-                            // segna l'evento come già visto
-                            markAsRead(eventKey, "false");
-
-
-                        }
-
-                    })
-
-                    .addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            //
-                            // scaricamento in corso
-
-                            if (progressBar.isIndeterminate())
-                                progressBar.setIndeterminate(false);
-
-                            // calcola la percentuale dello scaricamento
-                            int progress = (int) (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-
-                            // aggiorna la progressBar di conseguenza
-                            progressBar.setProgress(progress);
-
-                        }
-
-                    });
-
-            return null;
-        }
 
     }
 
     private void markAsRead(String eventKey, String value) {
 
-        eventsNode.child(eventKey).child("newItem").setValue(value);
+        eventsNode.child(eventKey).child("NewItem").setValue(value);
 
     }
 
     private void markAsLocked(String eventKey, String value) {
 
-        eventsNode.child(eventKey).child("lockedItem").setValue(value);
+        eventsNode.child(eventKey).child("LockedItem").setValue(value);
 
     }
 
@@ -610,7 +545,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         // lancia il video
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoFullPath));
-        intent.setDataAndType(Uri.parse(videoFullPath), "video/avi");
         startActivity(intent);
 
     }
@@ -623,7 +557,6 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         shareIntent.setAction(Intent.ACTION_SEND);
         shareIntent.putExtra(Intent.EXTRA_TEXT, "Text");
         shareIntent.putExtra(Intent.EXTRA_STREAM, uriPath);
-        shareIntent.setType("video/avi");
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, "send"));
 

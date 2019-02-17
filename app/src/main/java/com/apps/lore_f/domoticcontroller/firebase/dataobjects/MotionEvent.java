@@ -4,21 +4,22 @@ package com.apps.lore_f.domoticcontroller.firebase.dataobjects;
  * Created by lore_f on 08/10/2017.
  */
 
-public class VSEvent {
+public class MotionEvent {
 
     private String CameraFullID;
     private String Date;
     private String Time;
+    private String Timestamp;
     private String Device;
     private String ThreadID;
-    private String VideoLink;
+    private String VideoID;
     private String CameraName;
-    private String eventPictureData;
-    private String lockedItem;
-    private String newItem;
+    private String ThumbnailID;
+    private String LockedItem;
+    private String NewItem;
 
     // empty constructor
-    public VSEvent() {
+    public MotionEvent() {
     }
 
     public String getCameraFullID() {
@@ -33,6 +34,10 @@ public class VSEvent {
         return Time;
     }
 
+    public String getTimestamp() {
+        return Timestamp;
+    }
+
     public String getDevice() {
         return Device;
     }
@@ -41,14 +46,24 @@ public class VSEvent {
         return ThreadID;
     }
 
-    public String getVideoLink() {        return VideoLink;    }
+    public String getVideoID() {
+        return VideoID;
+    }
 
-    public String getCameraName() {return CameraName; }
+    public String getCameraName() {
+        return CameraName;
+    }
 
-    public String getEventPictureData() {return eventPictureData; }
+    public String getThumbnailID() {
+        return ThumbnailID;
+    }
 
-    public String isLockedItem(){return lockedItem;}
+    public String isLockedItem() {
+        return LockedItem;
+    }
 
-    public String isNewItem(){return newItem; }
+    public String isNewItem() {
+        return NewItem;
+    }
 
 }
