@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/MENU_MOTIONEVENT_VIEW"
+        android:icon="@drawable/eye"
+        android:title="@string/MENU_MOTIONEVENT_VIEWIMAGE"
+        />
+    <item android:id="@+id/MENU_MOTIONEVENT_SHARE"
+        android:icon="@drawable/share"
+        android:title="@string/MENU_MOTIONEVENT_SHARE" />
+
+    <item android:id="@+id/MENU_MOTIONEVENT_PROTECT"
+        android:icon="@drawable/lock"
+        android:title="@string/MENU_MOTIONEVENT_PROTECT" />
+
+    <item android:id="@+id/MENU_MOTIONEVENT_DELETE"
+        android:icon="@drawable/delete"
+        android:title="@string/MENU_MOTIONEVENT_DELETE" />
+</menu>

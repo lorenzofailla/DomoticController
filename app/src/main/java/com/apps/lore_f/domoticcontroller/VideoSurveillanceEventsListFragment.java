@@ -16,8 +16,10 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -82,6 +84,14 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     private static int stdPreviewImageWidth;
     private static int stdPreviewImageHeight;
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getParentFragment().getMenuInflater();
+        inflater.inflate(R.menu.motionevent_options, menu);
+    }
 
     private View.OnClickListener buttonClickListener = new View.OnClickListener() {
         @Override
@@ -223,6 +233,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
 
         eventsRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___VSEVENTVIEWERFRAGMENT___EVENTS);
+        registerForContextMenu(eventsRecyclerView);
 
         // assegna l'OnClickListener ai pulsanti
         Button filterAllButton = (Button) view.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
@@ -263,6 +274,8 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         // rimuove il ValueEventListener dal nodo del database di Firebase
         eventsQuery.removeEventListener(valueEventListener);
+
+        unregisterForContextMenu(eventsRecyclerView);
 
         super.onDetach();
 

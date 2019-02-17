@@ -117,4 +117,9 @@
     <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_FILTERS_LABEL">Events filters:</string>
     <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_ACTIONS_LABEL">Events actions:</string>
 
+    <string name="MENU_MOTIONEVENT_VIEWIMAGE">Preview image</string>
+    <string name="MENU_MOTIONEVENT_SHARE">Share</string>
+    <string name="MENU_MOTIONEVENT_DELETE">Delete</string>
+    <string name="MENU_MOTIONEVENT_PROTECT">Protect</string>
+
 </resources>
