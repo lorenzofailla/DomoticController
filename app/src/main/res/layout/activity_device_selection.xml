@@ -41,10 +41,10 @@
             android:src="@drawable/cloud" />
 
         <ImageButton
-            android:id="@+id/BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE"
+            android:id="@+id/BTN___DEVICE_SELECTION___MOTIONEVENTSMANAGEMENT"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/videocam" />
+            android:src="@drawable/motion" />
 
     </LinearLayout>
 

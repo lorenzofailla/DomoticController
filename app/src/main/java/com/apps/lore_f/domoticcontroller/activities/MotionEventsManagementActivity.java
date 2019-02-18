@@ -1,7 +1,8 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -13,6 +14,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -57,7 +59,9 @@ import static android.view.View.VISIBLE;
 import static apps.android.loref.GeneralUtilitiesLibrary.getTimeElapsed;
 import static apps.android.loref.GeneralUtilitiesLibrary.getTimeMillis;
 
-public class VideoSurveillanceEventsListFragment extends Fragment {
+import com.apps.lore_f.domoticcontroller.R;
+
+public class MotionEventsManagementActivity extends AppCompatActivity {
 
     private final static int BG_COLOR_SELECTED = Color.argb(32, 0, 0, 127);
     private final static long MAX_THUMBNAIL_DOWNLOAD_SIZE = 4194304;
@@ -89,7 +93,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getParentFragment().getMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.motionevent_options, menu);
     }
 
@@ -196,35 +200,52 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
     };
 
-    public VideoSurveillanceEventsListFragment() {
+    public MotionEventsManagementActivity() {
 
     }
 
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
+        Context context = getApplicationContext();
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                getString(R.string.data_file_key), Context.MODE_PRIVATE);
+
+        groupName=sharedPref.getString(getString(R.string.data_group_name),null);
+
+        if(groupName==null){ // should never happen
+
+            // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
+            startActivity(new Intent(this, GroupSelection.class));
+
+            // termina l'Activity corrente
+            finish();
+            return;
+
+        }
+
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    protected void onResume(){
 
-        View view = inflater.inflate(R.layout.fragment_videosurveillance_eventslist, container, false);
-
-        // recupera i parametri
-        Bundle bundle = getArguments();
-        this.groupName = bundle.getString(getString(R.string.data_group_name));
+        // calls the onResume() method on the superclass
+        super.onResume();
 
         // inizializza il nodo del database di Firebase contenente le informazioni sugli eventi
         eventsNode = FirebaseDatabase.getInstance().getReference(String.format("MotionEvents/%s", groupName));
 
         // inizializza il riferimento alla directory dove i file dei video saranno scaricati
         downloadDirectoryRoot = new File(Environment.getExternalStorageDirectory(), "Domotic");
-        // crea la directory se non esiste
+
+        // crea la directory principale se non esiste
         if(!downloadDirectoryRoot.exists()) downloadDirectoryRoot.mkdir();
 
+
+        // crea le sottodirectory se non esistono
         File videoDir=new File(downloadDirectoryRoot,VIDEO_SUBDIR);
         if(!videoDir.exists()) videoDir.mkdir();
 
@@ -232,12 +253,12 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
         if(!thumbnailDir.exists()) thumbnailDir.mkdir();
 
 
-        eventsRecyclerView = (RecyclerView) view.findViewById(R.id.RWV___VSEVENTVIEWERFRAGMENT___EVENTS);
-        registerForContextMenu(eventsRecyclerView);
+        eventsRecyclerView = (RecyclerView) findViewById(R.id.RWV___VSEVENTVIEWERFRAGMENT___EVENTS);
+        //registerForContextMenu(eventsRecyclerView);
 
         // assegna l'OnClickListener ai pulsanti
-        Button filterAllButton = (Button) view.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
-        Button filterNewButton = (Button) view.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
+        Button filterAllButton = (Button) findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
+        Button filterNewButton = (Button) findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
         filterAllButton.setOnClickListener(buttonClickListener);
         filterNewButton.setOnClickListener(buttonClickListener);
 
@@ -246,23 +267,12 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         refreshAdapter();
 
-        fragmentView = view;
-
-        return view;
-
+        // visualizza il layout
+        setContentView(R.layout.activity_motioneventsmanagement);
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        stdPreviewImageWidth = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_width);
-        stdPreviewImageHeight = (int) getResources().getDimension(R.dimen.std_event_preview_thumbnail_height);
-
-    }
-
-    @Override
-    public void onDetach() {
+    public void onPause() {
 
         // rimuove l'assegnazione dell'OnClickListener ai pulsanti
         if (fragmentView != null) {
@@ -277,13 +287,13 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
 
         unregisterForContextMenu(eventsRecyclerView);
 
-        super.onDetach();
+        super.onPause();
 
     }
 
     private void refreshAdapter() {
 
-        linearLayoutManager = new LinearLayoutManager(getContext());
+        linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setStackFromEnd(false);
 
         firebaseAdapter = new FirebaseRecyclerAdapter<MotionEvent, EventsHolder>(
@@ -334,12 +344,7 @@ public class VideoSurveillanceEventsListFragment extends Fragment {
                     });
                 }
 
-                holder.eventDateTextView.setText(
-                        getTimeElapsed(
-                                getTimeMillis(
-                                        String.format("%s %s", event.getDate(), event.getTime()),
-                                        "yyyy-MM-dd HH.mm.ss"), getContext()
-                        )
+                holder.eventDateTextView.setText(getTimeElapsed(Long.parseLong(event.getTimestamp()), getApplicationContext())
                 );
 
                 holder.eventMonitorNameTextView.setText(event.getDevice());

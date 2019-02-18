@@ -59,10 +59,10 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                     break;
 
-                case R.id.BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE:
+                case R.id.BTN___DEVICE_SELECTION___MOTIONEVENTSMANAGEMENT:
 
                     // avvia l'activity per la gestione della videosorveglianza
-                    intent = new Intent(getApplicationContext(), VideoSurveillanceActivity.class);
+                    intent = new Intent(getApplicationContext(), MotionEventsManagementActivity.class);
                     startActivity(intent);
 
                     break;
@@ -232,7 +232,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         // assegno OnClickListener
         findViewById(R.id.BTN___DEVICE_SELECTION___CLOUDSTORAGE).setOnClickListener(onClickListener);
-        findViewById(R.id.BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE).setOnClickListener(onClickListener);
+        findViewById(R.id.BTN___DEVICE_SELECTION___MOTIONEVENTSMANAGEMENT).setOnClickListener(onClickListener);
 
         // cerca i dispositivi online nel database
         DatabaseReference userNode = FirebaseDatabase.getInstance().getReference("Devices");
@@ -251,7 +251,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         // rimuove OnClickListener
         findViewById(R.id.BTN___DEVICE_SELECTION___CLOUDSTORAGE).setOnClickListener(null);
-        findViewById(R.id.BTN___DEVICE_SELECTION___VIDEOSURVEILLANCE).setOnClickListener(null);
+        findViewById(R.id.BTN___DEVICE_SELECTION___MOTIONEVENTSMANAGEMENT).setOnClickListener(null);
 
         onlineDevices.removeEventListener(valueEventListener);
 

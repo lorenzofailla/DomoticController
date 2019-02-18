@@ -109,13 +109,13 @@
     <!-- fragment_videosurveillance_cameralist.xml -->
     <string name="FGM_VIDEOSURVEILLANCE_CAMERALIST_SELECT_AVAILABLE_CAMERA">Select an available camera:</string>
 
-    <!-- fragment_videosurveillance_eventslist.xml -->
-    <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_HEADER">Videosurveillance Events</string>
-    <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_SELECT_EVENT">Select an event:</string>
-    <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_FILTER_BUTTON_ALL">ALL</string>
-    <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_FILTER_BUTTON_NEW">NEW</string>
-    <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_FILTERS_LABEL">Events filters:</string>
-    <string name="FGM_VIDEOSURVEILLANCE_EVENTSLIST_ACTIONS_LABEL">Events actions:</string>
+    <!-- MotionEventsManagementActivity -->
+    <string name="MOTIONEVENTSMANAGEMENT_HEADER">Videosurveillance Events</string>
+    <string name="MOTIONEVENTSMANAGEMENT_SELECT_EVENT">Select an event:</string>
+    <string name="MOTIONEVENTSMANAGEMENT_FILTER_BUTTON_ALL">ALL</string>
+    <string name="MOTIONEVENTSMANAGEMENT_FILTER_BUTTON_NEW">NEW</string>
+    <string name="MOTIONEVENTSMANAGEMENT_FILTERS_LABEL">Events filters:</string>
+    <string name="MOTIONEVENTSMANAGEMENT_ACTIONS_LABEL">Events actions:</string>
 
     <string name="MENU_MOTIONEVENT_VIEWIMAGE">Preview image</string>
     <string name="MENU_MOTIONEVENT_SHARE">Share</string>

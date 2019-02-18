@@ -12,6 +12,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.apps.lore_f.domoticcontroller.activities.GroupSelection;
+import com.apps.lore_f.domoticcontroller.activities.MotionEventsManagementActivity;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class VideoSurveillanceActivity extends AppCompatActivity {
@@ -73,7 +74,7 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
     public class CollectionPagerAdapter extends FragmentPagerAdapter {
 
         private VideoSurveillanceCameraListFragment videoSurveillanceCameraListFragment;
-        private VideoSurveillanceEventsListFragment videoSurveillanceEventsListFragment;
+        //private MotionEventsManagementActivity videoSurveillanceEventsListFragment;
 
         public CollectionPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -85,11 +86,6 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
             videoSurveillanceCameraListFragment = new VideoSurveillanceCameraListFragment();
             videoSurveillanceCameraListFragment.camerasNode = FirebaseDatabase.getInstance().getReference(String.format("/Groups/%s/VideoSurveillance/AvailableCameras", groupName));
             videoSurveillanceCameraListFragment.deviceName=null;
-
-            videoSurveillanceEventsListFragment = new VideoSurveillanceEventsListFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString(getString(R.string.data_group_name), groupName);
-            videoSurveillanceEventsListFragment.setArguments(bundle);
 
         }
 
@@ -106,7 +102,7 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
 
             switch (i) {
                 case 0:
-                    return videoSurveillanceEventsListFragment;
+                    //return videoSurveillanceEventsListFragment;
 
                 case 1:
                     return videoSurveillanceCameraListFragment;
