@@ -8,35 +8,27 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ContextMenu;
-import android.view.LayoutInflater;
 
 import android.view.MenuInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.MotionEvent;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -46,18 +38,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.content.ContentValues.TAG;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static apps.android.loref.GeneralUtilitiesLibrary.getTimeElapsed;
-import static apps.android.loref.GeneralUtilitiesLibrary.getTimeMillis;
 
 import com.apps.lore_f.domoticcontroller.R;
 
@@ -127,10 +115,6 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         public TextView eventDateTextView;
         public TextView eventMonitorNameTextView;
 
-        public ImageButton deleteEventButton;
-        public ImageButton shareEventButton;
-        public ImageButton lockEventButton;
-
         public ProgressBar progressBar;
         public TextView eventCameraNameTextView;
 
@@ -141,7 +125,6 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         public ImageView eventLocationImage;
 
         public ConstraintLayout eventLabels;
-        public LinearLayout eventOptions;
 
         public ConstraintLayout eventContainer;
 
@@ -151,13 +134,9 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
             eventDateTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDATETIME);
             eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDEVICENAME);
             eventCameraNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTCAMERANAME);
-            shareEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___SHAREEVENT);
-            deleteEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___DELETEEVENT);
-            lockEventButton = (ImageButton) v.findViewById(R.id.BTN___VSEVENTROW___LOCKEVENT);
 
             progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
             eventLabels = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___LABELS);
-            eventOptions = (LinearLayout) v.findViewById(R.id.LLA___VSEVENTROW___OPTIONS);
 
             eventPreviewImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
             newItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___NEWITEM);
@@ -227,6 +206,9 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
         }
 
+        // visualizza il layout
+        setContentView(R.layout.activity_motioneventsmanagement);
+
     }
 
     @Override
@@ -244,7 +226,6 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         // crea la directory principale se non esiste
         if(!downloadDirectoryRoot.exists()) downloadDirectoryRoot.mkdir();
 
-
         // crea le sottodirectory se non esistono
         File videoDir=new File(downloadDirectoryRoot,VIDEO_SUBDIR);
         if(!videoDir.exists()) videoDir.mkdir();
@@ -252,9 +233,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         File thumbnailDir=new File(downloadDirectoryRoot,THUMB_SUBDIR);
         if(!thumbnailDir.exists()) thumbnailDir.mkdir();
 
-
         eventsRecyclerView = (RecyclerView) findViewById(R.id.RWV___VSEVENTVIEWERFRAGMENT___EVENTS);
-        //registerForContextMenu(eventsRecyclerView);
 
         // assegna l'OnClickListener ai pulsanti
         Button filterAllButton = (Button) findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
@@ -267,8 +246,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
         refreshAdapter();
 
-        // visualizza il layout
-        setContentView(R.layout.activity_motioneventsmanagement);
+
     }
 
     @Override
@@ -298,7 +276,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
         firebaseAdapter = new FirebaseRecyclerAdapter<MotionEvent, EventsHolder>(
                 MotionEvent.class,
-                R.layout.row_holder_vsevent_element,
+                R.layout.row_holder_motionevent_element,
                 EventsHolder.class,
                 eventsQuery) {
 
@@ -320,28 +298,11 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
                 if (event.isLockedItem().equals("true")) {
 
                     holder.lockedItemImage.setVisibility(VISIBLE);
-                    holder.deleteEventButton.setVisibility(GONE);
-
-                    holder.lockEventButton.setImageResource(R.drawable.unlock);
-                    holder.lockEventButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            markAsLocked(eventKeys[position], "false");
-                        }
-                    });
 
                 } else {
 
                     holder.lockedItemImage.setVisibility(GONE);
-                    holder.deleteEventButton.setVisibility(VISIBLE);
 
-                    holder.lockEventButton.setImageResource(R.drawable.lock);
-                    holder.lockEventButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            markAsLocked(eventKeys[position], "true");
-                        }
-                    });
                 }
 
                 holder.eventDateTextView.setText(getTimeElapsed(Long.parseLong(event.getTimestamp()), getApplicationContext())
@@ -381,28 +342,18 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
                     });
 
-                    // mostra il pulsante per condividere il video dell'evento
-                    holder.shareEventButton.setVisibility(VISIBLE);
-
-                    // assegna un listener al pulsante per condividere il video dell'evento
-                    holder.shareEventButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            shareVideo(localVideoFile.getAbsolutePath());
-                        }
-                    });
-
                 } else { // non esiste
 
                     // imposta l'immagine da visualizzare
                     holder.eventLocationImage.setImageResource(R.drawable.cloud);
 
                     // imposta l'OnClickListener per scaricare il video in una cartella locale
-                    holder.eventLabels.setOnClickListener(new View.OnClickListener() {
+                    holder.eventPreviewImage.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
 
-
+                            // mostra la progressbar
+                            holder.progressBar.setVisibility(VISIBLE);
                             holder.progressBar.setIndeterminate(true);
 
                             FirebaseStorage.getInstance().getReference(videoFileRemoteLocation).getFile(localVideoFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -449,26 +400,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
                     });
 
-                    /*
-                    nasconde il pulsante per condividere il video dell'evento
-                     */
-                    holder.shareEventButton.setVisibility(GONE);
-
                 }
-
-                holder.deleteEventButton.setOnClickListener(new View.OnClickListener() {
-
-                    public void onClick(View view) {
-
-                        deleteEvent(localVideoFile, videoFileRemoteLocation, thumbnailFileRemoteLocation, eventKeys[position]);
-
-                        if (position == selectedPosition) {
-                            selectedPosition = -1;
-                        }
-
-                    }
-
-                });
 
                 // recupera i dati dell'immagine della preview
 
@@ -562,7 +494,8 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
     private void playVideo(String videoFullPath) {
 
         // lancia il video
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoFullPath));
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.parse(videoFullPath), "video/*");
         startActivity(intent);
 
     }

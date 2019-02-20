@@ -75,8 +75,7 @@
                 android:layout_width="@dimen/spacer_square_dim"
                 android:layout_height="@dimen/spacer_square_dim"
                 android:src="@drawable/new_item"
-                android:visibility="gone"
-                app:layout_constraintLeft_toRightOf="@+id/IVW___VSEVENTROW___EVENTTYPE" />
+                android:visibility="gone"                 />
 
             <ImageView
                 android:id="@+id/IVW___VSEVENTROW___LOCKEDITEM"
@@ -113,35 +112,5 @@
         </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>
-
-    <LinearLayout
-        android:id="@+id/LLA___VSEVENTROW___OPTIONS"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="2dp"
-        android:visibility="visible"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/BTN___VSEVENTROW___DELETEEVENT"
-            android:layout_width="@dimen/mediumsmall_button_width"
-            android:layout_height="@dimen/mediumsmall_button_height"
-            android:src="@drawable/delete" />
-
-        <ImageButton
-            android:id="@+id/BTN___VSEVENTROW___SHAREEVENT"
-            android:layout_width="@dimen/mediumsmall_button_width"
-            android:layout_height="@dimen/mediumsmall_button_height"
-            android:src="@drawable/share" />
-
-        <ImageButton
-            android:id="@+id/BTN___VSEVENTROW___LOCKEVENT"
-            android:layout_width="@dimen/mediumsmall_button_width"
-            android:layout_height="@dimen/mediumsmall_button_height"
-            android:src="@drawable/lock" />
-
-    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
