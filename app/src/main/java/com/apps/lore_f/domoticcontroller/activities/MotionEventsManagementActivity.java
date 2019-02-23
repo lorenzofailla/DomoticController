@@ -12,18 +12,22 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 
+import android.view.LayoutInflater;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.MotionEvent;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -74,15 +78,14 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
     private String childKeyFilter = null;
     private String childValueFilter = null;
 
-    private static int stdPreviewImageWidth;
-    private static int stdPreviewImageHeight;
+    private static LayoutInflater layoutInflater;
+    private static Context context;
+
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
                                     ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.motionevent_options, menu);
+
     }
 
     private View.OnClickListener buttonClickListener = new View.OnClickListener() {
@@ -110,7 +113,8 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
     };
 
-    public static class EventsHolder extends RecyclerView.ViewHolder {
+    public static class EventsHolder
+            extends RecyclerView.ViewHolder {
 
         public TextView eventDateTextView;
         public TextView eventMonitorNameTextView;
@@ -125,8 +129,28 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         public ImageView eventLocationImage;
 
         public ConstraintLayout eventLabels;
+        public ConstraintLayout eventOptions;
 
         public ConstraintLayout eventContainer;
+
+        private boolean optionsVisible;
+
+        public void setOptionsVisible(boolean value){
+
+            this.optionsVisible=value;
+
+            if(value) {
+                eventOptions.setVisibility(VISIBLE);
+            } else {
+                eventOptions.setVisibility(GONE);
+            }
+
+        }
+
+        private int position;
+        public void setPosition(int value){
+            this.position=value;
+        }
 
         public EventsHolder(View v) {
             super(v);
@@ -137,6 +161,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
             progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
             eventLabels = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___LABELS);
+            eventOptions = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___EVENTOPTIONS);
 
             eventPreviewImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
             newItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___NEWITEM);
@@ -144,6 +169,19 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
             eventLocationImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTLOCATION);
 
             eventContainer = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___EVENT);
+
+            setOptionsVisible(false);
+
+            eventLabels.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+
+                    setOptionsVisible(!optionsVisible);
+
+                }
+
+            });
 
         }
 
@@ -179,17 +217,12 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
     };
 
-    public MotionEventsManagementActivity() {
-
-    }
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
-        Context context = getApplicationContext();
+        context = getApplicationContext();
         SharedPreferences sharedPref = context.getSharedPreferences(
                 getString(R.string.data_file_key), Context.MODE_PRIVATE);
 
@@ -205,6 +238,8 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
             return;
 
         }
+
+        layoutInflater = getLayoutInflater();
 
         // visualizza il layout
         setContentView(R.layout.activity_motioneventsmanagement);
@@ -246,7 +281,6 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
         refreshAdapter();
 
-
     }
 
     @Override
@@ -283,6 +317,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
             @Override
             protected void populateViewHolder(final EventsHolder holder, final MotionEvent event, final int position) {
 
+                holder.setPosition(position);
 
                 if (event.isNewItem().equals("true")) {// se è un nuovo evento, mostra l'immagine newItemImage
 

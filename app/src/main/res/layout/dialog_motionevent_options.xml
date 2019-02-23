@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:layout_width="@dimen/very_small_button_width"
+        android:layout_height="@dimen/very_small_button_width"
+        android:src="@drawable/share"
+        android:padding="2dp"
+        android:id="@+id/IMG___MOTIONEVENTOPTIONS___SHARE"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        app:layout_constraintLeft_toRightOf="@+id/IMG___MOTIONEVENTOPTIONS___SHARE"
+        app:layout_constraintTop_toTopOf="@+id/IMG___MOTIONEVENTOPTIONS___SHARE"
+        app:layout_constraintBottom_toBottomOf="@+id/IMG___MOTIONEVENTOPTIONS___SHARE"
+        android:id="@+id/TXV___MOTIONEVENTOPTIONS___SHARE"/>
+
+    <ImageView
+        android:layout_width="@dimen/very_small_button_width"
+        android:layout_height="@dimen/very_small_button_width"
+        android:src="@drawable/delete"
+        android:padding="2dp"
+        android:id="@+id/IMG___MOTIONEVENTOPTIONS___DELETE"
+        app:layout_constraintTop_toBottomOf="@id/IMG___MOTIONEVENTOPTIONS___SHARE"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        app:layout_constraintLeft_toRightOf="@+id/IMG___MOTIONEVENTOPTIONS___DELETE"
+        app:layout_constraintTop_toTopOf="@+id/IMG___MOTIONEVENTOPTIONS___DELETE"
+        app:layout_constraintBottom_toBottomOf="@+id/IMG___MOTIONEVENTOPTIONS___DELETE"
+        android:id="@+id/TXV___MOTIONEVENTOPTIONS___DELETE"/>
+</android.support.constraint.ConstraintLayout>
