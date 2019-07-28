@@ -11,16 +11,13 @@ public class MotionEventsViewModel extends AndroidViewModel {
 
     private MotionEventsRepository repository;
 
-    private LiveData<List<MotionEvent>> allEvents;
-
     public MotionEventsViewModel (Application application) {
         super(application);
         repository = new MotionEventsRepository(application);
-        allEvents = repository.getAllMotionEvents();
 
     }
 
-    public LiveData<List<MotionEvent>> getAllEvents() { return allEvents; }
+    public LiveData<List<MotionEvent>> getEventsList(String whereClause) { return repository.getEventsList(whereClause); }
 
     public void insert(MotionEvent event) { repository.insert(event); }
 

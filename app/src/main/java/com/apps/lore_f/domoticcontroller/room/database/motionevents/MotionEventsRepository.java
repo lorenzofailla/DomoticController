@@ -3,10 +3,6 @@ package com.apps.lore_f.domoticcontroller.room.database.motionevents;
 import android.app.Application;
 import android.os.AsyncTask;
 
-import com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent;
-import com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEventsDAO;
-import com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEventsDatabase;
-
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -14,7 +10,6 @@ import androidx.lifecycle.LiveData;
 public class MotionEventsRepository {
 
     private MotionEventsDAO motionEventsDao;
-    private LiveData<List<MotionEvent>> allMotionEvents;
 
     public LiveData<Integer> countAll() {
         return motionEventsDao.countAll();
@@ -28,16 +23,14 @@ public class MotionEventsRepository {
         return motionEventsDao.countEvents(v1);
     }
 
+    LiveData<List<MotionEvent>> getEventsList(String whereClause) {
+        return motionEventsDao.getEventsList("");
+    }
 
     MotionEventsRepository(Application application) {
         MotionEventsDatabase db = MotionEventsDatabase.getDatabase(application);
         motionEventsDao = db.motionEventsDAO();
-        allMotionEvents = motionEventsDao.getAllEvents();
 
-    }
-
-    LiveData<List<MotionEvent>> getAllMotionEvents() {
-        return allMotionEvents;
     }
 
     public void insert(MotionEvent event) {

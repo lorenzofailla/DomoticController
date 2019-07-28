@@ -60,32 +60,22 @@ import com.apps.lore_f.domoticcontroller.R;
 
 public class MotionEventsManagementActivity extends AppCompatActivity {
 
-    private long last_hour;
-    private long today;
-    private long firstDayOfCurrentWeek;
-    private long firstDayOfCurrentMonth;
-
-    private void updateTimeDefinitions(){
-
-        Calendar calendar;
-
-        calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-
-        last_hour = System.currentTimeMillis()-3600000L;
-
-        today = calendar.getTimeInMillis();
-
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        firstDayOfCurrentWeek = calendar.getTimeInMillis();
-
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        firstDayOfCurrentMonth = calendar.getTimeInMillis();
-
+    private enum timeSpanDef {
+        HOUR,
+        DAY,
+        WEEK,
+        MONTH
     }
+
+    private boolean filterByNew = false;
+    private boolean filterByCameraName = false;
+    private boolean filterByLocked = false;
+    private boolean filterByTimestamp = false;
+
+    private String filterByNewVALUE;
+    private String filterByCameraNameVALUE;
+    private String filterByLockedVALUE;
+    private String filterByTimestampVALUE;
 
     private MotionEventsDatabase localDatabase;
     private MotionEventsViewModel motionEventsViewModel;
@@ -292,11 +282,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         File thumbnailDir = new File(downloadDirectoryRoot, THUMB_SUBDIR);
         if (!thumbnailDir.exists()) thumbnailDir.mkdir();
 
-        updateEvents();
-
-        updateTimeDefinitions();
-
-        motionEventsViewModel.countEvents(System.currentTimeMillis() - 3600000).observe(this, new Observer<Integer>() {
+        motionEventsViewModel.countEvents(getTimeDefinition(timeSpanDef.HOUR)).observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
 
@@ -307,7 +293,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
         });
 
-        motionEventsViewModel.countEvents(today).observe(this, new Observer<Integer>() {
+        motionEventsViewModel.countEvents(getTimeDefinition(timeSpanDef.DAY)).observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
 
@@ -318,7 +304,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
         });
 
-        motionEventsViewModel.countEvents(firstDayOfCurrentWeek).observe(this, new Observer<Integer>() {
+        motionEventsViewModel.countEvents(getTimeDefinition(timeSpanDef.WEEK)).observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
 
@@ -329,7 +315,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
         });
 
-        motionEventsViewModel.countEvents(firstDayOfCurrentMonth).observe(this, new Observer<Integer>() {
+        motionEventsViewModel.countEvents(getTimeDefinition(timeSpanDef.MONTH)).observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
 
@@ -369,6 +355,55 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
     }
 
+    private String getSQLWhereClause() {
+
+        String result = "1=1";
+
+        if (filterByNew) {
+            result += String.format(" AND new=%s", filterByNewVALUE);
+        }
+
+        if (filterByTimestamp) {
+            result += String.format(" AND timestamp>%s", filterByTimestampVALUE);
+        }
+
+        return result;
+
+    }
+
+    private long getTimeDefinition(timeSpanDef def) {
+
+        if (def == timeSpanDef.HOUR) {
+
+            return System.currentTimeMillis() - 3600000L;
+
+        } else {
+
+            Calendar calendar;
+
+            calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+
+            switch (def) {
+                case DAY:
+                    return calendar.getTimeInMillis();
+                case WEEK:
+                    calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+                    return calendar.getTimeInMillis();
+                case MONTH:
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+                    return calendar.getTimeInMillis();
+                default:
+                    return System.currentTimeMillis();
+            }
+
+        }
+
+    }
+
     private void updateEvents() {
 
         eventsRecyclerView = findViewById(R.id.RWV___MOTIONEVENTS_MANAGEMENT___EVENTS);
@@ -377,7 +412,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         motionEventsViewModel = ViewModelProviders.of(this).get(MotionEventsViewModel.class);
-        motionEventsViewModel.getAllEvents().observe(this, new Observer<List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent>>() {
+        motionEventsViewModel.getEventsList(getSQLWhereClause()).observe(this, new Observer<List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent>>() {
             @Override
             public void onChanged(@Nullable final List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent> events) {
                 // Update the cached copy of the words in the adapter.
@@ -397,22 +432,45 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
             // Check which radio button was clicked
             switch (v.getId()) {
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_ANY:
+                    filterByNew = false;
+                    filterByNewVALUE = "";
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW:
+                    filterByNew = true;
+                    filterByNewVALUE = "true";
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW:
+                    filterByNew = true;
+                    filterByNewVALUE = "false";
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_ANY:
+                    filterByTimestamp = false;
+                    filterByTimestampVALUE = "";
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_LASTHOUR:
+                    filterByTimestamp = true;
+                    filterByTimestampVALUE = "" + getTimeDefinition(timeSpanDef.HOUR);
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY:
+                    filterByTimestamp = true;
+                    filterByTimestampVALUE = "" + getTimeDefinition(timeSpanDef.DAY);
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISWEEK:
+                    filterByTimestamp = true;
+                    filterByTimestampVALUE = "" + getTimeDefinition(timeSpanDef.WEEK);
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISMONTH:
+                    filterByTimestamp = true;
+                    filterByTimestampVALUE = "" + getTimeDefinition(timeSpanDef.MONTH);
                     break;
+
+                default:
+                    filterByTimestamp = false;
+                    filterByNew = false;
+
             }
+
+            updateEvents();
 
         }
 
