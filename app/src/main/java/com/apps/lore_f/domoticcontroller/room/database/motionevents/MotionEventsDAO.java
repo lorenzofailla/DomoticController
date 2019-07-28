@@ -9,6 +9,8 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.RawQuery;
+import androidx.sqlite.db.SupportSQLiteQuery;
 
 @Dao
 public interface MotionEventsDAO {
@@ -19,8 +21,8 @@ public interface MotionEventsDAO {
     @Query("DELETE FROM motion_events")
     void deleteAll();
 
-    @Query("SELECT * FROM motion_events WHERE :whereClause ORDER BY timestamp DESC")
-    LiveData<List<MotionEvent>> getEventsList(String whereClause);
+    @RawQuery(observedEntities = MotionEvent.class)
+    LiveData<List<MotionEvent>> getEventsList(SupportSQLiteQuery query);
 
     @Query("UPDATE motion_events SET new=:value WHERE id=:id")
     void setField_NEW(String id, boolean value);

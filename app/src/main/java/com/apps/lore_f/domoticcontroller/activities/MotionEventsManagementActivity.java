@@ -21,6 +21,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.sqlite.db.SimpleSQLiteQuery;
+import androidx.sqlite.db.SupportSQLiteQuery;
 
 import android.util.Log;
 
@@ -32,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.MotionEvent;
@@ -252,11 +255,11 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         if (showFiltersPanel)
             filterPanelVisibility = VISIBLE;
 
-        RelativeLayout eventsDataResumeRLA = findViewById(R.id.RLA___MOTIONEVENTS_MANAGEMENT___DATA);
-        eventsDataResumeRLA.setVisibility(eventsDataResumeVisibility);
+        TableLayout eventsDataResumeTBL = findViewById(R.id.TBL___MOTIONEVENTS_MANAGEMENT___DATA);
+        eventsDataResumeTBL.setVisibility(eventsDataResumeVisibility);
 
-        RelativeLayout filterPanelRLA = findViewById(R.id.RLA___MOTIONEVENTS_MANAGEMENT___FILTERS);
-        filterPanelRLA.setVisibility(filterPanelVisibility);
+        TableLayout filterPanelTBL = findViewById(R.id.TBL___MOTIONEVENTS_MANAGEMENT___FILTERS);
+        filterPanelTBL.setVisibility(filterPanelVisibility);
 
     }
 
@@ -284,7 +287,12 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
         motionEventsViewModel = ViewModelProviders.of(this).get(MotionEventsViewModel.class);
 
-        updateEvents();
+        RadioButton button;
+        button = findViewById(R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW);
+        button.setChecked(true);
+
+        button = findViewById(R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY);
+        button.setChecked(true);
 
         motionEventsViewModel.countEvents(getTimeDefinition(timeSpanDef.HOUR)).observe(this, new Observer<Integer>() {
             @Override
@@ -359,9 +367,9 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
     }
 
-    private String getSQLWhereClause() {
+    private SupportSQLiteQuery getSQLLiteQuery() {
 
-        String result = "1=1";
+        String result = "SELECT * FROM motion_events WHERE 1=1";
 
         if (filterByNew) {
             result += String.format(" AND new=%s", filterByNewVALUE);
@@ -371,9 +379,10 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
             result += String.format(" AND timestamp>%s", filterByTimestampVALUE);
         }
 
+        result += " ORDER BY timestamp DESC";
         Log.d(TAG, result);
 
-        return result;
+        return new SimpleSQLiteQuery(result);
 
     }
 
@@ -418,13 +427,33 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
-        motionEventsViewModel.getEventsList(getSQLWhereClause()).observe(this, new Observer<List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent>>() {
+        motionEventsViewModel.getEventsList(getSQLLiteQuery()).observe(this, new Observer<List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent>>() {
             @Override
             public void onChanged(@Nullable final List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent> events) {
                 // Update the cached copy of the words in the adapter.
                 adapter.setWords(events);
+
+                // update content of info Textview
+                TextView infoTXV = findViewById(R.id.TXV___MOTIONEVENTS_MANAGEMENT___INFO);
+                infoTXV.setText(getEventsAndFiltersInfo(events.size()));
+
             }
+
         });
+
+    }
+
+    private String getEventsAndFiltersInfo(int nOfEvents){
+
+        if(nOfEvents==0){
+
+            return getString(R.string.MOTIONEVENTSMANAGEMENT_NO_EVENT_TO_SHOW);
+
+        } else {
+
+            return String.format(getString(R.string.MOTIONEVENTSMANAGEMENT_SHOWING_EVENTS), nOfEvents);
+
+        }
 
     }
 
@@ -443,11 +472,11 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW:
                     filterByNew = true;
-                    filterByNewVALUE = "true";
+                    filterByNewVALUE = "1";
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW:
                     filterByNew = true;
-                    filterByNewVALUE = "false";
+                    filterByNewVALUE = "0";
                     break;
                 case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_ANY:
                     filterByTimestamp = false;

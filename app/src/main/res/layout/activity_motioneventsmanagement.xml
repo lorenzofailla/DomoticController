@@ -22,6 +22,7 @@
         android:layout_below="@+id/TBR___MOTIONEVENTS_MANAGEMENT___TOOLBAR">
 
         <TableLayout
+            android:id="@+id/TBL___MOTIONEVENTS_MANAGEMENT___DATA"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="3dp">
@@ -118,15 +119,8 @@
 
         </TableLayout>
 
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/RLA___MOTIONEVENTS_MANAGEMENT___FILTERS"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/RLA___MOTIONEVENTS_MANAGEMENT___DATA">
-
         <TableLayout
+            android:id="@+id/TBL___MOTIONEVENTS_MANAGEMENT___FILTERS"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="3dp">
@@ -137,15 +131,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="2dp"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERHEADER_TIME" />
+                    android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERHEADER_TIME"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="2dp"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERHEADER_STATUS" />
+                    android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERHEADER_STATUS"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
                 <!--TextView
                     android:layout_width="wrap_content"
@@ -163,36 +157,36 @@
                         android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_ANY"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_ANY"
-                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_ANY" />
 
                     <RadioButton
                         android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_LASTHOUR"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_LASTHOUR"
-                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_LASTHOUR" />
 
                     <RadioButton
                         android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY"
-                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY" />
 
                     <RadioButton
                         android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISWEEK"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISWEEK"
-                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISWEEK" />
 
                     <RadioButton
                         android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISMONTH"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISMONTH"
-                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISMONTH" />
 
                 </RadioGroup>
 
@@ -202,22 +196,22 @@
                         android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_ANY"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_ANY"
-                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_ANY" />
 
                     <RadioButton
                         android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW"
-                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW" />
 
                     <RadioButton
                         android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW"
-                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW" />
 
                 </RadioGroup>
 
@@ -247,11 +241,20 @@
 
     </RelativeLayout>
 
+    <TextView
+        android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___INFO"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/RLA___MOTIONEVENTS_MANAGEMENT___DATA"
+        android:padding="2dp"
+        android:style="@style/TextAppearance.AppCompat.Body2"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/RWV___MOTIONEVENTS_MANAGEMENT___EVENTS"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/RLA___MOTIONEVENTS_MANAGEMENT___FILTERS"
+        android:layout_below="@+id/TXV___MOTIONEVENTS_MANAGEMENT___INFO"
         android:padding="3dp" />
 
 </RelativeLayout>

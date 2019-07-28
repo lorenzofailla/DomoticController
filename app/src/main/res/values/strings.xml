@@ -117,12 +117,10 @@
 
     <!-- *** MotionEventsManagementActivity -->
     <string name="MOTIONEVENTSMANAGEMENT_ACTIONBAR_TITLE">Motion events</string>
-    <string name="MOTIONEVENTSMANAGEMENT_HEADER">Videosurveillance Events</string>
     <string name="MOTIONEVENTSMANAGEMENT_SELECT_EVENT">Select an event:</string>
-    <string name="MOTIONEVENTSMANAGEMENT_FILTER_BUTTON_ALL">ALL</string>
-    <string name="MOTIONEVENTSMANAGEMENT_FILTER_BUTTON_NEW">NEW</string>
-    <string name="MOTIONEVENTSMANAGEMENT_FILTERS_LABEL">Events filters:</string>
-    <string name="MOTIONEVENTSMANAGEMENT_ACTIONS_LABEL">Events actions:</string>
+
+    <string name="MOTIONEVENTSMANAGEMENT_NO_EVENT_TO_SHOW">There is no event to show.</string>
+    <string name="MOTIONEVENTSMANAGEMENT_SHOWING_EVENTS">Showing %d events.</string>
 
     <string name="MOTIONEVENTSMANAGEMENT_HOUR">Last hour:</string>
     <string name="MOTIONEVENTSMANAGEMENT_TODAY">Today:</string>

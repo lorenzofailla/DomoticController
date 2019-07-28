@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
+import androidx.sqlite.db.SupportSQLiteQuery;
 
 public class MotionEventsRepository {
 
@@ -23,8 +24,8 @@ public class MotionEventsRepository {
         return motionEventsDao.countEvents(v1);
     }
 
-    LiveData<List<MotionEvent>> getEventsList(String whereClause) {
-        return motionEventsDao.getEventsList(whereClause);
+    LiveData<List<MotionEvent>> getEventsList(SupportSQLiteQuery query) {
+        return motionEventsDao.getEventsList(query);
     }
 
     MotionEventsRepository(Application application) {

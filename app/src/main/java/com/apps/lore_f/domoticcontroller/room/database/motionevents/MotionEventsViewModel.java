@@ -6,6 +6,7 @@ import java.util.List;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.sqlite.db.SupportSQLiteQuery;
 
 public class MotionEventsViewModel extends AndroidViewModel {
 
@@ -17,7 +18,7 @@ public class MotionEventsViewModel extends AndroidViewModel {
 
     }
 
-    public LiveData<List<MotionEvent>> getEventsList(String whereClause) { return repository.getEventsList(whereClause); }
+    public LiveData<List<MotionEvent>> getEventsList(SupportSQLiteQuery query) { return repository.getEventsList(query); }
 
     public void insert(MotionEvent event) { repository.insert(event); }
 
