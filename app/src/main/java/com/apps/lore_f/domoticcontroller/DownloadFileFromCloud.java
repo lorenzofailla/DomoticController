@@ -1,6 +1,5 @@
 package com.apps.lore_f.domoticcontroller;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,14 +7,14 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Binder;
 import android.os.Environment;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
+import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FileDownloadTask;

@@ -43,6 +43,9 @@
     <string name="ALERTDIALOG_TITLE_PLEASE_WAIT">Please wait</string>
     <string name="ALERTDIALOG_MESSAGE_DEVICE_CONNECTION">Connecting to device via TCP...</string>
 
+    <!-- ***   - Device selection -->
+    <string name="DEVICE_SELECTION_ACTIONBAR_TITLE">Device selection</string>
+
     <!-- ***   - Group selection -->
     <string name="GROUP_SELECTION_HEADER">Let\'s select a group!</string>
     <string name="GROUP_SELECTION_EXPLANATION">Select a group to work with.\nYour usedID \'!!!username!!!\' is enabled for %d groups.</string>
@@ -67,6 +70,7 @@
     <string name="MNU_MAIN_SIGNOUT">Sign out from Google</string>
     <string name="MNU_MAIN_REVOKE">Revoke Google access</string>
 
+    <string name="DEVICEVIEW_ACTIONBAR_TITLE">Device</string>
     <string name="DEVICEVIEW_LABEL_AVAILABLESERVICES">Available services:</string>
     <string name="DEVICEVIEW_LABEL_SYSTEM_LOAD">System load:</string>
     <string name="DEVICEVIEW_LABEL_FREE_DISK_SPACE">Free disk space:</string>
@@ -82,6 +86,8 @@
     <string name="DEVICEVIEW_LABEL_LASTHEARTBEAT_TIME">Last heartbeat:</string>
     <string name="DEVICEVIEW_LABEL_DEVICE_OPERATIONS">Device Operations:</string>
     <string name="DEVICEVIEW_REFRESHING_DEVICE_CONNECTION">Connecting to device...</string>
+    <string name="DEVICEVIEW_MENU_REBOOT">Reboot system</string>
+    <string name="DEVICEVIEW_MENU_SHUTDOWN">Shutdown system</string>
 
     <!-- ***   - Torrents management fragment -->
     <string name="TORRENTSMANAGER_LABEL_AVAILABLETORRENTS">Available Torrents:</string>
@@ -109,7 +115,8 @@
     <!-- fragment_videosurveillance_cameralist.xml -->
     <string name="FGM_VIDEOSURVEILLANCE_CAMERALIST_SELECT_AVAILABLE_CAMERA">Select an available camera:</string>
 
-    <!-- MotionEventsManagementActivity -->
+    <!-- *** MotionEventsManagementActivity -->
+    <string name="MOTIONEVENTSMANAGEMENT_ACTIONBAR_TITLE">Motion events</string>
     <string name="MOTIONEVENTSMANAGEMENT_HEADER">Videosurveillance Events</string>
     <string name="MOTIONEVENTSMANAGEMENT_SELECT_EVENT">Select an event:</string>
     <string name="MOTIONEVENTSMANAGEMENT_FILTER_BUTTON_ALL">ALL</string>
@@ -117,9 +124,36 @@
     <string name="MOTIONEVENTSMANAGEMENT_FILTERS_LABEL">Events filters:</string>
     <string name="MOTIONEVENTSMANAGEMENT_ACTIONS_LABEL">Events actions:</string>
 
+    <string name="MOTIONEVENTSMANAGEMENT_HOUR">Last hour:</string>
+    <string name="MOTIONEVENTSMANAGEMENT_TODAY">Today:</string>
+    <string name="MOTIONEVENTSMANAGEMENT_WEEK">This week:</string>
+    <string name="MOTIONEVENTSMANAGEMENT_MONTH">This month:</string>
+    <string name="MOTIONEVENTSMANAGEMENT_TOTAL">Total:</string>
+
     <string name="MENU_MOTIONEVENT_VIEWIMAGE">Preview image</string>
     <string name="MENU_MOTIONEVENT_SHARE">Share</string>
     <string name="MENU_MOTIONEVENT_DELETE">Delete</string>
     <string name="MENU_MOTIONEVENT_PROTECT">Protect</string>
+
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTER">Filter events</string>
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_SHOWDATA">Show events data</string>
+
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERHEADER_TIME">TIME</string>
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_ANY">Any</string>
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_LASTHOUR">Last hour</string>
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY">Today</string>
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISWEEK">This week</string>
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISMONTH">This month</string>
+
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERHEADER_STATUS">STATUS</string>
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_ANY">Any</string>
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW">To watch</string>
+    <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW">Watched</string>
+
+
+
+    <!-- *** Notifications Channel IDs -->
+    <string name="NOTIF_CHID___MOTION_EVENTS">NOTIF_CHID___MOTION_EVENTS</string>
+    <string name="NOTIF_CHID_READABLE___MOTION_EVENTS">Motion events</string>
 
 </resources>

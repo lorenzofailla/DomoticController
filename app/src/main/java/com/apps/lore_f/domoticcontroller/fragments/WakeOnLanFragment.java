@@ -2,30 +2,18 @@ package com.apps.lore_f.domoticcontroller.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
+import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
 import com.apps.lore_f.domoticcontroller.R;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.WOLDeviceEntry;
-import com.apps.lore_f.domoticcontroller.generic.classes.Message;
-import com.apps.lore_f.domoticcontroller.generic.dataadapters.TorrentsListAdapter;
 import com.apps.lore_f.domoticcontroller.generic.dataadapters.WOLDevicesListAdapter;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.WOLDeviceInfo;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;

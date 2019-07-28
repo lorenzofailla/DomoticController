@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -55,7 +55,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/SPC___ROWDEVICE___TOP_RIGHT" />
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/CLA___ROWDEVICE___DEVICEDATA"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -71,7 +71,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             app:layout_constraintLeft_toRightOf="@id/BTN___ROWDEVICE___CONNECT" />
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/CLA___ROWDEVICE___LASTUPDATE"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -94,9 +94,9 @@
                 android:textSize="12sp"
                 app:layout_constraintStart_toEndOf="@+id/IMG___ROWDEVICE___WARNING" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/CLA___ROWDEVICE___ADDITIONALDATA"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -119,7 +119,7 @@
                 android:textSize="12sp"
                 app:layout_constraintStart_toEndOf="@+id/IMG___ROWDEVICE___STATUS_RUNNINGSINCE" />
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ImageButton
             android:id="@+id/BTN___ROWDEVICE___CONNECT"
@@ -127,7 +127,7 @@
             android:layout_height="48dp"
             android:src="@drawable/connect" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageButton
         android:id="@+id/BTN___ROWDEVICE___EXPANDDATA"
@@ -200,4 +200,4 @@
         android:layout_height="@dimen/spacer_square_dim"
         app:layout_constraintTop_toBottomOf="@+id/BTN___ROWDEVICE___EXPANDDATA" />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

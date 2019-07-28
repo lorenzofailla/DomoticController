@@ -1,18 +1,19 @@
 package com.apps.lore_f.domoticcontroller;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-
-import static com.google.android.gms.plus.PlusOneDummyView.TAG;
 
 /**
  * Created by lore_f on 15/10/2017.
@@ -24,7 +25,6 @@ public class DomoticFCMService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-
 
         Log.d(TAG, remoteMessage.getData().toString());
         // Check if message contains a notification payload.
@@ -63,7 +63,7 @@ public class DomoticFCMService extends FirebaseMessagingService {
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(getApplicationContext())
+                new NotificationCompat.Builder(this, getString(R.string.NOTIF_CHID___MOTION_EVENTS))
                         .setSmallIcon(drawableRes)
                         .setContentTitle(title)
                         .setContentText(message)
@@ -71,10 +71,16 @@ public class DomoticFCMService extends FirebaseMessagingService {
                         .setSound(defaultSoundUri)
                         .setContentIntent(pendingIntent);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        NotificationChannel channel = new NotificationChannel(getString(R.string.NOTIF_CHID___MOTION_EVENTS),
+                getString(R.string.NOTIF_CHID_READABLE___MOTION_EVENTS),
+                NotificationManager.IMPORTANCE_DEFAULT);
+
+        notificationManager.createNotificationChannel(channel);
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
 
     }
+
 }

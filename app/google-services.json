@@ -15,6 +15,30 @@
       },
       "oauth_client": [
         {
+          "client_id": "410796746391-anfgq636qpeom6ka1g3celq4jb0kas34.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apps.lore_f.domoticcontroller",
+            "certificate_hash": "3928c3c04e0270a5086305221b18e44315dc5bd2"
+          }
+        },
+        {
+          "client_id": "410796746391-3408v3hftkf7ugrpkimr1f1r5c6vc2rs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apps.lore_f.domoticcontroller",
+            "certificate_hash": "a0442cc5a6628f24835340f1ddc11a2f57fa135e"
+          }
+        },
+        {
+          "client_id": "410796746391-pfj9rcm66l75f50imaheh9q846uviesa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apps.lore_f.domoticcontroller",
+            "certificate_hash": "758da6dfafcbc0b8c20639fae7f3bc2ef5686b19"
+          }
+        },
+        {
           "client_id": "410796746391-mku70if55as3nkh82ttcv3t4r4s4uefm.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -25,15 +49,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "410796746391-mku70if55as3nkh82ttcv3t4r4s4uefm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

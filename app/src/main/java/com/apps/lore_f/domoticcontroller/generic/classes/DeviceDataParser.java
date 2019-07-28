@@ -123,8 +123,6 @@ public class DeviceDataParser {
     public DeviceDataParser() {
     }
 
-    ;
-
     public DeviceDataParser(String statusDataJSON, String networkDataJSON, String staticDataJSON) {
 
         try {
@@ -160,13 +158,17 @@ public class DeviceDataParser {
             lastUpdate = generalStatus.getLong("LastUpdate");
             uptimeMessage = generalStatus.getString("Uptime");
 
-            String[] data = uptimeMessage.split(",  ");
+            String[] data = uptimeMessage.split("load average: ");
 
-            if (data.length == 3) {
 
-                connectedUsers = Integer.parseInt(data[1].split(" ")[0]);
-                averageLoad = (int) (Double.parseDouble(data[2].substring(13).split(", ")[0].replaceAll(",", ".")) * 100.0);
+            if (data.length == 2) {
 
+                try {
+                    connectedUsers = Integer.parseInt(data[0].split(",")[2].trim().split(" ")[0]);
+                    averageLoad = (int) (Double.parseDouble(data[1].split(", ")[0].replaceAll(",", ".")) * 100.0);
+                } catch (IndexOutOfBoundsException | NumberFormatException e) {
+
+                }
             }
 
             statusDataValidated = true;

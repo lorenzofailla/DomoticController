@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/RLA___TORRENTSLISTROW___TORRENTDATA"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -43,9 +43,9 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/TXV___TORRENTSLISTROW___TORRENTSTATUS" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/RLA___TORRENTSLISTROW___BUTTONSTRIP"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -72,9 +72,9 @@
             android:src="@drawable/delete"
             app:layout_constraintRight_toLeftOf="@+id/BTN___TORRENTSLISTROW___REMOVETORRENT" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/RLA___TORRENTSLISTROW___TORRENTSPEED"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -108,7 +108,7 @@
             android:text="@string/GENERIC_PLACEHOLDER_WAITING"
             app:layout_constraintLeft_toRightOf="@+id/IMG___TORRENTSLISTROW___DOWNSPEED" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ProgressBar
         android:id="@+id/PBR___TORRENTSLISTROW___TORRENTCOMPLETIONPERC"

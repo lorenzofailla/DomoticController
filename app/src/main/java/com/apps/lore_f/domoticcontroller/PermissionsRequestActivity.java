@@ -1,14 +1,13 @@
 package com.apps.lore_f.domoticcontroller;
 
-import android.*;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -59,9 +58,7 @@ public class PermissionsRequestActivity extends AppCompatActivity {
                         PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE
                 );
 
-
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -70,7 +67,6 @@ public class PermissionsRequestActivity extends AppCompatActivity {
         managePermissions();
 
     }
-
 
     private void showRationale(String message, final String permission, final int permissionID) {
 

@@ -3,22 +3,27 @@ package com.apps.lore_f.domoticcontroller.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
+
+import android.provider.Settings;
+import android.system.Os;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.apps.lore_f.domoticcontroller.CloudStorageActivity;
 import com.apps.lore_f.domoticcontroller.DefaultValues;
-import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
 import com.apps.lore_f.domoticcontroller.R;
-import com.apps.lore_f.domoticcontroller.VideoSurveillanceActivity;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
 import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -218,7 +223,10 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         }
 
-        FirebaseMessaging.getInstance().subscribeToTopic(groupName);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.TBR___DEVICE_SELECTION___TOOLBAR);
+        setSupportActionBar(myToolbar);
+        myToolbar.setTitle(R.string.DEVICE_SELECTION_ACTIONBAR_TITLE);
 
     }
 

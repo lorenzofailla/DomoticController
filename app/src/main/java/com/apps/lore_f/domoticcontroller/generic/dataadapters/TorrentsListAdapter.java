@@ -1,9 +1,9 @@
 package com.apps.lore_f.domoticcontroller.generic.dataadapters;
 
 import android.content.Context;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-import android.util.Log;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +12,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
+import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
 import com.apps.lore_f.domoticcontroller.R;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.TorrentInfo;
 

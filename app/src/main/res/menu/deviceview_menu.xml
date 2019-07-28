@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/MENU_DEVICEVIEW_Reboot"
+        android:icon="@drawable/reboot"
+        android:title="@string/DEVICEVIEW_MENU_REBOOT"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/MENU_DEVICEVIEW_SHUTDOWN"
+        android:icon="@drawable/shutdown"
+        android:title="@string/DEVICEVIEW_MENU_SHUTDOWN"
+        app:showAsAction="never"/>
+
+</menu>

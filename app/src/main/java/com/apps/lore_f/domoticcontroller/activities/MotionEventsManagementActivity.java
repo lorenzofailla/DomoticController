@@ -8,214 +8,186 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.ContextMenu;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.MotionEvent;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEventsDAO;
+import com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEventsDatabase;
+import com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEventsViewModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static apps.android.loref.GeneralUtilitiesLibrary.getTimeElapsed;
+import static apps.android.loref.GeneralUtilitiesLibrary.getTimeElapsedToday;
 
 import com.apps.lore_f.domoticcontroller.R;
 
 public class MotionEventsManagementActivity extends AppCompatActivity {
 
+    private long last_hour;
+    private long today;
+    private long firstDayOfCurrentWeek;
+    private long firstDayOfCurrentMonth;
+
+    private void updateTimeDefinitions(){
+
+        Calendar calendar;
+
+        calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        last_hour = System.currentTimeMillis()-3600000L;
+
+        today = calendar.getTimeInMillis();
+
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        firstDayOfCurrentWeek = calendar.getTimeInMillis();
+
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        firstDayOfCurrentMonth = calendar.getTimeInMillis();
+
+    }
+
+    private MotionEventsDatabase localDatabase;
+    private MotionEventsViewModel motionEventsViewModel;
+
+    private final static String TAG = MotionEventsManagementActivity.class.getName();
+
     private final static int BG_COLOR_SELECTED = Color.argb(32, 0, 0, 127);
     private final static long MAX_THUMBNAIL_DOWNLOAD_SIZE = 4194304;
-    private final static String VIDEO_SUBDIR="MotionEventVideos";
-    private final static String THUMB_SUBDIR="Thumbnails";
-
-    private View fragmentView;
-
-    private LinearLayoutManager linearLayoutManager;
-    private FirebaseRecyclerAdapter<MotionEvent, EventsHolder> firebaseAdapter;
+    private final static String VIDEO_SUBDIR = "MotionEventVideos";
+    private final static String THUMB_SUBDIR = "Thumbnails";
 
     private RecyclerView eventsRecyclerView;
     private File downloadDirectoryRoot;
-    private DatabaseReference eventsNode;
-    private Query eventsQuery;
     private String groupName;
 
-    private String[] eventKeys;
-
-    private int selectedPosition = -1;
-
-    private String childKeyFilter = null;
-    private String childValueFilter = null;
-
-    private static LayoutInflater layoutInflater;
     private static Context context;
 
+    private boolean showEventsResume = false;
+    private boolean showFiltersPanel = false;
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenu.ContextMenuInfo menuInfo) {
-
-    }
-
-    private View.OnClickListener buttonClickListener = new View.OnClickListener() {
+    private ChildEventListener firebaseMotionEventsManager = new ChildEventListener() {
         @Override
-        public void onClick(View v) {
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-            switch (v.getId()) {
+            MotionEvent event = dataSnapshot.getValue(MotionEvent.class);
+            Log.d(TAG, "Motion event found. Key=" + dataSnapshot.getKey());
 
-                case R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL:
-                    childValueFilter = "";
-                    childKeyFilter = "";
-                    break;
+            com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent localEvent = new com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent();
+            localEvent.setCameraFullID(event.getCameraFullID());
+            localEvent.setCameraName(event.getCameraName());
+            localEvent.setId(dataSnapshot.getKey());
+            localEvent.setPictureFileName(event.getThumbnailID());
+            localEvent.setVideoFileName(event.getVideoID());
+            localEvent.setTimeStamp(Long.parseLong(event.getTimestamp()));
+            localEvent.setLocked(false);
+            localEvent.setNewItem(true);
 
-                case R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY:
-                    childValueFilter = "true";
-                    childKeyFilter = "NewItem";
-
-                    break;
-
-            }
-
-            generateQuery();
+            new PopulateDbAsync(localDatabase).execute(localEvent);
 
         }
 
-    };
-
-    public static class EventsHolder
-            extends RecyclerView.ViewHolder {
-
-        public TextView eventDateTextView;
-        public TextView eventMonitorNameTextView;
-
-        public ProgressBar progressBar;
-        public TextView eventCameraNameTextView;
-
-        public ImageView eventPreviewImage;
-
-        public ImageView newItemImage;
-        public ImageView lockedItemImage;
-        public ImageView eventLocationImage;
-
-        public ConstraintLayout eventLabels;
-        public ConstraintLayout eventOptions;
-
-        public ConstraintLayout eventContainer;
-
-        private boolean optionsVisible;
-
-        public void setOptionsVisible(boolean value){
-
-            this.optionsVisible=value;
-
-            if(value) {
-                eventOptions.setVisibility(VISIBLE);
-            } else {
-                eventOptions.setVisibility(GONE);
-            }
-
-        }
-
-        private int position;
-        public void setPosition(int value){
-            this.position=value;
-        }
-
-        public EventsHolder(View v) {
-            super(v);
-
-            eventDateTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDATETIME);
-            eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDEVICENAME);
-            eventCameraNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTCAMERANAME);
-
-            progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
-            eventLabels = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___LABELS);
-            eventOptions = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___EVENTOPTIONS);
-
-            eventPreviewImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
-            newItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___NEWITEM);
-            lockedItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___LOCKEDITEM);
-            eventLocationImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTLOCATION);
-
-            eventContainer = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___EVENT);
-
-            setOptionsVisible(false);
-
-            eventLabels.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-
-                    setOptionsVisible(!optionsVisible);
-
-                }
-
-            });
-
-        }
-
-    }
-
-    private ValueEventListener valueEventListener = new ValueEventListener() {
         @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-            // definisce l'array delle keys dei record contenuti nel dataSnapshot
+        }
 
-            if (dataSnapshot != null) {
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-                List<String> keysList = new ArrayList<String>();
+        }
 
-                for (DataSnapshot item : dataSnapshot.getChildren()) {
-                    keysList.add(item.getKey());
-                }
-
-                eventKeys = keysList.toArray(new String[0]);
-
-            } else {
-
-                eventKeys = null;
-
-            }
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
         }
 
         @Override
         public void onCancelled(DatabaseError databaseError) {
+
         }
 
     };
+
+    private static class PopulateDbAsync extends AsyncTask<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent, Void, Void> {
+
+        private final MotionEventsDAO motionEventsDAO;
+
+        PopulateDbAsync(MotionEventsDatabase database) {
+
+            motionEventsDAO = database.motionEventsDAO();
+
+        }
+
+        @Override
+        protected Void doInBackground(final com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent... params) {
+
+            motionEventsDAO.insert(params[0]);
+            return null;
+
+        }
+
+    }
+
+    private static class MarkEventAsRead extends AsyncTask<String, Void, Void> {
+
+        private final MotionEventsDAO motionEventsDAO;
+
+        MarkEventAsRead(MotionEventsDatabase database) {
+
+            motionEventsDAO = database.motionEventsDAO();
+
+        }
+
+        @Override
+        protected Void doInBackground(final String... params) {
+
+            motionEventsDAO.setField_NEW(params[0], false);
+            return null;
+
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -226,9 +198,9 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 getString(R.string.data_file_key), Context.MODE_PRIVATE);
 
-        groupName=sharedPref.getString(getString(R.string.data_group_name),null);
+        groupName = sharedPref.getString(getString(R.string.data_group_name), null);
 
-        if(groupName==null){ // should never happen
+        if (groupName == null) { // should never happen
 
             // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
             startActivity(new Intent(this, GroupSelection.class));
@@ -239,121 +211,322 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
         }
 
-        layoutInflater = getLayoutInflater();
-
         // visualizza il layout
         setContentView(R.layout.activity_motioneventsmanagement);
+
+        // set up the toolbar of this activity
+        Toolbar toolbar = findViewById(R.id.TBR___MOTIONEVENTS_MANAGEMENT___TOOLBAR);
+        toolbar.inflateMenu(R.menu.motioneventsmanagement_menu);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.MENU_MOTIONEVENTMANAGEMENTS_Filter:
+
+                        showFiltersPanel = !showFiltersPanel;
+
+                        if (showFiltersPanel)
+                            showEventsResume = false;
+
+                        configureView();
+                        return true;
+
+                    case R.id.MENU_MOTIONEVENTMANAGEMENTS_ShowData:
+
+                        showEventsResume = !showEventsResume;
+
+                        if (showEventsResume)
+                            showFiltersPanel = false;
+
+                        configureView();
+
+                        return true;
+
+                    default:
+                        return false;
+
+                }
+            }
+
+        });
+
+    }
+
+    private void configureView() {
+
+        int eventsDataResumeVisibility = GONE;
+        if (showEventsResume)
+            eventsDataResumeVisibility = VISIBLE;
+
+        int filterPanelVisibility = GONE;
+        if (showFiltersPanel)
+            filterPanelVisibility = VISIBLE;
+
+        RelativeLayout eventsDataResumeRLA = findViewById(R.id.RLA___MOTIONEVENTS_MANAGEMENT___DATA);
+        eventsDataResumeRLA.setVisibility(eventsDataResumeVisibility);
+
+        RelativeLayout filterPanelRLA = findViewById(R.id.RLA___MOTIONEVENTS_MANAGEMENT___FILTERS);
+        filterPanelRLA.setVisibility(filterPanelVisibility);
 
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
 
         // calls the onResume() method on the superclass
         super.onResume();
 
-        // inizializza il nodo del database di Firebase contenente le informazioni sugli eventi
-        eventsNode = FirebaseDatabase.getInstance().getReference(String.format("MotionEvents/%s", groupName));
+        // configura la visualizzazione
+        configureView();
 
         // inizializza il riferimento alla directory dove i file dei video saranno scaricati
         downloadDirectoryRoot = new File(Environment.getExternalStorageDirectory(), "Domotic");
 
         // crea la directory principale se non esiste
-        if(!downloadDirectoryRoot.exists()) downloadDirectoryRoot.mkdir();
+        if (!downloadDirectoryRoot.exists()) downloadDirectoryRoot.mkdir();
 
         // crea le sottodirectory se non esistono
-        File videoDir=new File(downloadDirectoryRoot,VIDEO_SUBDIR);
-        if(!videoDir.exists()) videoDir.mkdir();
+        File videoDir = new File(downloadDirectoryRoot, VIDEO_SUBDIR);
+        if (!videoDir.exists()) videoDir.mkdir();
 
-        File thumbnailDir=new File(downloadDirectoryRoot,THUMB_SUBDIR);
-        if(!thumbnailDir.exists()) thumbnailDir.mkdir();
+        File thumbnailDir = new File(downloadDirectoryRoot, THUMB_SUBDIR);
+        if (!thumbnailDir.exists()) thumbnailDir.mkdir();
 
-        eventsRecyclerView = (RecyclerView) findViewById(R.id.RWV___VSEVENTVIEWERFRAGMENT___EVENTS);
+        updateEvents();
 
-        // assegna l'OnClickListener ai pulsanti
-        Button filterAllButton = (Button) findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
-        Button filterNewButton = (Button) findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
-        filterAllButton.setOnClickListener(buttonClickListener);
-        filterNewButton.setOnClickListener(buttonClickListener);
+        updateTimeDefinitions();
 
-        // innesca l'azione di click sul pulsante filtro ALL
-        filterAllButton.callOnClick();
+        motionEventsViewModel.countEvents(System.currentTimeMillis() - 3600000).observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
 
-        refreshAdapter();
+                TextView eventsCount = findViewById(R.id.TXV___MOTIONEVENTS_MANAGEMENT___EVENTSHOUR_VALUE);
+                eventsCount.setText(String.format("%d", integer));
+
+            }
+
+        });
+
+        motionEventsViewModel.countEvents(today).observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+
+                TextView eventsCount = findViewById(R.id.TXV___MOTIONEVENTS_MANAGEMENT___EVENTSTODAY_VALUE);
+                eventsCount.setText(String.format("%d", integer));
+
+            }
+
+        });
+
+        motionEventsViewModel.countEvents(firstDayOfCurrentWeek).observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+
+                TextView eventsCount = findViewById(R.id.TXV___MOTIONEVENTS_MANAGEMENT___EVENTSWEEK_VALUE);
+                eventsCount.setText(String.format("%d", integer));
+
+            }
+
+        });
+
+        motionEventsViewModel.countEvents(firstDayOfCurrentMonth).observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+
+                TextView eventsCount = findViewById(R.id.TXV___MOTIONEVENTS_MANAGEMENT___EVENTSMONTH_VALUE);
+                eventsCount.setText(String.format("%d", integer));
+
+            }
+
+        });
+
+        motionEventsViewModel.countAll().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+
+                TextView eventsCount = findViewById(R.id.TXV___MOTIONEVENTS_MANAGEMENT___EVENTSTOTAL_VALUE);
+                eventsCount.setText(String.format("%d", integer));
+
+            }
+
+        });
+
+        // ottiene un riferimento all'istanza del database locale
+        localDatabase = MotionEventsDatabase.getDatabase(this);
+
+        // ottiene un riferimento al nodo principale degli eventi, e assegna un ChildEventListener per aggiungere gli eventi al database locale
+        FirebaseDatabase.getInstance().getReference(String.format("MotionEvents/%s", groupName)).addChildEventListener(firebaseMotionEventsManager);
 
     }
 
     @Override
     public void onPause() {
 
-        // rimuove l'assegnazione dell'OnClickListener ai pulsanti
-        if (fragmentView != null) {
-            Button filterAllButton = (Button) fragmentView.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_ALL);
-            Button filterNewButton = (Button) fragmentView.findViewById(R.id.BTN___VSEVENTVIEWERFRAGMENT___FILTER_NEWONLY);
-            filterAllButton.setOnClickListener(null);
-            filterNewButton.setOnClickListener(null);
-        }
-
-        // rimuove il ValueEventListener dal nodo del database di Firebase
-        eventsQuery.removeEventListener(valueEventListener);
-
-        unregisterForContextMenu(eventsRecyclerView);
-
         super.onPause();
+
+        // ottiene un riferimento al nodo principale degli eventi, e rimuove il ChildEventListener per aggiungere gli eventi al database locale
+        FirebaseDatabase.getInstance().getReference(String.format("MotionEvents/%s", groupName)).removeEventListener(firebaseMotionEventsManager);
 
     }
 
-    private void refreshAdapter() {
+    private void updateEvents() {
 
-        linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        linearLayoutManager.setStackFromEnd(false);
+        eventsRecyclerView = findViewById(R.id.RWV___MOTIONEVENTS_MANAGEMENT___EVENTS);
+        final MotionEventsListAdapter adapter = new MotionEventsListAdapter(this);
+        eventsRecyclerView.setAdapter(adapter);
+        eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        firebaseAdapter = new FirebaseRecyclerAdapter<MotionEvent, EventsHolder>(
-                MotionEvent.class,
-                R.layout.row_holder_motionevent_element,
-                EventsHolder.class,
-                eventsQuery) {
-
+        motionEventsViewModel = ViewModelProviders.of(this).get(MotionEventsViewModel.class);
+        motionEventsViewModel.getAllEvents().observe(this, new Observer<List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent>>() {
             @Override
-            protected void populateViewHolder(final EventsHolder holder, final MotionEvent event, final int position) {
+            public void onChanged(@Nullable final List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent> events) {
+                // Update the cached copy of the words in the adapter.
+                adapter.setWords(events);
+            }
+        });
 
-                holder.setPosition(position);
+    }
 
-                if (event.isNewItem().equals("true")) {// se è un nuovo evento, mostra l'immagine newItemImage
+    public void manageMotionEventsFilterRadioButtonClick(View v) {
 
-                    holder.newItemImage.setVisibility(VISIBLE);
+        // Is the button now checked?
+        boolean checked = ((RadioButton) v).isChecked();
 
+        if (checked) {
+
+            // Check which radio button was clicked
+            switch (v.getId()) {
+                case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_ANY:
+                    break;
+                case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW:
+                    break;
+                case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW:
+                    break;
+                case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_ANY:
+                    break;
+                case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_LASTHOUR:
+                    break;
+                case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY:
+                    break;
+                case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISWEEK:
+                    break;
+                case R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISMONTH:
+                    break;
+            }
+
+        }
+
+    }
+
+    public class MotionEventsListAdapter extends RecyclerView.Adapter<MotionEventsListAdapter.MotionEventHolder> {
+
+        public class MotionEventHolder extends RecyclerView.ViewHolder {
+
+            private TextView eventDateTextView;
+            private TextView eventMonitorNameTextView;
+
+            private ProgressBar progressBar;
+            private TextView eventCameraNameTextView;
+
+            private ImageView eventPreviewImage;
+
+            private ImageView newItemImage;
+            private ImageView lockedItemImage;
+            private ImageView eventLocationImage;
+
+            private ConstraintLayout eventLabels;
+            private ConstraintLayout eventOptions;
+
+            private ConstraintLayout eventContainer;
+
+            private boolean optionsVisible;
+
+            public void setOptionsVisible(boolean value) {
+
+                this.optionsVisible = value;
+
+                if (value) {
+                    eventOptions.setVisibility(VISIBLE);
                 } else {
-
-                    holder.newItemImage.setVisibility(GONE);
-
+                    eventOptions.setVisibility(GONE);
                 }
 
-                // gestisce la visualizzazione degli elementi in funzione del valore del campo "lockedItem"
-                if (event.isLockedItem().equals("true")) {
+            }
 
-                    holder.lockedItemImage.setVisibility(VISIBLE);
+            private int position;
 
-                } else {
+            public void setPosition(int value) {
+                this.position = value;
+            }
 
-                    holder.lockedItemImage.setVisibility(GONE);
+            public MotionEventHolder(View v) {
+                super(v);
 
-                }
+                eventDateTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDATETIME);
+                eventMonitorNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTDEVICENAME);
+                eventCameraNameTextView = (TextView) v.findViewById(R.id.TXV___VSEVENTROW___EVENTCAMERANAME);
 
-                holder.eventDateTextView.setText(getTimeElapsed(Long.parseLong(event.getTimestamp()), getApplicationContext())
-                );
+                progressBar = (ProgressBar) v.findViewById(R.id.PBR___VSEVENTROW___DOWNLOADPROGRESS);
+                eventLabels = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___LABELS);
+                eventOptions = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___EVENTOPTIONS);
 
-                holder.eventMonitorNameTextView.setText(event.getDevice());
+                eventPreviewImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTPREVIEW);
+                newItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___NEWITEM);
+                lockedItemImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___LOCKEDITEM);
+                eventLocationImage = (ImageView) v.findViewById(R.id.IVW___VSEVENTROW___EVENTLOCATION);
+
+                eventContainer = (ConstraintLayout) v.findViewById(R.id.CLA___VSEVENTROW___EVENT);
+
+                setOptionsVisible(false);
+
+                eventLabels.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+
+                        setOptionsVisible(!optionsVisible);
+
+                    }
+
+                });
+
+            }
+
+        }
+
+        private final LayoutInflater layoutInflater;
+        private List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent> motionEvents;
+
+        MotionEventsListAdapter(Context context) {
+            layoutInflater = LayoutInflater.from(context);
+        }
+
+        @Override
+        public MotionEventHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View itemView = layoutInflater.inflate(R.layout.row_holder_motionevent_element, parent, false);
+            return new MotionEventHolder(itemView);
+        }
+
+        @Override
+        public void onBindViewHolder(final MotionEventHolder holder, final int position) {
+
+            if (motionEvents != null) {
+
+                final com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent event = motionEvents.get(position);
+
+                holder.eventMonitorNameTextView.setText(event.getCameraFullID());
                 holder.eventCameraNameTextView.setText(event.getCameraName());
 
-                // crea il File relativo alla posizione di download locale sul dispositivo
-                final File localVideoFile = new File(downloadDirectoryRoot, VIDEO_SUBDIR+"/"+event.getVideoID());
+                holder.eventDateTextView.setText(getTimeElapsedToday(event.getTimeStamp(), getApplicationContext()));
 
                 // crea il File relativo alla posizione di download locale sul dispositivo
-                final File localThumbnailFile = new File(downloadDirectoryRoot, THUMB_SUBDIR+"/"+event.getThumbnailID());
+                final File localVideoFile = new File(downloadDirectoryRoot, VIDEO_SUBDIR + "/" + event.getVideoFileName());
 
-                final String videoFileRemoteLocation = String.format("MotionEvents/%s/%s", groupName, event.getVideoID());
-                final String thumbnailFileRemoteLocation = String.format("MotionEvents/%s/%s", groupName, event.getThumbnailID());
+                // crea il File relativo alla posizione di download locale sul dispositivo
+                final File localThumbnailFile = new File(downloadDirectoryRoot, THUMB_SUBDIR + "/" + event.getPictureFileName());
+
+                final String videoFileRemoteLocation = String.format("MotionEvents/%s/%s", groupName, event.getVideoFileName());
+                final String thumbnailFileRemoteLocation = String.format("MotionEvents/%s/%s", groupName, event.getPictureFileName());
 
                 // controlla se il File creato esiste
                 if (localVideoFile.exists()) { // esiste
@@ -368,10 +541,9 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
                             // lancia il video
                             playVideo(localVideoFile.getAbsolutePath());
-                            selectedPosition = position;
 
                             // segna l'evento come già letto
-                            markAsRead(eventKeys[position], "false");
+                            new MarkEventAsRead(localDatabase).execute(event.getId());
 
                         }
 
@@ -402,9 +574,10 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
                                     playVideo(localVideoFile.getAbsolutePath());
 
                                     // segna l'evento come già visto
-                                    markAsRead(eventKeys[position], "false");
+                                    new MarkEventAsRead(localDatabase).execute(event.getId());
 
                                 }
+
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
@@ -440,17 +613,19 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
                 // recupera i dati dell'immagine della preview
 
                 // controlla che sia già stata scaricata
-                if(localThumbnailFile.exists()) { // è già stata scaricata
+                if (localThumbnailFile.exists()) { // è già stata scaricata
 
-                    updateEventPreviewImage(holder.eventPreviewImage,localThumbnailFile.getAbsolutePath());
+                    updateEventPreviewImage(holder.eventPreviewImage, localThumbnailFile.getAbsolutePath());
 
                 } else { // non è già stata scaricata
+
+                    holder.eventPreviewImage.setImageResource(R.drawable.dummy_movie);
 
                     FirebaseStorage.getInstance().getReference(thumbnailFileRemoteLocation).getFile(localThumbnailFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
 
-                            updateEventPreviewImage(holder.eventPreviewImage,localThumbnailFile.getAbsolutePath());
+                            updateEventPreviewImage(holder.eventPreviewImage, localThumbnailFile.getAbsolutePath());
 
                         }
 
@@ -464,66 +639,40 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
                 }
 
-            }
-
-        };
-
-        firebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                int mediaCount = firebaseAdapter.getItemCount();
-                int lastVisiblePosition = linearLayoutManager.findLastCompletelyVisibleItemPosition();
-                // If the recycler view is initially being loaded or the user is at the bottom of the list, scroll
-                // to the bottom of the list to show the newly added message.
-                if (lastVisiblePosition == -1 ||
-                        (positionStart >= (mediaCount - 1) && lastVisiblePosition == (positionStart - 1))) {
-                    eventsRecyclerView.scrollToPosition(positionStart);
+                // gestisce il tag NEW
+                if (event.isNewItem()) {
+                    holder.newItemImage.setVisibility(VISIBLE);
+                } else {
+                    holder.newItemImage.setVisibility(GONE);
                 }
 
+
+            } else {
+                // Covers the case of data not being ready yet.
+                //TODO: popolare l'holder
             }
-
-        });
-
-        eventsRecyclerView.setLayoutManager(linearLayoutManager);
-        eventsRecyclerView.setAdapter(firebaseAdapter);
-
-    }
-
-    private void updateEventPreviewImage(ImageView image, String imagePath){
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-        image.setImageBitmap(bitmap);
-    }
-
-    private void deleteEvent(File localFile, String remoteVideoLocation, String remoteThumbnailLocation, String eventKey) {
-
-        // elimina, se esiste, il file locale
-
-        if (localFile.exists()) {
-            localFile.delete();
         }
 
-        //        elimina, se esiste, il file remoto
+        void setWords(List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent> events) {
+            motionEvents = events;
+            notifyDataSetChanged();
+        }
 
-        // ottiene un riferimento alla posizione di storage sul cloud
-        FirebaseStorage.getInstance().getReference(remoteVideoLocation).delete();
-        FirebaseStorage.getInstance().getReference(remoteThumbnailLocation).delete();
+        // getItemCount() is called many times, and when it is first called,
+        // mWords has not been updated (means initially, it's null, and we can't return null).
+        @Override
+        public int getItemCount() {
+            if (motionEvents != null)
+                return motionEvents.size();
+            else return 0;
+        }
 
-        //        elimina il nodo del database
-        eventsNode.child(eventKey).removeValue();
 
     }
 
-    private void markAsRead(String eventKey, String value) {
-
-        eventsNode.child(eventKey).child("NewItem").setValue(value);
-
-    }
-
-    private void markAsLocked(String eventKey, String value) {
-
-        eventsNode.child(eventKey).child("LockedItem").setValue(value);
-
+    private void updateEventPreviewImage(ImageView image, String imagePath) {
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+        image.setImageBitmap(bitmap);
     }
 
     private void playVideo(String videoFullPath) {
@@ -545,23 +694,6 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         shareIntent.putExtra(Intent.EXTRA_STREAM, uriPath);
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, "send"));
-
-    }
-
-    private void generateQuery() {
-
-
-        if (!childKeyFilter.equals("")) {
-
-            //eventsNode.orderByChild(childKeyFilter).equalTo(childValueFilter).addValueEventListener(valueEventListener);
-            eventsQuery = eventsNode.orderByChild(childKeyFilter).equalTo(childValueFilter);
-
-        } else {
-
-            eventsQuery = eventsNode.orderByKey();
-        }
-
-        eventsQuery.addValueEventListener(valueEventListener);
 
     }
 

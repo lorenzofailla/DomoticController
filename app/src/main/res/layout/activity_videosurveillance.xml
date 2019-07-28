@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.apps.lore_f.domoticcontroller.VideoSurveillanceActivity">
 
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/PGR___VIDEOSURVEILLANCE___MAINPAGER"
         android:layout_width="match_parent"

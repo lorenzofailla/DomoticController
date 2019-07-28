@@ -13,7 +13,7 @@
         android:padding="3dp"
         android:text="@string/FGM_VIDEOSURVEILLANCE_CAMERALIST_SELECT_AVAILABLE_CAMERA" />
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/RWV___CAMERALISTFRAGMENT___AVAILABLECAMERAS"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

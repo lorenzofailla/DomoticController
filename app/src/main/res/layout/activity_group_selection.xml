@@ -25,7 +25,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat"
         android:layout_below="@+id/TXV___GROUPSSELECTION___HEADER"/>
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/RWV___GROUPSSELECTION___GROUPS"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

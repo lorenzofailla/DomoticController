@@ -1,17 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.apps.lore_f.domoticcontroller"
-        minSdkVersion 21
-        targetSdkVersion 25
+        minSdkVersion 26
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
-
-        //testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
     buildTypes {
@@ -29,28 +26,26 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    /*
-                            androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-                                exclude group: 'com.android.support', module: 'support-annotations'
-                            })
-                            */
-    // Firebase Auth
-    // Firebase Cloud Messaging
-    implementation 'com.google.firebase:firebase-auth:11.0.2'
-    implementation 'com.google.android.gms:play-services-auth:11.0.2'
-    implementation 'com.google.firebase:firebase-messaging:11.0.2'
-    implementation 'com.android.support:appcompat-v7:25.3.1'
-    implementation 'com.google.android.gms:play-services:11.0.2'
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation 'com.android.support:support-v4:25.3.1'
-    implementation 'com.android.support:recyclerview-v7:25.3.1'
-    implementation 'com.google.firebase:firebase-database:11.0.2'
+    implementation 'com.google.firebase:firebase-auth:18.1.0'
+    implementation 'com.google.firebase:firebase-messaging:19.0.1'
+    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-beta01'
+    implementation 'com.google.firebase:firebase-database:18.0.0'
     implementation 'com.firebaseui:firebase-ui-database:0.4.0'
-    //testImplementation 'junit:junit:4.12'
+    implementation 'com.firebaseui:firebase-ui-auth:5.0.0'
     implementation project(':generalutilitieslibrary')
-    implementation project(':AndroidTCPComm')
     implementation project(':AndroidShapes')
-}
+    // Room components
+    implementation "androidx.room:room-runtime:2.2.0-alpha01"
+    implementation 'com.google.firebase:firebase-storage:18.1.0'
+    annotationProcessor "androidx.room:room-compiler:2.2.0-alpha01"
+    androidTestImplementation "androidx.room:room-testing:$rootProject.roomVersion"
+    // Lifecycle components
+    implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.archLifecycleVersion"
+    annotationProcessor "androidx.lifecycle:lifecycle-compiler:$rootProject.archLifecycleVersion"
 
+}
 
 apply plugin: 'com.google.gms.google-services'

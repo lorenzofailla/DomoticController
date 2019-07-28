@@ -1,6 +1,6 @@
 package com.apps.lore_f.domoticcontroller.generic.classes;
 
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 import java.util.HashMap;
 

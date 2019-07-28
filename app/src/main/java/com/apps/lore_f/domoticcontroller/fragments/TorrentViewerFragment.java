@@ -2,7 +2,7 @@ package com.apps.lore_f.domoticcontroller.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,12 +11,10 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.apps.lore_f.domoticcontroller.DeviceViewActivity;
+import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
 import com.apps.lore_f.domoticcontroller.R;
 import com.apps.lore_f.domoticcontroller.generic.dataadapters.TorrentsListAdapter;
-import com.apps.lore_f.domoticcontroller.generic.dataadapters.WOLDevicesListAdapter;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.TorrentInfo;
-import com.apps.lore_f.domoticcontroller.generic.dataobjects.WOLDeviceInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;

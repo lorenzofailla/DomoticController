@@ -2,6 +2,7 @@ package apps.android.loref;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -14,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -105,6 +107,12 @@ public class GeneralUtilitiesLibrary {
     public static String getTimeElapsed(long when, Context context) {
 
         return getTimeElapsed(when, context, true);
+
+    }
+
+    public static String getTimeElapsedToday(long when, Context context) {
+
+        return getTimeElapsedToday(when, context, true);
 
     }
 
@@ -245,5 +253,103 @@ public class GeneralUtilitiesLibrary {
         }
 
     }
+
+    public static String getTimeElapsedToday(long when, Context context, boolean longFormat) {
+
+        long timeDiff = System.currentTimeMillis() - when;
+        String unit;
+        int numericQuantity;
+        String quantity;
+        String prefix;
+        String suffix;
+
+        if ((timeDiff) < DAY_MS) {
+            //within the current day
+            unit="";
+            quantity = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(when));
+            prefix = context.getString(R.string.today)+",";
+            suffix = "";
+
+        } else if ((timeDiff) < WEEK_MS) {
+            //days
+            numericQuantity = (int) (timeDiff / DAY_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.days);
+                } else {
+                    unit = context.getString(R.string.day);
+                }
+
+            } else {
+                unit = context.getString(R.string.day_compact);
+            }
+            quantity = "" + (int) (timeDiff / DAY_MS);
+            prefix = "";
+            suffix = context.getString(R.string.ago);
+
+        } else if ((timeDiff) < MONTH_MS) {
+            //weeks
+            numericQuantity = (int) (timeDiff / WEEK_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.weeks);
+                } else {
+                    unit = context.getString(R.string.week);
+                }
+
+            } else {
+                unit = context.getString(R.string.week_compact);
+            }
+            quantity = "" + (int) (timeDiff / WEEK_MS);
+            prefix = "";
+            suffix = context.getString(R.string.ago);
+
+        } else if ((timeDiff) < YEAR_MS) {
+            // months
+            numericQuantity = (int) (timeDiff / MONTH_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.months);
+                } else {
+                    unit = context.getString(R.string.month);
+                }
+
+            } else {
+                unit = context.getString(R.string.month_compact);
+            }
+            quantity = "" + (int) (timeDiff / MONTH_MS);
+            prefix = "";
+            suffix = context.getString(R.string.ago);
+
+        } else {
+            // years
+            numericQuantity = (int) (timeDiff / YEAR_MS);
+            if (longFormat) {
+                if (numericQuantity > 1) {
+                    unit = context.getString(R.string.years);
+                } else {
+                    unit = context.getString(R.string.year);
+                }
+
+            } else {
+                unit = context.getString(R.string.year_compact);
+            }
+            quantity = "" + (int) (timeDiff / YEAR_MS);
+            prefix = "";
+            suffix = context.getString(R.string.ago);
+        }
+
+
+        if (longFormat) {
+
+            return (prefix + " " + quantity + " " + unit + " " + suffix);
+
+        } else {
+
+            return (quantity + " " + unit);
+        }
+
+    }
+
 
 }

@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.apps.lore_f.domoticcontroller.activities.LiveCamViewActivity;
+import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.CameraFrame;
 import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -25,15 +27,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public class VSCameraViewerFragment extends Fragment {
+public class VideoCameraViewerFragment extends Fragment {
 
-    private final static String TAG = "VSCameraViewerFragment";
+    private final static String TAG = "VideoCameraViewerFragment";
     private final static long MAX_SHOTVIEW_DOWNLOAD_SIZE = 4194304;
 
     public boolean viewCreated = false;
@@ -58,7 +61,7 @@ public class VSCameraViewerFragment extends Fragment {
     private String cameraFullID;
 
     public void setCameraFullID(String value) {
-        this.cameraFullID=value;
+        this.cameraFullID = value;
     }
 
     private String cameraStatus;
@@ -76,6 +79,8 @@ public class VSCameraViewerFragment extends Fragment {
     private String liveBroadcastID = "";
 
     private boolean liveBroadcastRequested;
+
+    private boolean isNotificationEnabled;
 
     private View.OnLongClickListener onLongClickListener = new View.OnLongClickListener() {
         @Override
@@ -96,33 +101,23 @@ public class VSCameraViewerFragment extends Fragment {
 
                 case R.id.BTN___VSCAMERAVIEW___REQUESTVIDEOSTREAM:
 
-                    if (parent.getTCPCommInterfaceStatus()) {
-
-                        Intent intent = new Intent(getContext(), LiveCamViewActivity.class);
-                        intent.putExtra("__URL_TO_VIEW", "http://" + parent.getCurrentTCPHostAddress() + ":" + cameraStreamPort);
-
-                        startActivity(intent);
-
-                    } else {
                     /*
                     se è attivo uno stream, attiva la visualizzazione del componente youtube
                     altrimenti, manda un messaggio all'host remoto per l'inizializzazione di uno stream
                      */
 
-                        if (liveBroadcastStatus.equals("ready") && !liveBroadcastID.equals("")) {
+                    if (liveBroadcastStatus.equals("ready") && !liveBroadcastID.equals("")) {
 
-                            liveBroadcastRequested = false;
-                            startYouTubeLiveViewActivity();
+                        liveBroadcastRequested = false;
+                        startYouTubeLiveViewActivity();
 
 
-                        } else if (liveBroadcastStatus.equals("idle")) {
+                    } else if (liveBroadcastStatus.equals("idle")) {
 
-                            liveBroadcastRequested = true;
+                        liveBroadcastRequested = true;
 
-                            // richiede un nuovo live stream all'host remoto
-                            parent.sendCommandToDevice(new Message("__start_streaming_request", cameraID, parent.thisDevice));
-
-                        }
+                        // richiede un nuovo live stream all'host remoto
+                        parent.sendCommandToDevice(new Message("__start_streaming_request", cameraID, parent.thisDevice));
 
                     }
 
@@ -141,6 +136,9 @@ public class VSCameraViewerFragment extends Fragment {
                     requestMotionEvent();
                     break;
 
+                case R.id.BTN___VSCAMERAVIEW___NOTIFICATIONSTATUS:
+                    break;
+
 
             }
 
@@ -148,7 +146,7 @@ public class VSCameraViewerFragment extends Fragment {
 
     };
 
-    public VSCameraViewerFragment() {
+    public VideoCameraViewerFragment() {
         // Required empty public constructor
     }
 
@@ -203,7 +201,7 @@ public class VSCameraViewerFragment extends Fragment {
                         public void onFailure(@NonNull Exception e) {
                             shotView.setImageResource(R.drawable.broken);
 
-                            Log.d(TAG,"Videocameras/" + parent.groupName + "/" + cameraFullID + "/shotview.jpg");
+                            Log.d(TAG, "Videocameras/" + parent.groupName + "/" + cameraFullID + "/shotview.jpg");
 
                         }
                     });
@@ -316,9 +314,7 @@ public class VSCameraViewerFragment extends Fragment {
 
         statusNode.addValueEventListener(deviceStatusEventListener);
 
-        if (!parent.getTCPCommInterfaceStatus()) {
-            shotNode.addValueEventListener(lastShotEventListener);
-        }
+        shotNode.addValueEventListener(lastShotEventListener);
 
         cameraStreamPortNode.addValueEventListener(cameraStreamPortEventListener);
 
@@ -379,9 +375,7 @@ public class VSCameraViewerFragment extends Fragment {
         youTubeLiveBroadcastAddressNode = FirebaseDatabase.getInstance().getReference(String.format("Groups/%s/VideoSurveillance/AvailableCameras/%s-%s/LiveStreamingBroadcastData", parent.groupName, parent.remoteDeviceName, cameraID));
 
         statusNode.removeEventListener(deviceStatusEventListener);
-        if (!parent.getTCPCommInterfaceStatus()) {
-            shotNode.removeEventListener(lastShotEventListener);
-        }
+        shotNode.removeEventListener(lastShotEventListener);
         cameraStreamPortNode.removeEventListener(cameraStreamPortEventListener);
 
 
@@ -392,15 +386,9 @@ public class VSCameraViewerFragment extends Fragment {
 
     public void requestSingleShot() {
 
-        if (parent.getTCPCommInterfaceStatus()) {
-            parent.sendCommandToDevice(
-                    new Message("__request_shot_data", cameraID, parent.thisDevice)
-            );
-        } else {
-            parent.sendCommandToDevice(
-                    new Message("__request_shot", cameraID, parent.thisDevice)
-            );
-        }
+        parent.sendCommandToDevice(
+                new Message("__request_shot", cameraID, parent.thisDevice)
+        );
 
     }
 
@@ -517,53 +505,36 @@ public class VSCameraViewerFragment extends Fragment {
         int drawableToShow = R.drawable.waiting_data;
         boolean liveStreamRequestEnabled = false;
 
-        if (parent.getTCPCommInterfaceStatus()) {
+        switch (liveBroadcastStatus) {
 
-            if (!cameraStreamPort.equals("")) {
-
+            case "idle":
                 drawableToShow = R.drawable.live;
                 liveStreamRequestEnabled = true;
+                break;
 
-            } else {
+            case "creating":
+                drawableToShow = R.drawable.live_yellow;
+                liveStreamRequestEnabled = true;
+                break;
 
-                drawableToShow = R.drawable.block;
+            case "ready":
+                drawableToShow = R.drawable.live_green;
                 liveStreamRequestEnabled = true;
 
-            }
+                if (liveBroadcastRequested)
+                    startYouTubeLiveViewActivity();
 
-        } else {
+                break;
 
-            switch (liveBroadcastStatus) {
+            case "not available":
+                drawableToShow = R.drawable.block;
+                liveStreamRequestEnabled = false;
+                break;
 
-                case "idle":
-                    drawableToShow = R.drawable.live;
-                    liveStreamRequestEnabled = true;
-                    break;
-
-                case "creating":
-                    drawableToShow = R.drawable.live_yellow;
-                    liveStreamRequestEnabled = true;
-                    break;
-
-                case "ready":
-                    drawableToShow = R.drawable.live_green;
-                    liveStreamRequestEnabled = true;
-
-                    if (liveBroadcastRequested)
-                        startYouTubeLiveViewActivity();
-
-                    break;
-
-                case "not available":
-                    drawableToShow = R.drawable.block;
-                    liveStreamRequestEnabled = false;
-                    break;
-
-                default:
-                    drawableToShow = R.drawable.waiting_data;
-                    liveStreamRequestEnabled = false;
-                    break;
-            }
+            default:
+                drawableToShow = R.drawable.waiting_data;
+                liveStreamRequestEnabled = false;
+                break;
 
         }
 

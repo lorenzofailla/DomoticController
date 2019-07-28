@@ -4,22 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.apps.lore_f.domoticcontroller.DeviceViewActivity">
+    tools:context="com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity">
 
-    <TextView
-        android:id="@+id/TXV___DEVICEVIEW___HOSTNAME"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/TBR___DEVICEVIEW___TOOLBAR"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:title="@string/DEVICEVIEW_ACTIONBAR_TITLE"/>
 
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/PGR___DEVICEVIEW___MAINPAGER"
-        android:layout_below="@+id/TXV___DEVICEVIEW___HOSTNAME"
+        android:layout_below="@+id/TBR___DEVICEVIEW___TOOLBAR"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

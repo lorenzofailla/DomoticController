@@ -1,18 +1,15 @@
 package com.apps.lore_f.domoticcontroller;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 import static com.apps.lore_f.domoticcontroller.Developer_Keys.YOUTUBE;
 
 public class YouTubeLiveViewActivity extends YouTubeBaseActivity {

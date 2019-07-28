@@ -1,7 +1,7 @@
 package loref.android.apps.androidtcpcomm;
 
 import android.os.AsyncTask;
-import android.support.v4.os.AsyncTaskCompat;
+import androidx.core.os.AsyncTaskCompat;
 import android.util.Log;
 
 import java.io.BufferedInputStream;

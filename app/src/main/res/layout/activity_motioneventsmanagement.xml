@@ -1,61 +1,257 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.apps.lore_f.domoticcontroller.activities.MotionEventsManagementActivity">
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/CLA___VSEVENTVIEWERFRAGMENT___FILTERS"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/TBR___MOTIONEVENTS_MANAGEMENT___TOOLBAR"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:title="@string/MOTIONEVENTSMANAGEMENT_ACTIONBAR_TITLE" />
+
+    <RelativeLayout
+        android:id="@+id/RLA___MOTIONEVENTS_MANAGEMENT___DATA"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="3dp">
+        android:layout_below="@+id/TBR___MOTIONEVENTS_MANAGEMENT___TOOLBAR">
 
-        <TextView
-            android:id="@+id/TXV___VSEVENTVIEWERFRAGMENT___FILTERS_LABEL_HEADER"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/MOTIONEVENTSMANAGEMENT_FILTERS_LABEL"/>
-
-        <LinearLayout
+        <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:id="@+id/LLA___VSEVENTVIEWERFRAGMENT___FILTERBUTTONS"
-            app:layout_constraintTop_toBottomOf="@+id/TXV___VSEVENTVIEWERFRAGMENT___FILTERS_LABEL_HEADER">
+            android:padding="3dp">
 
-            <Button
-                android:id="@+id/BTN___VSEVENTVIEWERFRAGMENT___FILTER-ALL"
-                android:layout_width="@dimen/filter_button_width"
-                android:layout_height="@dimen/filter_button_height"
-                android:text="@string/MOTIONEVENTSMANAGEMENT_FILTER_BUTTON_ALL"
-                />
+            <TableRow>
 
-            <Button
-                android:id="@+id/BTN___VSEVENTVIEWERFRAGMENT___FILTER-NEWONLY"
-                android:layout_width="@dimen/filter_button_width"
-                android:layout_height="@dimen/filter_button_height"
-                android:text="@string/MOTIONEVENTSMANAGEMENT_FILTER_BUTTON_NEW"/>
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSHOUR_LABEL"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MOTIONEVENTSMANAGEMENT_HOUR"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSHOUR_VALUE"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
 
-    </android.support.constraint.ConstraintLayout>
+            </TableRow>
 
-    <TextView
-        android:id="@+id/TXV___VSEVENTVIEWERFRAGMENT___EVENTLISTHEADER"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/MOTIONEVENTSMANAGEMENT_SELECT_EVENT"
-        android:padding="3dp"
-        app:layout_constraintTop_toBottomOf="@+id/CLA___VSEVENTVIEWERFRAGMENT___FILTERS"/>
+            <TableRow>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/RWV___VSEVENTVIEWERFRAGMENT___EVENTS"
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSTODAY_LABEL"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MOTIONEVENTSMANAGEMENT_TODAY"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSTODAY_VALUE"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSWEEK_LABEL"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MOTIONEVENTSMANAGEMENT_WEEK"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSWEEK_VALUE"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSMONTH_LABEL"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MOTIONEVENTSMANAGEMENT_MONTH"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSMONTH_VALUE"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSTOTAL_LABEL"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MOTIONEVENTSMANAGEMENT_TOTAL"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+                <TextView
+                    android:id="@+id/TXV___MOTIONEVENTS_MANAGEMENT___EVENTSTOTAL_VALUE"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
+            </TableRow>
+
+        </TableLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/RLA___MOTIONEVENTS_MANAGEMENT___FILTERS"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:padding="3dp"
-        app:layout_constraintTop_toBottomOf="@+id/TXV___VSEVENTVIEWERFRAGMENT___EVENTLISTHEADER" />
+        android:layout_below="@+id/RLA___MOTIONEVENTS_MANAGEMENT___DATA">
 
-</android.support.constraint.ConstraintLayout>
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="3dp">
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERHEADER_TIME" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                    android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERHEADER_STATUS" />
+
+                <!--TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="2dp"
+                    android:text="@string/GENERIC_PLACEHOLDER_WAITING" /-->
+
+            </TableRow>
+
+            <TableRow>
+
+                <RadioGroup>
+
+                    <RadioButton
+                        android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_ANY"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_ANY"
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+
+                    <RadioButton
+                        android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_LASTHOUR"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_LASTHOUR"
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+
+                    <RadioButton
+                        android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY"
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+
+                    <RadioButton
+                        android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISWEEK"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISWEEK"
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+
+                    <RadioButton
+                        android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISMONTH"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_THISMONTH"
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+
+                </RadioGroup>
+
+                <RadioGroup>
+
+                    <RadioButton
+                        android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_ANY"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_ANY"
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+
+                    <RadioButton
+                        android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW"
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+
+                    <RadioButton
+                        android:id="@+id/RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW"
+                        android:onClick="manageMotionEventsFilterRadioButtonClick"/>
+
+                </RadioGroup>
+
+                <!--RadioGroup>
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="porco dio"/>
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="porco dio"/>
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="porco dio"/>
+
+
+                </RadioGroup-->
+
+            </TableRow>
+
+        </TableLayout>
+
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/RWV___MOTIONEVENTS_MANAGEMENT___EVENTS"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/RLA___MOTIONEVENTS_MANAGEMENT___FILTERS"
+        android:padding="3dp" />
+
+</RelativeLayout>

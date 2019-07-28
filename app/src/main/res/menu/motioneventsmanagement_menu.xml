@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/MENU_MOTIONEVENTMANAGEMENTS_Filter"
+        android:icon="@drawable/filter"
+        android:title="@string/MENU_MOTIONEVENTSMANAGEMENT_FILTER"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/MENU_MOTIONEVENTMANAGEMENTS_ShowData"
+        android:icon="@drawable/clear_log"
+        android:title="@string/MENU_MOTIONEVENTSMANAGEMENT_SHOWDATA"
+        app:showAsAction="ifRoom"/>
+
+</menu>
