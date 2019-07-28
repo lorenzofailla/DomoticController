@@ -24,7 +24,7 @@ public class MotionEventsRepository {
     }
 
     LiveData<List<MotionEvent>> getEventsList(String whereClause) {
-        return motionEventsDao.getEventsList("");
+        return motionEventsDao.getEventsList(whereClause);
     }
 
     MotionEventsRepository(Application application) {

@@ -282,6 +282,10 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         File thumbnailDir = new File(downloadDirectoryRoot, THUMB_SUBDIR);
         if (!thumbnailDir.exists()) thumbnailDir.mkdir();
 
+        motionEventsViewModel = ViewModelProviders.of(this).get(MotionEventsViewModel.class);
+
+        updateEvents();
+
         motionEventsViewModel.countEvents(getTimeDefinition(timeSpanDef.HOUR)).observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
@@ -367,6 +371,8 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
             result += String.format(" AND timestamp>%s", filterByTimestampVALUE);
         }
 
+        Log.d(TAG, result);
+
         return result;
 
     }
@@ -411,7 +417,7 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         eventsRecyclerView.setAdapter(adapter);
         eventsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        motionEventsViewModel = ViewModelProviders.of(this).get(MotionEventsViewModel.class);
+
         motionEventsViewModel.getEventsList(getSQLWhereClause()).observe(this, new Observer<List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent>>() {
             @Override
             public void onChanged(@Nullable final List<com.apps.lore_f.domoticcontroller.room.database.motionevents.MotionEvent> events) {
