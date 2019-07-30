@@ -232,7 +232,6 @@
                         android:layout_height="wrap_content"
                         android:text="porco dio"/>
 
-
                 </RadioGroup-->
 
             </TableRow>
@@ -247,7 +246,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/RLA___MOTIONEVENTS_MANAGEMENT___DATA"
         android:padding="2dp"
-        android:style="@style/TextAppearance.AppCompat.Body2"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
 
     <androidx.recyclerview.widget.RecyclerView

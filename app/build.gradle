@@ -45,6 +45,7 @@ dependencies {
     // Lifecycle components
     implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.archLifecycleVersion"
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$rootProject.archLifecycleVersion"
+    implementation files('C:\\Users\\lore_f\\java_lib\\YouTubeAndroidPlayerApi-1.2.2\\libs\\YouTubeAndroidPlayerApi.jar')
 
 }
 
