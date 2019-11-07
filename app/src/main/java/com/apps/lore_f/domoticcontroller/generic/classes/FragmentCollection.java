@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment;
 
 import java.util.HashMap;
 
-public class FragmentsCollection {
+public class FragmentCollection {
 
     private class FragmentInfo {
 
@@ -81,7 +81,7 @@ public class FragmentsCollection {
 
     }
 
-    public int getFragmentsNumber(){
+    public int getFragmentsCount(){
 
         return fragments.size();
 
@@ -93,5 +93,20 @@ public class FragmentsCollection {
 
     }
 
+    public Fragment getFragmentByType(FragmentType type){
+
+        for (int i = 0; i<getFragmentsCount(); i++){
+
+            FragmentInfo info = fragments.get(i);
+
+            if (info.getType().equals(type))
+                return info.getFragment();
+
+
+        }
+
+        return null;
+
+    }
 
 }

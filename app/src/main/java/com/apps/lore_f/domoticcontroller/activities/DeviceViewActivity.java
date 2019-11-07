@@ -5,37 +5,33 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
-
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.NotificationCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
-import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.widget.EditText;
 
-import com.apps.lore_f.domoticcontroller.DeviceSSHFragment;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
 import com.apps.lore_f.domoticcontroller.DownloadFileFromDataSlots;
 import com.apps.lore_f.domoticcontroller.FileViewerFragment;
 import com.apps.lore_f.domoticcontroller.R;
-import com.apps.lore_f.domoticcontroller.VideoCameraViewerFragment;
 import com.apps.lore_f.domoticcontroller.fragments.DeviceInfoFragment;
 import com.apps.lore_f.domoticcontroller.fragments.TorrentViewerFragment;
+import com.apps.lore_f.domoticcontroller.fragments.VideoCameraViewerFragment;
 import com.apps.lore_f.domoticcontroller.fragments.WakeOnLanFragment;
-import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;
+import com.apps.lore_f.domoticcontroller.generic.classes.FragmentCollection;
 import com.apps.lore_f.domoticcontroller.generic.classes.Message;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.FileInfo;
-import com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -49,19 +45,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.zip.DataFormatException;
 
 import static apps.android.loref.GeneralUtilitiesLibrary.decode;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
+import static com.apps.lore_f.domoticcontroller.DefaultValues.LOG_FIREBASEDB_NODATA;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentCollection.FragmentType.CAMERA_VIEWER;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentCollection.FragmentType.DEVICE_INFO;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentCollection.FragmentType.DIRECTORY_NAVIGATOR;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentCollection.FragmentType.TORRENT_MANAGER;
+import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentCollection.FragmentType.WOL_MANAGER;
 
-import static com.apps.lore_f.domoticcontroller.DefaultValues.*;
-import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.CAMERA_VIEWER;
-import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.DEVICE_INFO;
-import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.DIRECTORY_NAVIGATOR;
-import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.TORRENT_MANAGER;
-import static com.apps.lore_f.domoticcontroller.generic.classes.FragmentsCollection.FragmentType.WOL_MANAGER;
-
-public class DeviceViewActivity extends AppCompatActivity {
+public class DeviceViewActivity extends FragmentActivity {
 
     private static final String TAG = "DeviceViewActivity";
 
@@ -80,13 +76,13 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     public static final String DEVICE_TO_CONNECT_TAG = "__DEVICE_TO_CONNECT";
     public static final String STATICDATA_JSON_TAG = "__STATICDATA_JSON";
+    public static final String STATUSDATA_JSON_TAG = "__STATUSDATA_JSON";
+    public static final String NETWORKDATA_JSON_TAG = "__NETWORKDATA_JSON";
 
     public static final String ACTIONTYPE_TAG = "__ACTION_TYPE";
     public static final int ACTIONTYPE_NOTSPECIFIED = -1;
     public static final int ACTIONTYPE_VIEWALL = 1;
     public static final int ACTIONTYPE_CAMERAMONITOR = 2;
-
-    public static final String IPADDRESSESLIST_TAG = "__IP_ADDRESSES_LIST";
 
     private int sessionMode = UNSPECIFIED_INT_VALUE;
     private int connectionType = UNSPECIFIED_INT_VALUE;
@@ -95,21 +91,18 @@ public class DeviceViewActivity extends AppCompatActivity {
     //region GESTIONE FRAGMENTS
 
     private CollectionPagerAdapter collectionPagerAdapter;
-    private FragmentsCollection fragments = new FragmentsCollection();
-
-    private DeviceInfoFragment deviceInfoFragment;
-    private TorrentViewerFragment torrentViewerFragment;
-    private FileViewerFragment fileViewerFragment;
-    private WakeOnLanFragment wakeOnLanFragment;
-    private DeviceSSHFragment deviceSSHFragment;
-    private String[] cameraNames;
-    private String[] cameraIDs;
-    private int nOfAvailableCameras;
+    private FragmentCollection fragments = new FragmentCollection();
 
     private int deviceInfoFragmentIndex = 0;
     private int firstCameraFragmentIndex = 0;
 
     private String staticDataJSON;
+    private HashMap<String, Object> statusDataMap;
+    private String networkDataJSON;
+
+    public String getStaticDataJSON() {
+        return this.staticDataJSON;
+    }
 
     private ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
 
@@ -122,7 +115,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void onPageSelected(int position) {
 
             Log.i(TAG, String.format("ViewPager.OnPageChangeListener.onPageSelected(%d)", position));
-            collectionPagerAdapter.initializeFragmentAction(position);
+            //collectionPagerAdapter.initializeFragmentAction(position);
 
         }
 
@@ -130,74 +123,46 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void onPageScrollStateChanged(int state) {
 
         }
+
     };
 
-    public class CollectionPagerAdapter extends FragmentPagerAdapter {
+    public class CollectionPagerAdapter extends FragmentStatePagerAdapter {
 
         CollectionPagerAdapter(FragmentManager fragmentManager) {
-            super(fragmentManager);
+            super(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         }
 
         @Override
         public Fragment getItem(int i) {
 
             Log.i(TAG, String.format("getItem(%d)", i));
-            initializeFragmentAction(i);
             return fragments.getFragment(i);
 
         }
 
         @Override
         public int getCount() {
-
-            return fragments.getFragmentsNumber();
+            return fragments.getFragmentsCount();
 
         }
 
-        public void initializeFragmentAction(int fragmentPosition) {
+        public TorrentViewerFragment getTorrentViewerFragment() {
 
-            switch (fragments.getFragmentType(fragmentPosition)) {
+            return (TorrentViewerFragment) fragments.getFragmentByType(TORRENT_MANAGER);
 
-                case DEVICE_INFO:
-                    if (deviceInfoFragment != null) {
-                        deviceInfoFragment.refreshView();
-                    }
-                    break;
+        }
 
-                case DIRECTORY_NAVIGATOR:
+        public DeviceInfoFragment getTDeviceInfoFragment() {
 
-                    if (fileViewerFragment.currentDirName == null) {
-                        // invia al dispositivo remoto la richiesta di conoscere la directory corrente
-                        sendCommandToDevice(new Message("__get_homedir", "null", thisDevice));
-                    }
-
-                    break;
-
-                case TORRENT_MANAGER:
-                    requestTorrentsData();
-                    break;
-
-                case WOL_MANAGER:
-                    // no action
-                    break;
-
-                case CAMERA_VIEWER:
-                    /*
-                     * Calls
-                     * */
-
-                    VideoCameraViewerFragment f = (VideoCameraViewerFragment) fragments.getFragment(fragmentPosition);
-                    f.manageLiveBroadcastStatus();
-
-            }
+            return (DeviceInfoFragment) fragments.getFragmentByType(DEVICE_INFO);
 
         }
 
     }
 
-    private void initFragments() {
+    private void createFragments() {
 
-        DeviceDataParser deviceData = new DeviceDataParser();
+        DeviceData deviceData = new DeviceData();
 
         if (!deviceData.setStaticDataJSON(staticDataJSON)) {
             finish();
@@ -222,17 +187,13 @@ public class DeviceViewActivity extends AppCompatActivity {
 
         int count = 0;
 
-        fragments.clearFragments();
-
         //inizializza i fragment
 
         // WakeOnLanFragment
         if (deviceData.isHasWakeOnLan()) {
 
-            wakeOnLanFragment = new WakeOnLanFragment();
-            wakeOnLanFragment.parent = this;
-
-            fragments.add(count, wakeOnLanFragment, WOL_MANAGER, "Wake-On-Lan");
+            WakeOnLanFragment wakeOnLanFragment = new WakeOnLanFragment();
+            fragments.add(count, wakeOnLanFragment, WOL_MANAGER, "Wake-on-Lan");
             count++;
 
         }
@@ -240,10 +201,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         // TorrentViewerFragment
         if (deviceData.isHasTorrent()) {
 
-            torrentViewerFragment = new TorrentViewerFragment();
-            torrentViewerFragment.parent = this;
-
-            fragments.add(count, torrentViewerFragment, TORRENT_MANAGER, "Transmission controller");
+            TorrentViewerFragment torrentViewerFragment = new TorrentViewerFragment();
+            fragments.add(count, torrentViewerFragment, TORRENT_MANAGER, "Torrent management");
             count++;
 
         }
@@ -251,10 +210,9 @@ public class DeviceViewActivity extends AppCompatActivity {
         // FileViewerFragment
         if (deviceData.isHasFileManager()) {
 
-            fileViewerFragment = new FileViewerFragment();
-            fileViewerFragment.parent = this;
+            FileViewerFragment fileViewerFragment = new FileViewerFragment();
 
-            fragments.add(count, fileViewerFragment, DIRECTORY_NAVIGATOR, "Directory Navigator");
+            fragments.add(count, fileViewerFragment, DIRECTORY_NAVIGATOR, "File management");
             count++;
 
         }
@@ -262,10 +220,9 @@ public class DeviceViewActivity extends AppCompatActivity {
         // DeviceInfoFragment
         if (createDeviceInfoFragment) {
 
-            deviceInfoFragment = new DeviceInfoFragment();
-            deviceInfoFragment.setParent(this);
+            DeviceInfoFragment deviceInfoFragment = new DeviceInfoFragment();
 
-            fragments.add(count, deviceInfoFragment, DEVICE_INFO, "Device info");
+            fragments.add(count, deviceInfoFragment, DEVICE_INFO, "Device manager");
             deviceInfoFragmentIndex = count;
 
             count++;
@@ -289,9 +246,8 @@ public class DeviceViewActivity extends AppCompatActivity {
                     temp.setCameraID(cameraID);
                     temp.setCameraName(cameras.getJSONObject(i).getString("Name"));
                     temp.setCameraFullID(cameras.getJSONObject(i).getString("FullID"));
-                    temp.setParent(this);
 
-                    fragments.add(count, temp, CAMERA_VIEWER, "Camera " + cameraID);
+                    fragments.add(count, temp, CAMERA_VIEWER, "Videosurveillance-" + cameraID);
 
                     if (i == 0) {
 
@@ -303,6 +259,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                 }
 
+
             } catch (JSONException e) {
 
                 e.printStackTrace();
@@ -313,13 +270,49 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
-    public void updateWOLFragment() {
+    private void refreshTorrentViewerFragment(String torrentDataJSON) {
 
-        if (this.wakeOnLanFragment != null) {
+        TorrentViewerFragment fragment = collectionPagerAdapter.getTorrentViewerFragment();
 
-            this.wakeOnLanFragment.updateContent(staticDataJSON);
+        if (fragment != null) {
+            fragment.updateContent(torrentDataJSON);
+        }
+
+    }
+
+    private void refreshDeviceInfoFragmentGeneralStatus(HashMap<String, Object> generalStatusDataMap) {
+
+        DeviceInfoFragment deviceInfoFragment = collectionPagerAdapter.getTDeviceInfoFragment();
+
+        if (deviceInfoFragment != null) {
+
+            if (deviceInfoFragment.getDeviceData().setStatusDataMap(generalStatusDataMap))
+                deviceInfoFragment.refreshView();
 
         }
+
+    }
+
+    private void refreshDeviceInfoFragmentNetworkStatus(String networkStatusDataJSON) {
+
+        DeviceInfoFragment deviceInfoFragment = collectionPagerAdapter.getTDeviceInfoFragment();
+
+        if (deviceInfoFragment != null) {
+
+            if (deviceInfoFragment.getDeviceData().setNetworkDataJSON(networkStatusDataJSON))
+                deviceInfoFragment.refreshView();
+
+        }
+
+    }
+
+    private void refreshDeviceInfoFragment(){
+
+        if(statusDataMap != null)
+            refreshDeviceInfoFragmentGeneralStatus(statusDataMap);
+
+        if(!networkDataJSON.equals(""))
+            refreshDeviceInfoFragmentNetworkStatus(networkDataJSON);
 
     }
 
@@ -374,22 +367,14 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            if (dataSnapshot != null) {
+            if (dataSnapshot.getValue() != null) {
 
-                String generalStatusJSON = dataSnapshot.getValue().toString();
-
-                if (deviceInfoFragment != null) {
-
-                    if (deviceInfoFragment.getDeviceData().setStatusDataJSON(generalStatusJSON))
-                        deviceInfoFragment.refreshView();
-
-                }
+                statusDataMap = (HashMap<String, Object>) dataSnapshot.getValue();
+                refreshDeviceInfoFragmentGeneralStatus(statusDataMap);
 
             } else {
 
-                String logData;
-                logData = LOG_FIREBASEDB_NODATA;
-                Log.d(TAG, "generalStatusValueEventListener - " + logData);
+                Log.d(TAG, "generalStatusValueEventListener - " + LOG_FIREBASEDB_NODATA);
 
             }
 
@@ -399,6 +384,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         public void onCancelled(DatabaseError databaseError) {
 
         }
+
     };
 
     /*
@@ -409,22 +395,14 @@ public class DeviceViewActivity extends AppCompatActivity {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            if (dataSnapshot != null) {
+            if (dataSnapshot.getValue() != null) {
 
-                String networkStatusJSON = dataSnapshot.getValue().toString();
-
-                if (deviceInfoFragment != null) {
-
-                    if (deviceInfoFragment.getDeviceData().setNetworkDataJSON(networkStatusJSON)) ;
-                    deviceInfoFragment.refreshView();
-
-                }
+                networkDataJSON = dataSnapshot.getValue().toString();
+                refreshDeviceInfoFragmentNetworkStatus(networkDataJSON);
 
             } else {
 
-                String logData;
-                logData = LOG_FIREBASEDB_NODATA;
-                Log.d(TAG, "networkStatusValueEventListener - " + logData);
+                Log.d(TAG, "networkStatusValueEventListener - " + LOG_FIREBASEDB_NODATA);
 
             }
 
@@ -507,6 +485,15 @@ public class DeviceViewActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle instanceState) {
+        super.onSaveInstanceState(instanceState);
+        instanceState.putString(DEVICE_TO_CONNECT_TAG, remoteDeviceName);
+        instanceState.putString(STATICDATA_JSON_TAG, staticDataJSON);
+        instanceState.putString(STATUSDATA_JSON_TAG, statusDataMap.toString());
+        instanceState.putString(NETWORKDATA_JSON_TAG, networkDataJSON);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
@@ -536,20 +523,70 @@ public class DeviceViewActivity extends AppCompatActivity {
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
 
+        setContentView(R.layout.activity_device_view);
+
         action = intent.getIntExtra(ACTIONTYPE_TAG, UNSPECIFIED_INT_VALUE);
-        remoteDeviceName = intent.getStringExtra(DEVICE_TO_CONNECT_TAG);
 
         // recupera la modalità di connessione
         connectionType = extras.getInt(CONNECTIONMETHOD_TAG);
 
-        staticDataJSON = extras.getString(STATICDATA_JSON_TAG);
+        // se disponibili, recupera i parametri dallo stato salvato, altrimenti dagli extra dell'Intent con cui l'Activity è stata chiamata
+        if (savedInstanceState != null) {
+            staticDataJSON = savedInstanceState.getString(STATICDATA_JSON_TAG, extras.getString(STATICDATA_JSON_TAG, ""));
+            //statusDataMap = savedInstanceState.get(STATUSDATA_JSON_TAG, "");
+            networkDataJSON = savedInstanceState.getString(NETWORKDATA_JSON_TAG, "");
 
-        initFragments();
+            remoteDeviceName = savedInstanceState.getString(DEVICE_TO_CONNECT_TAG, extras.getString(DEVICE_TO_CONNECT_TAG, ""));
+        } else {
+            staticDataJSON = extras.getString(STATICDATA_JSON_TAG, "");
+            //statusDataMap = "";
+            networkDataJSON = "";
+            remoteDeviceName = extras.getString(DEVICE_TO_CONNECT_TAG, "");
+
+        }
 
         // crea il CollectionPagerAdapter
+        createFragments();
         collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
-        setContentView(R.layout.activity_device_view);
+        refreshDeviceInfoFragment();
+
+        // set up the toolbar of this activity
+        Toolbar toolbar = findViewById(R.id.TBR___DEVICEVIEW___TOOLBAR);
+        toolbar.inflateMenu(R.menu.deviceview_menu);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                switch (item.getItemId()) {
+
+                    case R.id.MENU_DEVICEVIEW_SHUTDOWN:
+                        shutdownHost();
+                        return true;
+
+                    case R.id.MENU_DEVICEVIEW_REBOOT:
+                        rebootHost();
+                        return true;
+
+                    default:
+                        return false;
+
+                }
+            }
+
+        });
+
+        // imposta il ViewPager per la gestione dei fragment
+        ViewPager viewPager = findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
+        viewPager.setAdapter(collectionPagerAdapter);
+        viewPager.addOnPageChangeListener(onPageChangeListener);
+
+        // se l'azione specificata non è "monitor", posiziona il ViewPager sul fragment deviceInfoFragment
+        if (action != ACTIONTYPE_CAMERAMONITOR) {
+
+            viewPager.setCurrentItem(deviceInfoFragmentIndex);
+
+        }
 
 
             /*
@@ -598,7 +635,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
         // inizializza i fragments
-        initFragments();
+        createFragments();
 
         // crea il CollectionPagerAdapter
         collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
@@ -612,10 +649,7 @@ public class DeviceViewActivity extends AppCompatActivity {
         super.onResume();
 
         // definisce il nome del dispositivo locale
-        thisDevice = Settings.Secure.getString(getContentResolver(), "bluetooth_name")+"_"+System.currentTimeMillis();
-
-        // set up the toolbar of this activity
-        Toolbar toolbar = (Toolbar) findViewById(R.id.TBR___DEVICEVIEW___TOOLBAR);
+        thisDevice = Settings.Secure.getString(getContentResolver(), "bluetooth_name") + "_" + System.currentTimeMillis();
 
         if (connectionType == CONNECTIONMETHOD_FIREBASE || connectionType == CONNECTIONMETHOD_FIREBASE_CRITICAL) {
             // imposta il metodo di comunicazione via Firebase DB
@@ -641,26 +675,25 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             } else {
 
+                // set up the toolbar of this activity
+                Toolbar toolbar = (Toolbar) findViewById(R.id.TBR___DEVICEVIEW___TOOLBAR);
                 toolbar.setTitle(remoteDeviceName);
-                toolbar.inflateMenu(R.menu.deviceview_menu);
 
             }
 
+            collectionPagerAdapter.getTDeviceInfoFragment().setListener(new DeviceInfoFragment.DeviceInfoFragmentListener() {
+                @Override
+                public void onUpdateRequest() {
+
+                    refreshDeviceInfoFragment();
+
+                }
+
+            });
 
         }
 
-        // imposta il ViewPager per la gestione dei fragment
-        ViewPager viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
-        viewPager.setAdapter(collectionPagerAdapter);
-        viewPager.addOnPageChangeListener(onPageChangeListener);
 
-        // se l'azione specificata non è "monitor", posiziona il ViewPager sul fragment deviceInfoFragment
-
-        if (action != ACTIONTYPE_CAMERAMONITOR) {
-
-            viewPager.setCurrentItem(deviceInfoFragmentIndex);
-
-        }
 
 
 /*
@@ -686,12 +719,14 @@ public class DeviceViewActivity extends AppCompatActivity {
         // associa un ChildEventListener al nodo per poter processare i messaggi in ingresso
         incomingMessagesRef.addChildEventListener(newCommandsToProcess);
 
-        // rimuove i listener dai nodi
+        // attacca i listener ai nodi
         String generalStatusNode = String.format("Devices/%s/%s/StatusData", groupName, remoteDeviceName);
         String networkStatusNode = String.format("Devices/%s/%s/NetworkData", groupName, remoteDeviceName);
 
         FirebaseDatabase.getInstance().getReference(generalStatusNode).addValueEventListener(generalStatusValueEventListener);
         FirebaseDatabase.getInstance().getReference(networkStatusNode).addValueEventListener(networkStatusValueEventListener);
+
+
 
     }
 
@@ -727,6 +762,8 @@ public class DeviceViewActivity extends AppCompatActivity {
         ViewPager viewPager = (ViewPager) findViewById(R.id.PGR___DEVICEVIEW___MAINPAGER);
         viewPager.removeOnPageChangeListener(onPageChangeListener);
 
+        collectionPagerAdapter.getTDeviceInfoFragment().setListener(null);
+
         handler = null;
 
     }
@@ -754,7 +791,6 @@ public class DeviceViewActivity extends AppCompatActivity {
                 break;
 
 
-
             case "TORRENT_STARTED":
             case "TORRENT_STOPPED":
             case "TORRENT_REMOVED":
@@ -767,13 +803,13 @@ public class DeviceViewActivity extends AppCompatActivity {
 
             case "TORRENT_DATA":
 
-                if (torrentViewerFragment.viewCreated)
-                    torrentViewerFragment.updateContent(decodedBody);
+                refreshTorrentViewerFragment(decodedBody);
 
                 break;
 
             case "HOME_DIRECTORY":
 
+                /*
                 if (fileViewerFragment != null) {
 
                     fileViewerFragment.currentDirName = decodedBody.replace("\n", "");
@@ -782,19 +818,20 @@ public class DeviceViewActivity extends AppCompatActivity {
 
                     // invia un instant message con la richiesta del contenuto della directory home ricevuta
                     sendCommandToDevice(new Message("__get_directory_content", decodedBody, thisDevice));
-                }
+                }*/
 
                 break;
 
             case "DIRECTORY_CONTENT":
 
+                /*
                 if (fileViewerFragment != null) {
 
                     fileViewerFragment.rawDirData = decodedBody;
                     if (fileViewerFragment.viewCreated)
                         fileViewerFragment.updateContent();
                 }
-
+                */
                 break;
 
             case "GENERIC_NOTIFICATION":
@@ -835,7 +872,7 @@ public class DeviceViewActivity extends AppCompatActivity {
                 String frameData = decodedBody.substring(7);
 
                 int cameraIndex = Integer.parseInt(frameCameraID);
-                VideoCameraViewerFragment fragment = (VideoCameraViewerFragment) fragments.getFragment(firstCameraFragmentIndex + cameraIndex - 1);
+                VideoCameraViewerFragment fragment = (VideoCameraViewerFragment) getSupportFragmentManager().findFragmentById(firstCameraFragmentIndex + cameraIndex - 1);
 
                 try {
                     fragment.refreshFrame((decompress(Base64.decode(frameData, Base64.DEFAULT))));
@@ -1018,6 +1055,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     public void manageFileViewerFragmentRequest(FileInfo fileInfo) {
 
+        /*
         if (fileInfo.getFileInfoType() == FileInfo.FileInfoType.TYPE_FILE) {
 
             // attiva la procedura di upload del file da parte del dispositivo remoto sulla piattaforma Firebase Storage
@@ -1070,7 +1108,7 @@ public class DeviceViewActivity extends AppCompatActivity {
             sendCommandToDevice(new Message("__get_directory_content", fileViewerFragment.currentDirName, thisDevice));
 
         }
-
+        */
     }
 
     public void uploadAsDataSlot(FileInfo fileInfo) {
@@ -1089,6 +1127,7 @@ public class DeviceViewActivity extends AppCompatActivity {
 
     }
 
+    /*
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
@@ -1112,5 +1151,6 @@ public class DeviceViewActivity extends AppCompatActivity {
         }
 
     }
+    */
 
 }

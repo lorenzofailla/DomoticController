@@ -2,7 +2,6 @@ package com.apps.lore_f.domoticcontroller.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +10,10 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
+import androidx.fragment.app.Fragment;
+
 import com.apps.lore_f.domoticcontroller.R;
+import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
 import com.apps.lore_f.domoticcontroller.generic.dataadapters.TorrentsListAdapter;
 import com.apps.lore_f.domoticcontroller.generic.dataobjects.TorrentInfo;
 
@@ -25,14 +26,12 @@ import java.util.List;
 
 public class TorrentViewerFragment extends Fragment {
 
-public int nOfTorrents;
-
-    private static final String TAG="TorrentViewerFragment";
+    private static final String TAG = "TorrentViewerFragment";
+    public int nOfTorrents;
 
     private ListView torrentsListView;
     private TextView mainInfoTextView;
-
-    public boolean viewCreated=false;
+    public boolean viewCreated = false;
 
     public DeviceViewActivity parent;
 
@@ -53,13 +52,15 @@ public int nOfTorrents;
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_torrent_viewer, container, false);
-        fragmentView=view;
+        fragmentView = view;
+
+        parent = (DeviceViewActivity) getActivity();
 
         // inizializza l'handler ai controlli
-        torrentsListView = (ListView) view.findViewById(R.id.LVW___TORRENTSLIST___MAIN);
-        mainInfoTextView = (TextView) view.findViewById(R.id.TXV___TORRENTSVIEWER_INFO);
+        torrentsListView = view.findViewById(R.id.LVW___TORRENTSLIST___MAIN);
+        mainInfoTextView = view.findViewById(R.id.TXV___TORRENTSVIEWER_INFO);
 
-        ImageButton addTorrentButton = (ImageButton) view.findViewById(R.id.BTN___TORRENTSVIEWER_ADDTORRENT);
+        ImageButton addTorrentButton = view.findViewById(R.id.BTN___TORRENTSVIEWER_ADDTORRENT);
         addTorrentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,7 +70,7 @@ public int nOfTorrents;
             }
         });
 
-        ImageButton refreshButton = (ImageButton) view.findViewById(R.id.BTN___TORRENTSVIEWER_REFRESH);
+        ImageButton refreshButton = view.findViewById(R.id.BTN___TORRENTSVIEWER_REFRESH);
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,7 +80,9 @@ public int nOfTorrents;
             }
         });
 
-        viewCreated=true;
+        refreshButton.callOnClick();
+
+        viewCreated = true;
         return view;
 
     }
@@ -94,17 +97,17 @@ public int nOfTorrents;
     public void onDetach() {
         super.onDetach();
 
-        ImageButton addTorrentButton = (ImageButton) fragmentView.findViewById(R.id.BTN___TORRENTSVIEWER_ADDTORRENT);
-        ImageButton refreshButton = (ImageButton) fragmentView.findViewById(R.id.BTN___TORRENTSVIEWER_REFRESH);
+        ImageButton addTorrentButton = fragmentView.findViewById(R.id.BTN___TORRENTSVIEWER_ADDTORRENT);
+        ImageButton refreshButton = fragmentView.findViewById(R.id.BTN___TORRENTSVIEWER_REFRESH);
 
         addTorrentButton.setOnClickListener(null);
         refreshButton.setOnClickListener(null);
 
     }
 
-    public void updateContent(String dataJSON){
+    public void updateContent(String dataJSON) {
 
-        if(!viewCreated)
+        if (!viewCreated)
             return;
 
         List<TorrentInfo> torrents = new ArrayList<TorrentInfo>();
@@ -116,7 +119,7 @@ public int nOfTorrents;
 
             JSONObject generalData = data.getJSONObject("TorrentData");
 
-            if(generalData.has("Torrents")) {
+            if (generalData.has("Torrents")) {
 
                 JSONArray torrentsData = generalData.getJSONArray("Torrents");
 
@@ -140,7 +143,7 @@ public int nOfTorrents;
 
         } catch (JSONException e) {
 
-            Log.e(TAG, "Unable to update the view. JSON data: "+ dataJSON);
+            Log.e(TAG, "Unable to update the view. JSON data: " + dataJSON);
 
         }
 

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/MENU_DEVICEVIEW_Reboot"
+    <item android:id="@+id/MENU_DEVICEVIEW_REBOOT"
         android:icon="@drawable/reboot"
         android:title="@string/DEVICEVIEW_MENU_REBOOT"
         app:showAsAction="ifRoom"/>

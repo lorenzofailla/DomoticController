@@ -35,10 +35,6 @@ public class DeviceInfoFragment extends Fragment {
 
     private DeviceViewActivity parent;
 
-    public void setParent(DeviceViewActivity p) {
-        parent = p;
-    }
-
     private DeviceDataParser deviceData = new DeviceDataParser();
 
     public DeviceDataParser getDeviceData() {
@@ -155,6 +151,16 @@ public class DeviceInfoFragment extends Fragment {
 
     };
 
+    public interface DeviceInfoFragmentListener{
+        void onUpdateRequest();
+    }
+
+    private DeviceInfoFragmentListener listener;
+
+    public void setListener(DeviceInfoFragmentListener listener){
+        this.listener=listener;
+    }
+
     // VPN management
     private boolean isVPNConnected;
 
@@ -236,6 +242,8 @@ public class DeviceInfoFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_device_info, container, false);
 
+        parent=(DeviceViewActivity) getActivity();
+
         // inizializza l'handler alla view, in questo modo i componenti possono essere ritrovati
         fragmentView = view;
 
@@ -252,6 +260,9 @@ public class DeviceInfoFragment extends Fragment {
 
         // aggiorna il flag e effettua il trigger del metodo nel listener
         viewCreated = true;
+
+        if(listener!=null)
+            listener.onUpdateRequest();
 
         return view;
 
@@ -290,6 +301,7 @@ public class DeviceInfoFragment extends Fragment {
     }
 
     public void refreshView() {
+
 
         if (fragmentView != null) {
 

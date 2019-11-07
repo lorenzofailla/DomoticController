@@ -29,7 +29,7 @@ public class WakeOnLanFragment extends Fragment {
 
     private static final String TAG = "WakeOnLanFragment";
 
-    public DeviceViewActivity parent;
+    private DeviceViewActivity parent;
 
     ListView devicesListView;
 
@@ -48,6 +48,8 @@ public class WakeOnLanFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        parent = (DeviceViewActivity) getActivity();
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_wol_devices, container, false);
 
@@ -61,7 +63,7 @@ public class WakeOnLanFragment extends Fragment {
         viewCreated = true;
 
         // chiama il metodo di aggiornamento dal parent
-        parent.updateWOLFragment();
+        updateContent(parent.getStaticDataJSON());
 
         return view;
 

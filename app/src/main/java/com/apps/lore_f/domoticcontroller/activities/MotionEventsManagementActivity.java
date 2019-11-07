@@ -80,6 +80,8 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
     private String filterByLockedVALUE;
     private String filterByTimestampVALUE;
 
+    private boolean executeFilters;
+
     private MotionEventsDatabase localDatabase;
     private MotionEventsViewModel motionEventsViewModel;
 
@@ -290,9 +292,13 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
         RadioButton button;
         button = findViewById(R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NEW);
         button.setChecked(true);
+        executeFilters=false;
+        button.callOnClick();
 
         button = findViewById(R.id.RBT___MOTIONEVENTSMANAGEMENT_FILTERENTRY_TIME_TODAY);
         button.setChecked(true);
+        executeFilters=true;
+        button.callOnClick();
 
         motionEventsViewModel.countEvents(getTimeDefinition(timeSpanDef.HOUR)).observe(this, new Observer<Integer>() {
             @Override
@@ -443,9 +449,9 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
     }
 
-    private String getEventsAndFiltersInfo(int nOfEvents){
+    private String getEventsAndFiltersInfo(int nOfEvents) {
 
-        if(nOfEvents==0){
+        if (nOfEvents == 0) {
 
             return getString(R.string.MOTIONEVENTSMANAGEMENT_NO_EVENT_TO_SHOW);
 
@@ -505,7 +511,8 @@ public class MotionEventsManagementActivity extends AppCompatActivity {
 
             }
 
-            updateEvents();
+            if (executeFilters)
+                updateEvents();
 
         }
 

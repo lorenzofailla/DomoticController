@@ -1,4 +1,4 @@
-package com.apps.lore_f.domoticcontroller;
+package com.apps.lore_f.domoticcontroller.fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +17,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.apps.lore_f.domoticcontroller.DefaultValues;
+import com.apps.lore_f.domoticcontroller.R;
+import com.apps.lore_f.domoticcontroller.VideosurveillanceParameters;
+import com.apps.lore_f.domoticcontroller.YouTubeLiveViewActivity;
 import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.CameraFrame;
 import com.apps.lore_f.domoticcontroller.generic.classes.Message;
@@ -41,10 +45,6 @@ public class VideoCameraViewerFragment extends Fragment {
 
     public boolean viewCreated = false;
     private DeviceViewActivity parent;
-
-    public void setParent(DeviceViewActivity value) {
-        this.parent = value;
-    }
 
     private String cameraID;
 
@@ -160,7 +160,7 @@ public class VideoCameraViewerFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            if (dataSnapshot != null) {
+            if (dataSnapshot.getValue() != null) {
 
                 setCameraStreamPort(dataSnapshot.getValue().toString());
 
@@ -184,7 +184,7 @@ public class VideoCameraViewerFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            if (dataSnapshot != null) {
+            if (dataSnapshot.getValue() != null) {
 
                 CameraFrame shotData = dataSnapshot.getValue(CameraFrame.class);
 
@@ -231,7 +231,7 @@ public class VideoCameraViewerFragment extends Fragment {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            if (dataSnapshot != null) {
+            if (dataSnapshot.getValue() != null) {
                 cameraStatus = dataSnapshot.getValue().toString();
                 updateCameraStatus();
             }
@@ -247,7 +247,7 @@ public class VideoCameraViewerFragment extends Fragment {
     private ValueEventListener liveBroadcastStatusListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            if (dataSnapshot != null) {
+            if (dataSnapshot.getValue() != null) {
                 liveBroadcastStatus = dataSnapshot.getValue().toString();
                 manageLiveBroadcastStatus();
             }
@@ -263,7 +263,7 @@ public class VideoCameraViewerFragment extends Fragment {
     private ValueEventListener liveBroadcastAddressListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            if (dataSnapshot != null) {
+            if (dataSnapshot.getValue() != null) {
                 liveBroadcastID = dataSnapshot.getValue().toString();
                 manageLiveBroadcastStatus();
             }
@@ -281,6 +281,8 @@ public class VideoCameraViewerFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_videosurveillance_cameraviewer, container, false);
+
+        parent=(DeviceViewActivity) getActivity();
 
         TextView cameraNameTXVview = (TextView) view.findViewById(R.id.TXV___VSCAMERAVIEW___CAMERANAME);
         cameraNameTXVview.setText(cameraName);

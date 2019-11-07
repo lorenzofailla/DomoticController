@@ -6,26 +6,21 @@ import android.content.SharedPreferences;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Build;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
-import android.provider.Settings;
-import android.system.Os;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.apps.lore_f.domoticcontroller.CloudStorageActivity;
 import com.apps.lore_f.domoticcontroller.DefaultValues;
 import com.apps.lore_f.domoticcontroller.R;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceToConnect;
-import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;
+import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceData;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,7 +28,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import apps.android.loref.GeneralUtilitiesLibrary;
 
@@ -43,7 +37,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     public RecyclerView devicesRecyclerView;
     public LinearLayoutManager linearLayoutManager;
-    public FirebaseRecyclerAdapter<DeviceToConnect, DevicesHolder> firebaseAdapter;
+    public FirebaseRecyclerAdapter<DeviceData, DevicesHolder> firebaseAdapter;
 
     private Query onlineDevices;
 
@@ -101,19 +95,19 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         public DevicesHolder(View v) {
 
             super(v);
-            deviceNameTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___DEVICENAME);
+            deviceNameTxv = itemView.findViewById(R.id.TXV___ROWDEVICE___DEVICENAME);
 
-            connectToDeviceBtn = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___CONNECT);
-            torrentImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
-            directoryNaviImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
-            videoSurveillanceImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___VIDEOSURVEILLANCE);
-            wakeOnLanImg = (ImageView) itemView.findViewById(R.id.IMG___ROWDEVICE___WAKEONLAN);
-            deviceLastUpdateTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_LASTUPDATE);
-            deviceRunningSinceTxv = (TextView) itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_RUNNINGSINCE);
+            connectToDeviceBtn = itemView.findViewById(R.id.BTN___ROWDEVICE___CONNECT);
+            torrentImg = itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
+            directoryNaviImg = itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
+            videoSurveillanceImg = itemView.findViewById(R.id.IMG___ROWDEVICE___VIDEOSURVEILLANCE);
+            wakeOnLanImg = itemView.findViewById(R.id.IMG___ROWDEVICE___WAKEONLAN);
+            deviceLastUpdateTxv = itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_LASTUPDATE);
+            deviceRunningSinceTxv = itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_RUNNINGSINCE);
 
-            deviceLastUpdateData = (ConstraintLayout) itemView.findViewById(R.id.CLA___ROWDEVICE___LASTUPDATE);
-            deviceAdditionalData = (ConstraintLayout) itemView.findViewById(R.id.CLA___ROWDEVICE___ADDITIONALDATA);
-            buttonShowAdditionalData = (ImageButton) itemView.findViewById(R.id.BTN___ROWDEVICE___EXPANDDATA);
+            deviceLastUpdateData = itemView.findViewById(R.id.CLA___ROWDEVICE___LASTUPDATE);
+            deviceAdditionalData = itemView.findViewById(R.id.CLA___ROWDEVICE___ADDITIONALDATA);
+            buttonShowAdditionalData = itemView.findViewById(R.id.BTN___ROWDEVICE___EXPANDDATA);
 
             buttonShowAdditionalData.setOnClickListener(new View.OnClickListener() {
 
@@ -170,7 +164,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             aggiorna il contenuto della label
              */
 
-            TextView availableDevicesTextView = (TextView) findViewById(R.id.TXV___DEVICE_SELECTION___LABEL);
+            TextView availableDevicesTextView = findViewById(R.id.TXV___DEVICE_SELECTION___LABEL);
 
             long availableDevicesNumber = dataSnapshot.getChildrenCount();
             String message;
@@ -224,7 +218,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         }
 
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.TBR___DEVICE_SELECTION___TOOLBAR);
+        Toolbar myToolbar = findViewById(R.id.TBR___DEVICE_SELECTION___TOOLBAR);
         setSupportActionBar(myToolbar);
         myToolbar.setTitle(R.string.DEVICE_SELECTION_ACTIONBAR_TITLE);
 
@@ -236,7 +230,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         super.onResume();
 
         // handler
-        devicesRecyclerView = (RecyclerView) findViewById(R.id.RWV___DEVICE_SELECTION___DEVICES);
+        devicesRecyclerView = findViewById(R.id.RWV___DEVICE_SELECTION___DEVICES);
 
         // assegno OnClickListener
         findViewById(R.id.BTN___DEVICE_SELECTION___CLOUDSTORAGE).setOnClickListener(onClickListener);
@@ -270,62 +264,46 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setStackFromEnd(false);
 
-        firebaseAdapter = new FirebaseRecyclerAdapter<DeviceToConnect, DevicesHolder>(
-                DeviceToConnect.class,
+        firebaseAdapter = new FirebaseRecyclerAdapter<DeviceData, DevicesHolder>(
+                DeviceData.class,
                 R.layout.row_holder_device_element,
                 DevicesHolder.class,
                 onlineDevices) {
 
             @Override
-            protected void populateViewHolder(DevicesHolder holder, final DeviceToConnect device, int position) {
+            protected void populateViewHolder(DevicesHolder holder, final DeviceData deviceData, int position) {
 
-                holder.deviceNameTxv.setText(device.getDeviceName());
-
-                final DeviceDataParser deviceData = new DeviceDataParser(device.getStatusData(), device.getNetworkData(), device.getStaticData());
+                holder.deviceNameTxv.setText(deviceData.getDeviceName());
 
                 // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
                 //
-                if (deviceData.isHasTorrent()) {
+                if (deviceData.hasTransmission()) {
                     //
                     holder.torrentImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if (deviceData.isHasFileManager()) {
+                if (deviceData.hasFileManager()) {
                     //
                     holder.directoryNaviImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if (deviceData.isHasVideoSurveillance()) {
+                if (deviceData.hasVideoSurveillance()) {
                     //
                     holder.videoSurveillanceImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if (deviceData.isHasWakeOnLan()) {
+                if (deviceData.hasWakeOnLAN()) {
                     //
                     holder.wakeOnLanImg.setVisibility(View.VISIBLE);
 
                 }
 
-                if (device.getOnline()) {
+                if (deviceData.getOnline()) {
 
                     holder.connectToDeviceBtn.setEnabled(true);
-
-                    holder.connectToDeviceBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-
-                            connectToDevice(
-                                    device.getDeviceName(),
-                                    device.getStaticData(),
-                                    deviceData.getLastUpdate() != -1 && ((System.currentTimeMillis() - deviceData.getLastUpdate()) > DefaultValues.LAST_UPDATE_TOO_FAR)
-                            );
-
-                        }
-
-                    });
 
                 } else {
 
@@ -358,7 +336,6 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                 // aggiorna la label con l'informazione sul tempo di funzionamento del server
 
                 long runningSince = deviceData.getRunningSince();
-                ;
 
                 if (runningSince != -1) {
 
