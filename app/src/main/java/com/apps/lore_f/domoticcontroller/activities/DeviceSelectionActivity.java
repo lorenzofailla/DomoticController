@@ -1,26 +1,27 @@
 package com.apps.lore_f.domoticcontroller.activities;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-
+import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.apps.lore_f.domoticcontroller.CloudStorageActivity;
-import com.apps.lore_f.domoticcontroller.DefaultValues;
 import com.apps.lore_f.domoticcontroller.R;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceData;
+import com.apps.lore_f.domoticcontroller.services.FirebaseDBComm;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,8 +29,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import apps.android.loref.GeneralUtilitiesLibrary;
 
 public class DeviceSelectionActivity extends AppCompatActivity {
 
@@ -40,8 +39,13 @@ public class DeviceSelectionActivity extends AppCompatActivity {
     public FirebaseRecyclerAdapter<DeviceData, DevicesHolder> firebaseAdapter;
 
     private Query onlineDevices;
-
     private String groupName;
+    private String selectedRemoteDeviceName;
+    private Intent selectedIntent;
+
+    private boolean serviceBound=false;
+
+    private FirebaseDBComm firebaseDBComm;
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -76,19 +80,13 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         public TextView deviceNameTxv;
 
-        public ImageButton connectToDeviceBtn;
         public ImageButton buttonShowAdditionalData;
-
-        public ImageView torrentImg;
-        public ImageView directoryNaviImg;
-        public ImageView videoSurveillanceImg;
-        public ImageView wakeOnLanImg;
+        public ImageButton buttonGoToTorrent;
+        public ImageButton buttonGoToDeviceInfo;
+        public ImageButton buttonGoToWakeOnLAN;
 
         public TextView deviceRunningSinceTxv;
         public TextView deviceLastUpdateTxv;
-
-        public ConstraintLayout deviceLastUpdateData;
-        public ConstraintLayout deviceAdditionalData;
 
         public boolean showAdditionalData = false;
 
@@ -97,17 +95,10 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             super(v);
             deviceNameTxv = itemView.findViewById(R.id.TXV___ROWDEVICE___DEVICENAME);
 
-            connectToDeviceBtn = itemView.findViewById(R.id.BTN___ROWDEVICE___CONNECT);
-            torrentImg = itemView.findViewById(R.id.IMG___ROWDEVICE___TORRENT);
-            directoryNaviImg = itemView.findViewById(R.id.IMG___ROWDEVICE___DIRNAVI);
-            videoSurveillanceImg = itemView.findViewById(R.id.IMG___ROWDEVICE___VIDEOSURVEILLANCE);
-            wakeOnLanImg = itemView.findViewById(R.id.IMG___ROWDEVICE___WAKEONLAN);
-            deviceLastUpdateTxv = itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_LASTUPDATE);
-            deviceRunningSinceTxv = itemView.findViewById(R.id.TXV___ROWDEVICE___STATUS_RUNNINGSINCE);
-
-            deviceLastUpdateData = itemView.findViewById(R.id.CLA___ROWDEVICE___LASTUPDATE);
-            deviceAdditionalData = itemView.findViewById(R.id.CLA___ROWDEVICE___ADDITIONALDATA);
-            buttonShowAdditionalData = itemView.findViewById(R.id.BTN___ROWDEVICE___EXPANDDATA);
+            buttonShowAdditionalData = itemView.findViewById(R.id.BTN___ROWDEVICE___MOREINFO);
+            buttonGoToTorrent = itemView.findViewById(R.id.BTN___ROWDEVICE___TORRENT);
+            buttonGoToDeviceInfo = itemView.findViewById(R.id.BTN___ROWDEVICE___DEVICEINFO);
+            buttonGoToWakeOnLAN = itemView.findViewById(R.id.BTN___ROWDEVICE___WAKEONLAN);
 
             buttonShowAdditionalData.setOnClickListener(new View.OnClickListener() {
 
@@ -125,18 +116,6 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         public void setShowAdditionalData(boolean value) {
             this.showAdditionalData = value;
 
-            if (this.showAdditionalData) {
-
-                deviceAdditionalData.setVisibility(View.VISIBLE);
-                buttonShowAdditionalData.setImageResource(R.drawable.less);
-
-            } else {
-
-                deviceAdditionalData.setVisibility(View.GONE);
-                buttonShowAdditionalData.setImageResource(R.drawable.more);
-
-            }
-
         }
 
         public boolean getShowAdditionalData() {
@@ -150,19 +129,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-            try {
 
-                Log.i(TAG, dataSnapshot.getValue().toString());
-
-            } catch (NullPointerException e) {
-
-                Log.i(TAG, "Cannot show datasnapshot");
-
-            }
-
-            /*
-            aggiorna il contenuto della label
-             */
+            // aggiorna il contenuto della label
 
             TextView availableDevicesTextView = findViewById(R.id.TXV___DEVICE_SELECTION___LABEL);
 
@@ -191,9 +159,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_selection);
 
-        /*
-        recupera gli extra dalle preferenze, se il nome del gruppo non è stato specificato, l'Activity non può proseguire e viene riaperta l'Activity per la selezione del gruppo
-         */
+        // recupera gli extra dalle preferenze, se il nome del gruppo non è stato specificato, l'Activity non può proseguire e viene riaperta l'Activity per la selezione del gruppo
 
         // recupera il nome del gruppo [R.string.data_group_name] dalle shared preferences
         Context context = getApplicationContext();
@@ -204,9 +170,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         if (groupName == null) {
 
-            /*
-            questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
-             */
+            // questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
 
             // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
             startActivity(new Intent(this, GroupSelection.class));
@@ -217,17 +181,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         }
 
-
         Toolbar myToolbar = findViewById(R.id.TBR___DEVICE_SELECTION___TOOLBAR);
         setSupportActionBar(myToolbar);
         myToolbar.setTitle(R.string.DEVICE_SELECTION_ACTIONBAR_TITLE);
-
-    }
-
-    @Override
-    protected void onResume() {
-
-        super.onResume();
 
         // handler
         devicesRecyclerView = findViewById(R.id.RWV___DEVICE_SELECTION___DEVICES);
@@ -242,6 +198,17 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         onlineDevices = userNode.child(groupName).orderByChild("Online").equalTo(true);
         onlineDevices.addValueEventListener(valueEventListener);
 
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        if(serviceBound){
+            unbindService(connection);
+        }
+
         refreshAdapter();
 
     }
@@ -251,11 +218,22 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         super.onPause();
 
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        super.onDestroy();
+
         // rimuove OnClickListener
         findViewById(R.id.BTN___DEVICE_SELECTION___CLOUDSTORAGE).setOnClickListener(null);
         findViewById(R.id.BTN___DEVICE_SELECTION___MOTIONEVENTSMANAGEMENT).setOnClickListener(null);
 
         onlineDevices.removeEventListener(valueEventListener);
+
+        if(serviceBound){
+            unbindService(connection);
+        }
 
     }
 
@@ -274,75 +252,46 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             protected void populateViewHolder(DevicesHolder holder, final DeviceData deviceData, int position) {
 
                 holder.deviceNameTxv.setText(deviceData.getDeviceName());
+                selectedRemoteDeviceName = deviceData.getDeviceName();
 
                 // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
                 //
                 if (deviceData.hasTransmission()) {
                     //
-                    holder.torrentImg.setVisibility(View.VISIBLE);
+                    holder.buttonGoToTorrent.setVisibility(View.VISIBLE);
+                    holder.buttonGoToTorrent.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
 
-                }
+                            selectedIntent = new Intent(DeviceSelectionActivity.this, TransmissionRemoteActivity.class);
 
-                if (deviceData.hasFileManager()) {
-                    //
-                    holder.directoryNaviImg.setVisibility(View.VISIBLE);
+                            // Bind to LocalService
+                            Intent intent = new Intent(DeviceSelectionActivity.this, FirebaseDBComm.class);
+                            bindService(intent, connection, Context.BIND_AUTO_CREATE);
+                        }
 
-                }
-
-                if (deviceData.hasVideoSurveillance()) {
-                    //
-                    holder.videoSurveillanceImg.setVisibility(View.VISIBLE);
-
+                    });
                 }
 
                 if (deviceData.hasWakeOnLAN()) {
                     //
-                    holder.wakeOnLanImg.setVisibility(View.VISIBLE);
+                    holder.buttonGoToWakeOnLAN.setVisibility(View.VISIBLE);
+                    holder.buttonGoToWakeOnLAN.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            selectedIntent = new Intent(DeviceSelectionActivity.this, WakeOnLANActivity.class);
+
+                            // Bind to LocalService
+                            Intent intent = new Intent(DeviceSelectionActivity.this, FirebaseDBComm.class);
+                            bindService(intent, connection, Context.BIND_AUTO_CREATE);
+                        }
+
+                    });
 
                 }
-
-                if (deviceData.getOnline()) {
-
-                    holder.connectToDeviceBtn.setEnabled(true);
-
-                } else {
-
-                    holder.connectToDeviceBtn.setEnabled(false);
-                    holder.connectToDeviceBtn.setImageResource(R.drawable.shutdown);
-
-                }
-
-                holder.connectToDeviceBtn.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        return false;
-                    }
-                });
 
                 // aggiorna la label con l'informazione sull'ultimo update
-
-                if (deviceData.getLastUpdate() != -1 && ((System.currentTimeMillis() - deviceData.getLastUpdate()) > DefaultValues.LAST_UPDATE_TOO_FAR)) {
-
-                    String message = getString(R.string.DEVICEELEMENT_LABEL_LAST_UPDATE) + GeneralUtilitiesLibrary.getTimeElapsed(deviceData.getLastUpdate(), getApplicationContext(), false);
-                    holder.deviceLastUpdateTxv.setText(message);
-                    holder.deviceLastUpdateData.setVisibility(View.VISIBLE);
-
-                } else {
-
-                    holder.deviceLastUpdateData.setVisibility(View.GONE);
-
-                }
-
-                // aggiorna la label con l'informazione sul tempo di funzionamento del server
-
-                long runningSince = deviceData.getRunningSince();
-
-                if (runningSince != -1) {
-
-                    String message = getString(R.string.DEVICEELEMENT_LABEL_RUNNING_SINCE) + GeneralUtilitiesLibrary.getTimeElapsed(runningSince, getApplicationContext(), false);
-                    holder.deviceRunningSinceTxv.setText(message);
-
-                }
 
             }
 
@@ -370,35 +319,33 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     }
 
-    private void connectToDevice(
-            String deviceName,
-            String staticData,
-            boolean criticalConnection
-    ) {
+    private ServiceConnection connection = new ServiceConnection() {
 
-        Intent intent = new Intent(this, DeviceViewActivity.class);
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
 
-        if (criticalConnection) {
-            intent.putExtra(DeviceViewActivity.CONNECTIONMETHOD_TAG, DeviceViewActivity.CONNECTIONMETHOD_FIREBASE_CRITICAL);
-        } else {
-            intent.putExtra(DeviceViewActivity.CONNECTIONMETHOD_TAG, DeviceViewActivity.CONNECTIONMETHOD_FIREBASE);
+            serviceBound=true;
+
+            FirebaseDBComm.LocalBinder binder = (FirebaseDBComm.LocalBinder) service;
+            firebaseDBComm = binder.getService();
+
+            firebaseDBComm.setGroupName(groupName);
+            firebaseDBComm.setRemoteDeviceName(selectedRemoteDeviceName);
+            firebaseDBComm.setThisDeviceName(Settings.Secure.getString(getContentResolver(), "bluetooth_name") + "_" + System.currentTimeMillis());
+
+            startActivity(selectedIntent);
+
         }
-        intent.putExtra(DeviceViewActivity.DEVICE_TO_CONNECT_TAG, deviceName);
-        intent.putExtra(DeviceViewActivity.STATICDATA_JSON_TAG, staticData);
 
-        startActivity(intent);
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
 
-    }
+            serviceBound=false;
 
-    private void connectToDeviceTCP(
-            String ipAddressesList) {
+        }
 
-        Intent intent = new Intent(this, DeviceViewActivity.class);
-        intent.putExtra(DeviceViewActivity.CONNECTIONMETHOD_TAG, DeviceViewActivity.CONNECTIONMETHOD_TCP);
-        intent.putExtra(DeviceViewActivity.SESSIONMODE_TAG, DeviceViewActivity.SESSIONMODE_NEW);
+    };
 
-        startActivity(intent);
-
-    }
 
 }

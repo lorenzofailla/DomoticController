@@ -1,30 +1,12 @@
 package com.apps.lore_f.domoticcontroller.generic.dataadapters;
 
-import android.content.Context;
-import androidx.annotation.LayoutRes;
-import androidx.annotation.NonNull;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-
-import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
-import com.apps.lore_f.domoticcontroller.R;
-import com.apps.lore_f.domoticcontroller.generic.dataobjects.TorrentInfo;
-
-import java.util.List;
-
 /**
  * Created by 105053228 on 20/apr/2017.
  */
 
-public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
+public class TorrentsListAdapter /*extends ArrayAdapter<TorrentInfo>*/ {
 
-    private static final String TAG="TorrentsListAdapter";
+   /* private static final String TAG="TorrentsListAdapter";
 
     public TorrentsListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List<TorrentInfo> objects, final DeviceViewActivity parentDeviceViewActivity) {
         super(context, resource, objects);
@@ -41,7 +23,7 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         convertView = inflater.inflate(R.layout.row_holder_torrent_element, null);
 
-        /* inizializza l'handler ai vari controlli */
+        *//* inizializza l'handler ai vari controlli *//*
         TextView torrentNameTXV=(TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTNAME);
         TextView torrentStatusTXV = (TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTSTATUS);
         TextView torrentHaveTXV = (TextView) convertView.findViewById(R.id.TXV___TORRENTSLISTROW___TORRENTHAVE);
@@ -129,6 +111,6 @@ public class TorrentsListAdapter extends ArrayAdapter<TorrentInfo> {
 
         return convertView;
 
-    }
+    }*/
 
 }

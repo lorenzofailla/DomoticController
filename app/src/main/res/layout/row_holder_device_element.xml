@@ -4,63 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <loref.android.apps.androidshapes.RoundRect
-        android:id="@+id/RRE___ROWDEVICE_RECTANGLE"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:RR_line_thickness="2dp"
-        app:RR_padding="12dp"
-        app:RR_radius="15dp"
-        app:layout_constraintBottom_toBottomOf="@+id/SPC___ROWDEVICE___BOTTOM_LEFT"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <loref.android.apps.androidshapes.BlankRect
-        android:id="@+id/blankRect"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
-        app:layout_constraintLeft_toLeftOf="@+id/linearLayout"
-        app:layout_constraintRight_toRightOf="@+id/linearLayout"
-        app:layout_constraintTop_toTopOf="@+id/linearLayout" />
-
-    <Space
-        android:id="@+id/SPC___ROWDEVICE___TOP_LEFT"
-        android:layout_width="@dimen/spacer_square_dim"
-        android:layout_height="@dimen/spacer_square_dim" />
-
-    <Space
-        android:id="@+id/SPC___ROWDEVICE___TOP_LEFT2"
-        android:layout_width="@dimen/spacer_square_dim"
-        android:layout_height="@dimen/spacer_square_dim"
-        app:layout_constraintLeft_toRightOf="@id/SPC___ROWDEVICE___TOP_LEFT" />
-
-    <Space
-        android:id="@+id/SPC___ROWDEVICE___TOP_LEFT3"
-        android:layout_width="@dimen/spacer_square_dim"
-        android:layout_height="@dimen/spacer_square_dim"
-        app:layout_constraintTop_toBottomOf="@id/SPC___ROWDEVICE___TOP_LEFT" />
-
-    <Space
-        android:id="@+id/SPC___ROWDEVICE___TOP_RIGHT"
-        android:layout_width="@dimen/spacer_square_dim"
-        android:layout_height="@dimen/spacer_square_dim"
-        app:layout_constraintRight_toRightOf="parent" />
-
-    <Space
-        android:id="@+id/SPC___ROWDEVICE___TOP_RIGHT2"
-        android:layout_width="@dimen/spacer_square_dim"
-        android:layout_height="@dimen/spacer_square_dim"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/SPC___ROWDEVICE___TOP_RIGHT" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/CLA___ROWDEVICE___DEVICEDATA"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/LLO___ROWDEVICE___DEVICENAMEHEADER"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@+id/SPC___ROWDEVICE___TOP_LEFT3"
-        app:layout_constraintTop_toBottomOf="@+id/SPC___ROWDEVICE___TOP_LEFT">
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/medium_button_width"
+            android:layout_height="@dimen/medium_button_height"
+            android:src="@drawable/computer" />
 
         <TextView
             android:id="@+id/TXV___ROWDEVICE___DEVICENAME"
@@ -68,136 +21,41 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-            app:layout_constraintLeft_toRightOf="@id/BTN___ROWDEVICE___CONNECT" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/CLA___ROWDEVICE___LASTUPDATE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="@+id/TXV___ROWDEVICE___DEVICENAME"
-            app:layout_constraintTop_toBottomOf="@+id/TXV___ROWDEVICE___DEVICENAME">
-
-            <ImageView
-                android:id="@+id/IMG___ROWDEVICE___WARNING"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:src="@drawable/warning" />
-
-            <TextView
-                android:id="@+id/TXV___ROWDEVICE___STATUS-LASTUPDATE"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp"
-                android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-                android:textSize="12sp"
-                app:layout_constraintStart_toEndOf="@+id/IMG___ROWDEVICE___WARNING" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/CLA___ROWDEVICE___ADDITIONALDATA"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="@+id/TXV___ROWDEVICE___DEVICENAME"
-            app:layout_constraintTop_toBottomOf="@+id/CLA___ROWDEVICE___LASTUPDATE">
-
-            <ImageView
-                android:id="@+id/IMG___ROWDEVICE___STATUS_RUNNINGSINCE"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/watch" />
-
-            <TextView
-                android:id="@+id/TXV___ROWDEVICE___STATUS_RUNNINGSINCE"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp"
-                android:text="@string/GENERIC_PLACEHOLDER_WAITING"
-                android:textSize="12sp"
-                app:layout_constraintStart_toEndOf="@+id/IMG___ROWDEVICE___STATUS_RUNNINGSINCE" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <ImageButton
-            android:id="@+id/BTN___ROWDEVICE___CONNECT"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/connect" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <ImageButton
-        android:id="@+id/BTN___ROWDEVICE___EXPANDDATA"
-        android:layout_width="@dimen/very_small_button_width"
-        android:layout_height="@dimen/very_small_button_height"
-        android:src="@drawable/more"
-        app:layout_constraintTop_toBottomOf="@+id/CLA___ROWDEVICE___DEVICEDATA"
-        app:layout_constraintStart_toEndOf="@id/SPC___ROWDEVICE___TOP_LEFT"
-        app:layout_constraintEnd_toEndOf="@id/SPC___ROWDEVICE___TOP_RIGHT"/>
-
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintLeft_toRightOf="@id/SPC___ROWDEVICE___TOP_LEFT2">
-
-        <ImageView
-            android:id="@+id/IMG___ROWDEVICE___DEVICE_TYPE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/home" />
-
-        <ImageView
-            android:id="@+id/IMG___ROWDEVICE___TORRENT"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/torrent"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/IMG___ROWDEVICE___DIRNAVI"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/directory"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/IMG___ROWDEVICE___WAKEONLAN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/alarm"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/IMG___ROWDEVICE___VIDEOSURVEILLANCE"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/videocam"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/IMG___ROWDEVICE___VPN"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/vpn_black"
-            android:visibility="gone" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
 
     </LinearLayout>
 
-    <Space
-        android:id="@+id/SPC___ROWDEVICE___BOTTOM_LEFT"
-        android:layout_width="@dimen/spacer_square_dim"
-        android:layout_height="@dimen/spacer_square_dim"
-        app:layout_constraintTop_toBottomOf="@+id/BTN___ROWDEVICE___EXPANDDATA" />
+    <LinearLayout
+        android:id="@+id/LLO___ROWDEVICE___CONNECTBUTTONS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/LLO___ROWDEVICE___DEVICENAMEHEADER">
+
+        <ImageButton
+            android:id="@+id/BTN___ROWDEVICE___MOREINFO"
+            android:layout_width="@dimen/mediumsmall_button_width"
+            android:layout_height="@dimen/mediumsmall_button_height"
+            android:src="@drawable/more" />
+
+        <ImageButton
+            android:id="@+id/BTN___ROWDEVICE___DEVICEINFO"
+            android:layout_width="@dimen/mediumsmall_button_width"
+            android:layout_height="@dimen/mediumsmall_button_height"
+            android:src="@drawable/info" />
+
+        <ImageButton
+            android:id="@+id/BTN___ROWDEVICE___TORRENT"
+            android:layout_width="@dimen/mediumsmall_button_width"
+            android:layout_height="@dimen/mediumsmall_button_height"
+            android:src="@drawable/torrent" />
+
+        <ImageButton
+            android:id="@+id/BTN___ROWDEVICE___WAKEONLAN"
+            android:layout_width="@dimen/mediumsmall_button_width"
+            android:layout_height="@dimen/mediumsmall_button_height"
+            android:src="@drawable/alarm" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

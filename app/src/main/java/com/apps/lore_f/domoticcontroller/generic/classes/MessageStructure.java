@@ -4,16 +4,16 @@ package com.apps.lore_f.domoticcontroller.generic.classes;
  * Created by lore_f on 20/08/2017.
  */
 
-public class Message {
+public class MessageStructure {
 
     private String header;
     private String body;
     private String replyto;
 
     // required empty constructor
-    public Message(){}
+    public MessageStructure(){}
 
-    public Message(String header, String body, String replyto) {
+    public MessageStructure(String header, String body, String replyto) {
 
         this.header = header;
         this.body = body;

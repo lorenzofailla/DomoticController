@@ -1,46 +1,8 @@
 package com.apps.lore_f.domoticcontroller.fragments;
 
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Bundle;
+public class VideoCameraViewerFragment /*extends Fragment*/ {
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import com.apps.lore_f.domoticcontroller.DefaultValues;
-import com.apps.lore_f.domoticcontroller.R;
-import com.apps.lore_f.domoticcontroller.VideosurveillanceParameters;
-import com.apps.lore_f.domoticcontroller.YouTubeLiveViewActivity;
-import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.CameraFrame;
-import com.apps.lore_f.domoticcontroller.generic.classes.Message;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-
-public class VideoCameraViewerFragment extends Fragment {
-
-    private final static String TAG = "VideoCameraViewerFragment";
+   /* private final static String TAG = "VideoCameraViewerFragment";
     private final static long MAX_SHOTVIEW_DOWNLOAD_SIZE = 4194304;
 
     public boolean viewCreated = false;
@@ -101,10 +63,10 @@ public class VideoCameraViewerFragment extends Fragment {
 
                 case R.id.BTN___VSCAMERAVIEW___REQUESTVIDEOSTREAM:
 
-                    /*
+                    *//*
                     se è attivo uno stream, attiva la visualizzazione del componente youtube
                     altrimenti, manda un messaggio all'host remoto per l'inizializzazione di uno stream
-                     */
+                     *//*
 
                     if (liveBroadcastStatus.equals("ready") && !liveBroadcastID.equals("")) {
 
@@ -117,7 +79,7 @@ public class VideoCameraViewerFragment extends Fragment {
                         liveBroadcastRequested = true;
 
                         // richiede un nuovo live stream all'host remoto
-                        parent.sendCommandToDevice(new Message("__start_streaming_request", cameraID, parent.thisDevice));
+                        parent.sendCommandToDevice(new MessageStructure("__start_streaming_request", cameraID, parent.thisDevice));
 
                     }
 
@@ -297,7 +259,7 @@ public class VideoCameraViewerFragment extends Fragment {
 
         view.findViewById(R.id.BTN___VSCAMERAVIEW___REQUESTVIDEOSTREAM).setEnabled(false);
 
-        /* define the database nodes, and attach the value listeners*/
+        *//* define the database nodes, and attach the value listeners*//*
 
         DatabaseReference shotNode;
         DatabaseReference statusNode;
@@ -323,7 +285,7 @@ public class VideoCameraViewerFragment extends Fragment {
         youTubeLiveBroadcastStatusNode.addValueEventListener(liveBroadcastStatusListener);
         youTubeLiveBroadcastAddressNode.addValueEventListener(liveBroadcastAddressListener);
 
-        /* store the view object in a global variable */
+        *//* store the view object in a global variable *//*
         fragmentView = view;
 
         manageFullScreenMode();
@@ -346,7 +308,7 @@ public class VideoCameraViewerFragment extends Fragment {
         super.onDetach();
 
         parent.sendCommandToDevice(
-                new Message(
+                new MessageStructure(
                         "__stop_cameravideostreaming",
                         this.cameraID,
                         parent.thisDevice
@@ -361,7 +323,7 @@ public class VideoCameraViewerFragment extends Fragment {
 
         shotView.setOnClickListener(null);
 
-        /* define the database nodes, and remove the value listeners*/
+        *//* define the database nodes, and remove the value listeners*//*
 
         DatabaseReference shotNode;
         DatabaseReference statusNode;
@@ -389,14 +351,14 @@ public class VideoCameraViewerFragment extends Fragment {
     public void requestSingleShot() {
 
         parent.sendCommandToDevice(
-                new Message("__request_shot", cameraID, parent.thisDevice)
+                new MessageStructure("__request_shot", cameraID, parent.thisDevice)
         );
 
     }
 
     public void requestShotSeries() {
         parent.sendCommandToDevice(
-                new Message("__request_shots", cameraID, parent.thisDevice)
+                new MessageStructure("__request_shots", cameraID, parent.thisDevice)
         );
     }
 
@@ -467,7 +429,7 @@ public class VideoCameraViewerFragment extends Fragment {
         if (!commandHeader.equals("")) {
 
             parent.sendCommandToDevice(
-                    new Message(
+                    new MessageStructure(
                             commandHeader,
                             this.cameraID,
                             parent.thisDevice
@@ -482,7 +444,7 @@ public class VideoCameraViewerFragment extends Fragment {
     private void requestMotionEvent() {
 
         parent.sendCommandToDevice(
-                new Message(
+                new MessageStructure(
                         "__request_motion_event",
                         this.cameraID,
                         parent.thisDevice
@@ -500,9 +462,9 @@ public class VideoCameraViewerFragment extends Fragment {
 
     public void manageLiveBroadcastStatus() {
 
-        /*
+        *//*
         gestisce l'immagine da mostrare e l'abilitazione del pulsante "BTN___VSCAMERAVIEW___REQUESTVIDEOSTREAM" in funzione dello stato del live broadcast registrato sul nodo di Firebase
-         */
+         *//*
 
         int drawableToShow = R.drawable.waiting_data;
         boolean liveStreamRequestEnabled = false;
@@ -540,9 +502,9 @@ public class VideoCameraViewerFragment extends Fragment {
 
         }
 
-        /*
+        *//*
         se è disponibile la view, imposta l'immagine e l'abilitazione del pulsante
-         */
+         *//*
 
         if (fragmentView != null) {
 
@@ -572,6 +534,6 @@ public class VideoCameraViewerFragment extends Fragment {
 
         }
 
-    }
+    }*/
 
 }

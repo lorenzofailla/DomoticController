@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.WakeOnLANActivity">
+
+
+
+    <TextView
+        android:id="@+id/TXV___TRANSMISSIONREMOTE___LABEL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:padding="5dp"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/LLO___TRANSMISSIONREMOTE___BUTTONS"
+        app:layout_constraintTop_toBottomOf="@+id/TXV___TRANSMISSIONREMOTE___LABEL">
+
+        <ImageButton
+            android:id="@+id/BTN___TRANSMISSIONREMOTE___REFRESH"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/reboot" />
+
+        <ImageButton
+            android:id="@+id/BTN___TRANSMISSIONREMOTE___ADDTORRENT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/add_new" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/RVW___TRANSMISSIONREMOTE___TORRENTSLIST"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/LLO___TRANSMISSIONREMOTE___BUTTONS">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

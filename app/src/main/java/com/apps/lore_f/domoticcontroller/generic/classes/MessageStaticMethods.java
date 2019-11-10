@@ -4,15 +4,15 @@ import java.io.UnsupportedEncodingException;
 
 public class MessageStaticMethods {
 
-    public static byte[] getMessageAsBytesArray(Message message) {
+    public static byte[] getMessageAsBytesArray(MessageStructure messageStructure) {
 
-        return String.format("@COMMAND?header=%s&body=%s\n", message.getHeader(), message.getBody()).getBytes();
+        return String.format("@COMMAND?header=%s&body=%s\n", messageStructure.getHeader(), messageStructure.getBody()).getBytes();
 
     }
 
-    public static Message createMessageFromBytesArray(byte[] rawData) {
+    public static MessageStructure createMessageFromBytesArray(byte[] rawData) {
 
-        Message message = new Message("", "", "");
+        MessageStructure messageStructure = new MessageStructure("", "", "");
         String rawString = "";
         try {
 
@@ -20,20 +20,20 @@ public class MessageStaticMethods {
 
         } catch (UnsupportedEncodingException e) {
 
-            return message;
+            return messageStructure;
 
         }
 
         String[] mainLine = rawString.split("[?]");
         if (mainLine.length != 2) {
-            return message;
+            return messageStructure;
         }
 
         String[] lines = mainLine[1].split("[&]");
 
         if (lines.length != 3) {
 
-            return message;
+            return messageStructure;
 
         } else {
 
@@ -47,7 +47,7 @@ public class MessageStaticMethods {
 
                 if (struct.length != 2) {
 
-                    return message;
+                    return messageStructure;
 
                 } else {
 
@@ -68,7 +68,7 @@ public class MessageStaticMethods {
 
             }
 
-            return new Message(header, body, replyto);
+            return new MessageStructure(header, body, replyto);
 
         }
 

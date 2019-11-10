@@ -1,32 +1,8 @@
 package com.apps.lore_f.domoticcontroller.fragments;
 
-import android.content.Context;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.TextView;
+public class TorrentViewerFragment /*extends Fragment*/ {
 
-import androidx.fragment.app.Fragment;
-
-import com.apps.lore_f.domoticcontroller.R;
-import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
-import com.apps.lore_f.domoticcontroller.generic.dataadapters.TorrentsListAdapter;
-import com.apps.lore_f.domoticcontroller.generic.dataobjects.TorrentInfo;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class TorrentViewerFragment extends Fragment {
-
-    private static final String TAG = "TorrentViewerFragment";
+    /*private static final String TAG = "TorrentViewerFragment";
     public int nOfTorrents;
 
     private ListView torrentsListView;
@@ -148,5 +124,5 @@ public class TorrentViewerFragment extends Fragment {
         }
 
     }
-
+*/
 }

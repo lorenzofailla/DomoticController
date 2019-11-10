@@ -149,7 +149,6 @@
     <string name="MENU_MOTIONEVENTSMANAGEMENT_FILTERENTRY_STATUS_NOTNEW">Watched</string>
 
 
-
     <!-- *** Notifications Channel IDs -->
     <string name="NOTIF_CHID___MOTION_EVENTS">NOTIF_CHID___MOTION_EVENTS</string>
     <string name="NOTIF_CHID_READABLE___MOTION_EVENTS">Motion events</string>

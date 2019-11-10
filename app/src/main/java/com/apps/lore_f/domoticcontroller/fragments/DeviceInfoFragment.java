@@ -1,33 +1,10 @@
 package com.apps.lore_f.domoticcontroller.fragments;
 
-import android.content.Context;
-import android.os.Bundle;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import com.apps.lore_f.domoticcontroller.activities.DeviceViewActivity;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.LogEntry;
-import com.apps.lore_f.domoticcontroller.generic.classes.DeviceDataParser;
-import com.apps.lore_f.domoticcontroller.generic.classes.Message;
-import com.apps.lore_f.domoticcontroller.R;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import apps.android.loref.GeneralUtilitiesLibrary;
 
 public class DeviceInfoFragment extends Fragment {
 
+    /*
     private static final String TAG = "DeviceInfoFragment";
 
     public boolean viewCreated = false;
@@ -194,7 +171,7 @@ public class DeviceInfoFragment extends Fragment {
                         // richiede all'Activity parent di mandare un comando per disconnettere dalla VPN
 
                         parent.sendCommandToDevice(
-                                new Message(
+                                new MessageStructure(
                                         "__disconnect_vpn",
                                         null,
                                         parent.thisDevice
@@ -207,7 +184,7 @@ public class DeviceInfoFragment extends Fragment {
                         // richiede all'Activity parent di mandare un comando per connettere alla VPN
 
                         parent.sendCommandToDevice(
-                                new Message(
+                                new MessageStructure(
                                         "__connect_vpn",
                                         null,
                                         parent.thisDevice
@@ -368,5 +345,6 @@ public class DeviceInfoFragment extends Fragment {
         }
 
     }
+    */
 
 }

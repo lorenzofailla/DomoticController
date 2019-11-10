@@ -15,9 +15,9 @@ import com.apps.lore_f.domoticcontroller.generic.dataobjects.FileInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileViewerFragment extends Fragment {
+public class FileViewerFragment /*extends Fragment*/ {
 
-    public String rawDirData;
+    /*public String rawDirData;
     public String currentDirName;
 
     public boolean viewCreated=false;
@@ -102,7 +102,7 @@ public class FileViewerFragment extends Fragment {
         List<FileInfo> tmpFilesInfos = new ArrayList<>();
         String[] tmpFileStringLines = rawDirData.split("\n");
 
-        /* procedura di generazione */
+        *//* procedura di generazione *//*
         for (int i=1; i<tmpFileStringLines.length; i++){
 
             tmpFilesInfos.add(new FileInfo(currentDirName,tmpFileStringLines[i]));
@@ -114,5 +114,5 @@ public class FileViewerFragment extends Fragment {
     }
 
 
-
+*/
 }
