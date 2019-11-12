@@ -21,6 +21,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 public class DeviceInfoViewActivity extends AppCompatActivity {
@@ -37,8 +38,10 @@ public class DeviceInfoViewActivity extends AppCompatActivity {
     private ValueEventListener deviceStatusData = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            deviceData=dataSnapshot.getValue(DeviceData.class);
+
+            deviceData=dataSnapshot.getValue(new GenericTypeIndicator<DeviceData>() {});
             refreshUI();
+
         }
 
         @Override
