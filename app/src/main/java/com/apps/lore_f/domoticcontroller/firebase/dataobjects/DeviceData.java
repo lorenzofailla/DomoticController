@@ -20,6 +20,14 @@ public class DeviceData {
     public DeviceData() {
     }
 
+    public DeviceData(String DeviceName, boolean Online, HashMap<String, Object> StaticData,HashMap<String, Object> NetworkData, HashMap<String, Object> StatusData){
+        this.DeviceName=DeviceName;
+        this.Online=Online;
+        this.StaticData=StaticData;
+        this.NetworkData=NetworkData;
+        this.StatusData=StatusData;
+    }
+
     public String getDeviceName() {
         return this.DeviceName;
     }

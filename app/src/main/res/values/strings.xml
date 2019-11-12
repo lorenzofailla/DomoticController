@@ -91,8 +91,13 @@
     <string name="DEVICEVIEW_MENU_SHUTDOWN">Shutdown system</string>
 
     <!-- ***   - Torrents management fragment -->
-    <string name="TORRENTSMANAGER_LABEL_AVAILABLETORRENTS">%d available torrents:</string>
-    <string name="TORRENTSMANAGER_LABEL_NOTORRENTS">No available Torrent.</string>
+    <string name="TRANSMISSIONREMOTE_LABEL_AVAILABLETORRENTS">%d available torrents.</string>
+    <string name="TRANSMISSIONREMOTE_LABEL_NOTORRENTS">No available Torrent.</string>
+    <string name="TRANSMISSIONREMOTE_MENU_ADD">Add Torrent</string>
+    <string name="TRANSMISSIONREMOTE_MENU_REFRESH">Refresh</string>
+    <string name="TRANSMISSIONREMOTE_MENU_STARTALL">Start ALL</string>
+    <string name="TRANSMISSIONREMOTE_MENU_PAUSEALL">Stop ALL</string>
+
 
     <string name="CLOUDSTORAGE_LABEL_REQUESTOR">Uploaded by: </string>
     <string name="CLOUDSTORAGE_LABEL_SIZE">Size: </string>

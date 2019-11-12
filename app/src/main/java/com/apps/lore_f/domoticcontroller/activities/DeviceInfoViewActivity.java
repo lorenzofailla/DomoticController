@@ -24,6 +24,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import apps.android.loref.GeneralUtilitiesLibrary;
+
 public class DeviceInfoViewActivity extends AppCompatActivity {
 
     private FirebaseDBComm firebaseDBComm;
@@ -32,14 +34,19 @@ public class DeviceInfoViewActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private DeviceData deviceData;
 
+    private TextView textViewSystemLoad;
     private TextView textViewFreeDiskSpace;
-
+    private TextView textViewPublicIP;
+    private TextView textViewLocalIP;
+    private TextView textViewRunningSince;
+    private TextView textViewLastUpdate;
 
     private ValueEventListener deviceStatusData = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-            deviceData=dataSnapshot.getValue(new GenericTypeIndicator<DeviceData>() {});
+            //deviceData=dataSnapshot.getValue(new GenericTypeIndicator<DeviceData>() {});
+            deviceData=dataSnapshot.getValue(DeviceData.class);
             refreshUI();
 
         }
@@ -89,6 +96,11 @@ public class DeviceInfoViewActivity extends AppCompatActivity {
 
         //
         textViewFreeDiskSpace = findViewById(R.id.TXV___DEVICEINFOVIEW___DISKSTATUS_VALUE);
+        textViewSystemLoad = findViewById(R.id.TXV___DEVICEINFOVIEW___SYSLOAD_VALUE);
+        textViewPublicIP = findViewById(R.id.TXV___DEVICEINFOVIEW___PRIVATEIP_VALUE);
+        textViewLocalIP = findViewById(R.id.TXV___DEVICEINFOVIEW___PUBLICIP_VALUE);
+        textViewRunningSince = findViewById(R.id.TXV___DEVICEINFOVIEW___RUNNINGSINCE_VALUE);
+        textViewLastUpdate = findViewById(R.id.TXV___DEVICEINFOVIEW___LASTUPDATE_VALUE);
 
     }
 
@@ -112,7 +124,7 @@ public class DeviceInfoViewActivity extends AppCompatActivity {
             groupName = firebaseDBComm.getGroupName();
             remoteDeviceName = firebaseDBComm.getRemoteDeviceName();
 
-            deviceInfo = FirebaseDatabase.getInstance().getReference(String.format("Devices/%s/%s/StatusData", groupName, remoteDeviceName));
+            deviceInfo = FirebaseDatabase.getInstance().getReference(String.format("Devices/%s/%s", groupName, remoteDeviceName));
             deviceInfo.addValueEventListener(deviceStatusData);
 
         }
@@ -127,7 +139,13 @@ public class DeviceInfoViewActivity extends AppCompatActivity {
     private void refreshUI(){
 
         toolbar.setTitle(deviceData.getDeviceName());
-        textViewFreeDiskSpace.setText(String.format("%d MB",deviceData.getAvailableDiskSpace()));
+        textViewSystemLoad.setText(String.format("%d%%",deviceData.getAverageLoad()));
+        textViewFreeDiskSpace.setText(String.format("%.0f MB",deviceData.getAvailableDiskSpace()));
+        textViewPublicIP.setText(deviceData.getPublicIPAddress());
+        textViewLocalIP.setText(deviceData.getLocalIPAddresses());
+        textViewRunningSince.setText(GeneralUtilitiesLibrary.getTimeElapsed(deviceData.getRunningSince(),this));
+        textViewLastUpdate.setText(GeneralUtilitiesLibrary.getTimeElapsed(deviceData.getLastUpdate(),this));
+
     }
 
     private void shutdownHost(){

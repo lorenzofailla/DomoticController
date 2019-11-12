@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/MENU_TRANSMISSIONREMOTE_REFRESH"
+        android:icon="@drawable/reboot"
+        android:title="@string/TRANSMISSIONREMOTE_MENU_REFRESH"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/MENU_TRANSMISSIONREMOTE_ADD"
+        android:icon="@drawable/add_new"
+        android:title="@string/TRANSMISSIONREMOTE_MENU_ADD"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/MENU_TRANSMISSIONREMOTE_PAUSEALL"
+        android:icon="@drawable/pause"
+        android:title="@string/TRANSMISSIONREMOTE_MENU_PAUSEALL"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/MENU_TRANSMISSIONREMOTE_STARTALL"
+        android:icon="@drawable/play"
+        android:title="@string/TRANSMISSIONREMOTE_MENU_STARTALL"
+        app:showAsAction="ifRoom"/>
+
+</menu>
