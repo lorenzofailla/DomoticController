@@ -129,7 +129,6 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
 
-
             // aggiorna il contenuto della label
 
             TextView availableDevicesTextView = findViewById(R.id.TXV___DEVICE_SELECTION___LABEL);
@@ -266,8 +265,7 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                             selectedIntent = new Intent(DeviceSelectionActivity.this, TransmissionRemoteActivity.class);
 
                             // Bind to LocalService
-                            Intent intent = new Intent(DeviceSelectionActivity.this, FirebaseDBComm.class);
-                            bindService(intent, connection, Context.BIND_AUTO_CREATE);
+                            bindService();
                         }
 
                     });
@@ -283,13 +281,25 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                             selectedIntent = new Intent(DeviceSelectionActivity.this, WakeOnLANActivity.class);
 
                             // Bind to LocalService
-                            Intent intent = new Intent(DeviceSelectionActivity.this, FirebaseDBComm.class);
-                            bindService(intent, connection, Context.BIND_AUTO_CREATE);
+                            bindService();
                         }
 
                     });
 
                 }
+
+                holder.buttonGoToDeviceInfo.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        selectedIntent = new Intent(DeviceSelectionActivity.this, DeviceInfoViewActivity.class);
+
+                        // Bind to LocalService
+                        bindService();
+
+                    }
+
+                });
 
                 // aggiorna la label con l'informazione sull'ultimo update
 
@@ -317,6 +327,13 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         devicesRecyclerView.setLayoutManager(linearLayoutManager);
         devicesRecyclerView.setAdapter(firebaseAdapter);
 
+    }
+
+    private void bindService(){
+
+        // Bind to LocalService
+        Intent intent = new Intent(DeviceSelectionActivity.this, FirebaseDBComm.class);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     private ServiceConnection connection = new ServiceConnection() {

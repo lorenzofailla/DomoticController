@@ -16,8 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:replace="android:appComponentFactory">
-        <activity android:name=".activities.WakeOnLANActivity"></activity>
-        <activity android:name=".activities.TransmissionRemoteActivity"></activity>
+        <activity android:name=".activities.DeviceInfoViewActivity"></activity>
+        <activity android:name=".activities.WakeOnLANActivity" />
+        <activity android:name=".activities.TransmissionRemoteActivity" />
 
         <service
             android:name=".services.FirebaseDBComm"

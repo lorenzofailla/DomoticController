@@ -42,19 +42,18 @@ public class WakeOnLANActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wake_on_lan);
 
-    }
-
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-
         // handler
         devicesRecyclerView = findViewById(R.id.RVW___WAKEONLAN___DEVICESLIST);
 
         // Bind to LocalService
         Intent intent = new Intent(this, FirebaseDBComm.class);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
 
     }
 

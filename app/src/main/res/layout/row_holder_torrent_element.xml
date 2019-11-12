@@ -33,7 +33,8 @@
             android:text="@string/GENERIC_PLACEHOLDER_WAITING"
             android:textSize="14sp"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/TXV___TORRENTSLISTROW___TORRENTNAME" />
+            app:layout_constraintTop_toBottomOf="@+id/TXV___TORRENTSLISTROW___TORRENTNAME"
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/TXV___TORRENTSLISTROW___TORRENTHAVE"
@@ -41,7 +42,19 @@
             android:layout_height="wrap_content"
             android:text="@string/GENERIC_PLACEHOLDER_WAITING"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/TXV___TORRENTSLISTROW___TORRENTSTATUS" />
+            app:layout_constraintTop_toBottomOf="@+id/TXV___TORRENTSLISTROW___TORRENTSTATUS"
+            android:padding="2dp"/>
+
+        <TextView
+            android:id="@+id/TXV___TORRENTSLISTROW___TORRENTETA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+            app:layout_constraintLeft_toRightOf="@+id/TXV___TORRENTSLISTROW___TORRENTHAVE"
+            app:layout_constraintTop_toTopOf="@+id/TXV___TORRENTSLISTROW___TORRENTHAVE"
+            android:padding="2dp"/>
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

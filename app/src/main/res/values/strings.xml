@@ -32,6 +32,7 @@
     <string name="ALERTDIALOG_MESSAGE_REPLY_TIMEOUT">The remote host did not reply. Do you want to keep waiting ?</string>
     <string name="ALERTDIALOG_TITLE_CONFIRM_TORRENT_REMOVAL">Torrent removal</string>
     <string name="ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL">Do you really want to remove the selected torrent ?</string>
+    <string name="ALERTDIALOG_MESSAGE_CONFIRM_TORRENT_REMOVAL_AND_DATA_ERASE">Do you really want to remove the selected torrent and completely erase the relevant data ?</string>
     <string name="ALERTDIALOG_MESSAGE_ADD_TORRENT">Enter the URL to add</string>
     <string name="ALERTDIALOG_MESSAGE_CONFIRM_DELETE_FROM_CLOUD">Please confirm you want to remove this file from the cloud storage.\nThis cannot be undone.</string>
     <string name="ALERTDIALOG_MESSAGE_REMOTE_DEVICE_NOT_RESPONDING">The remote device does not answer to requests.\nPlease ensure the remote device is actually on line.\n</string>
@@ -90,7 +91,7 @@
     <string name="DEVICEVIEW_MENU_SHUTDOWN">Shutdown system</string>
 
     <!-- ***   - Torrents management fragment -->
-    <string name="TORRENTSMANAGER_LABEL_AVAILABLETORRENTS">Available Torrents:</string>
+    <string name="TORRENTSMANAGER_LABEL_AVAILABLETORRENTS">%d available torrents:</string>
     <string name="TORRENTSMANAGER_LABEL_NOTORRENTS">No available Torrent.</string>
 
     <string name="CLOUDSTORAGE_LABEL_REQUESTOR">Uploaded by: </string>
