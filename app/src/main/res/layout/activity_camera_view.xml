@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.CameraViewActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/TBR___CAMERA_VIEW___TOOLBAR"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/TBR___CAMERA_VIEW___TOOLBAR"
+        app:layout_constraintRight_toLeftOf="parent"
+        android:id="@+id/IVW___CAMERA_VIEW_PREVIEW"
+        android:padding="3dp"/>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/TBL___CAMERA_VIEW___CAMERADATA"
+        app:layout_constraintTop_toBottomOf="@+id/IVW___CAMERA_VIEW_PREVIEW"
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <TableRow>
+
+            <ImageView
+                android:src="@drawable/watch_black"
+                android:padding="3dp"/>
+
+            <TextView
+                android:id="@+id/TXV___CAMERA_VIEW___SHOTTIME_LABEL"
+                android:text="@string/CAMERAVIEW_LABEL_SHOTTIME"
+                android:padding="3dp"/>
+
+            <TextView
+                android:id="@+id/TXV___CAMERA_VIEW___SHOTTIME_VALUE"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+                android:padding="3dp"/>
+
+        </TableRow>
+
+    </TableLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

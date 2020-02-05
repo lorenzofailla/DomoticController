@@ -1,5 +1,8 @@
 package com.apps.lore_f.domoticcontroller.generic.classes;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by lore_f on 20/08/2017.
  */
@@ -31,6 +34,23 @@ public class MessageStructure {
 
     public String getReplyto() {
         return replyto;
+    }
+
+    public String getMessageAsJSONString(){
+
+        try {
+            JSONObject result = new JSONObject();
+            result.put("header", header);
+            result.put("body", body);
+            result.put("replyto",replyto);
+
+            return result.toString();
+
+        } catch (JSONException e){
+
+        }
+
+        return null;
     }
 
 }

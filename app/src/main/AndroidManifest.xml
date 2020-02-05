@@ -16,12 +16,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:replace="android:appComponentFactory">
-        <activity android:name=".activities.DeviceInfoViewActivity"></activity>
+        <activity android:name=".activities.ThermostatActivity"></activity>
+        <activity android:name=".activities.CameraViewActivity" />
+        <activity android:name=".activities.CameraSelectionActivity" />
+        <activity android:name=".activities.DeviceInfoViewActivity" />
         <activity android:name=".activities.WakeOnLANActivity" />
         <activity android:name=".activities.TransmissionRemoteActivity" />
 
         <service
             android:name=".services.FirebaseDBComm"
+            android:enabled="true"
+            android:exported="true" />
+
+        <service
+            android:name=".services.TCPComm"
             android:enabled="true"
             android:exported="true" />
 

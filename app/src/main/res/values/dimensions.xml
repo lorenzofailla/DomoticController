@@ -8,6 +8,9 @@
     <dimen name="std_event_preview_thumbnail_width">96dp</dimen>
     <dimen name="std_event_preview_thumbnail_height">72dp</dimen>
 
+    <dimen name="normal_button_width">56dp</dimen>
+    <dimen name="normal_button_height">56dp</dimen>
+
     <dimen name="medium_button_width">48dp</dimen>
     <dimen name="medium_button_height">48dp</dimen>
 

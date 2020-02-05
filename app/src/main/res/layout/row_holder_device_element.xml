@@ -56,6 +56,18 @@
             android:layout_height="@dimen/mediumsmall_button_height"
             android:src="@drawable/alarm" />
 
+        <ImageButton
+            android:id="@+id/BTN___ROWDEVICE___CAMERA"
+            android:layout_width="@dimen/mediumsmall_button_width"
+            android:layout_height="@dimen/mediumsmall_button_height"
+            android:src="@drawable/videocam" />
+
+        <ImageButton
+            android:id="@+id/BTN___ROWDEVICE___THERMOSTAT"
+            android:layout_width="@dimen/mediumsmall_button_width"
+            android:layout_height="@dimen/mediumsmall_button_height"
+            android:src="@drawable/thermostat" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

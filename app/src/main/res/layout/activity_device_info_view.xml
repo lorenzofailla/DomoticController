@@ -43,6 +43,24 @@
         <TableRow>
 
             <TextView
+                android:id="@+id/TXV___DEVICEINFOVIEW___RESPONSETIME_LABEL"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/DEVICEVIEW_LABEL_RESPONSETIME"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+            <TextView
+                android:id="@+id/TXV___DEVICEINFOVIEW___RESPONSETIME_VALUE"
+                android:padding="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/GENERIC_PLACEHOLDER_WAITING" />
+
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
                 android:id="@+id/TXV___DEVICEINFOVIEW___DISKSTATUS_LABEL"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

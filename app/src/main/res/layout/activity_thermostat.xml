@@ -4,22 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.WakeOnLANActivity">
+    tools:context=".activities.ThermostatActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/TBR___TRANSMISSIONREMOTE___TOOLBAR"
+        android:id="@+id/TBR___THERMOSTAT_SELECTION___TOOLBAR"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:title="@string/DEVICEVIEW_ACTIONBAR_TITLE"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:title="@string/THERMOSTAT_TOOLBAR_TITLE"/>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/RVW___TRANSMISSIONREMOTE___TORRENTSLIST"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/TBR___TRANSMISSIONREMOTE___TOOLBAR">
+        android:id="@+id/RVW___THERMOSTAT_SELECTION___THERMOSTATS"
+        app:layout_constraintTop_toBottomOf="@+id/TBR___THERMOSTAT_SELECTION___TOOLBAR"
+        app:layout_constraintLeft_toLeftOf="parent">
 
     </androidx.recyclerview.widget.RecyclerView>
 

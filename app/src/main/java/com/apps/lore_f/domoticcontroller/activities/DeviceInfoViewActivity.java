@@ -1,73 +1,150 @@
 package com.apps.lore_f.domoticcontroller.activities;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Handler;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+
 import com.apps.lore_f.domoticcontroller.R;
-import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceData;
+import com.apps.lore_f.domoticcontroller.generic.classes.DeviceGeneralStatus;
+import com.apps.lore_f.domoticcontroller.generic.classes.DeviceNetworkStatus;
 import com.apps.lore_f.domoticcontroller.generic.classes.MessageStructure;
-import com.apps.lore_f.domoticcontroller.services.FirebaseDBComm;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import apps.android.loref.GeneralUtilitiesLibrary;
 
-public class DeviceInfoViewActivity extends AppCompatActivity {
+public class DeviceInfoViewActivity extends TCPCommActivity {
 
-    private FirebaseDBComm firebaseDBComm;
-    private DatabaseReference deviceInfo;
+    private final static String TAG = "DeviceInfoViewActivity";
+
+    private final static int REFRESH_GENERAL = 0x0001;
+    private final static int REFRESH_NETWORK = 0x0002;
+    private final static int REFRESH_NAME = 0x0003;
+
+    @Override
+    public void onSocketCreated() {
+
+        super.onSocketCreated();
+
+        // attiva il timer delle richieste
+        handler.post(sendRequest);
+
+        tcpComm.sendData(new MessageStructure("__get_device_data", "network", "-").getMessageAsJSONString());
+        tcpComm.sendData(new MessageStructure("__get_device_data", "devicename", "-").getMessageAsJSONString());
+
+    }
+
+    @Override
+    public void onSocketClosed() {
+        super.onSocketClosed();
+    }
+
+    @Override
+    public void onDataReceived(String data) {
+
+        super.onDataReceived(data);
+
+        Log.i(TAG, "data received from tcp comm interface:" + data);
+
+        try {
+            JSONObject reply = new JSONObject(data);
+            switch (reply.getString("header")) {
+
+                case "__device_generalstatus_reply":
+                    deviceGeneralStatus = new DeviceGeneralStatus(reply.getString("body"));
+                    responseTime = System.currentTimeMillis() - lastMessageTimeStamp;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            refreshUI(REFRESH_GENERAL);
+                        }
+                    });
+
+                    break;
+
+                case "__device_networkstatus_reply":
+
+                    deviceNetworkStatus = new DeviceNetworkStatus(reply.getString("body"));
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            refreshUI(REFRESH_NETWORK);
+                        }
+                    });
+
+                    break;
+
+                case "__device_name_reply":
+                    remoteDeviceName = reply.getString("body");
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            refreshUI(REFRESH_NAME);
+                        }
+                    });
+
+                    break;
+
+            }
+
+        } catch (JSONException e) {
+            Log.d(TAG, "NOT A JSON REPLY!" + data);
+        }
+
+    }
+
 
     private Toolbar toolbar;
-    private DeviceData deviceData;
+    private DeviceGeneralStatus deviceGeneralStatus;
+    private DeviceNetworkStatus deviceNetworkStatus;
+    private String remoteDeviceName;
 
     private TextView textViewSystemLoad;
+    private TextView textViewResponseTime;
     private TextView textViewFreeDiskSpace;
     private TextView textViewPublicIP;
     private TextView textViewLocalIP;
     private TextView textViewRunningSince;
     private TextView textViewLastUpdate;
 
-    private ValueEventListener deviceStatusData = new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+    private long lastMessageTimeStamp;
+    private long responseTime;
 
-            //deviceData=dataSnapshot.getValue(new GenericTypeIndicator<DeviceData>() {});
-            deviceData=dataSnapshot.getValue(DeviceData.class);
-            refreshUI();
+    private Handler handler;
+
+
+
+    private final static long REQUEST_INTERVAL = 5000L;
+
+    private Runnable sendRequest = new Runnable() {
+
+        @Override
+        public void run() {
+
+            lastMessageTimeStamp = System.currentTimeMillis();
+            tcpComm.sendData(new MessageStructure("__get_device_data", "general", "-").getMessageAsJSONString());
+            handler.postDelayed(this, REQUEST_INTERVAL);
 
         }
 
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-        }
     };
-
-    private String groupName;
-    private String remoteDeviceName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_info_view);
 
-        // Bind to LocalService
-        Intent intent = new Intent(this, FirebaseDBComm.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        // inizializza l'handler
+        handler = new Handler();
 
         // set up the toolbar of this activity
         toolbar = findViewById(R.id.TBR___DEVICEINFOVIEW___TOOLBAR);
@@ -96,6 +173,7 @@ public class DeviceInfoViewActivity extends AppCompatActivity {
 
         //
         textViewFreeDiskSpace = findViewById(R.id.TXV___DEVICEINFOVIEW___DISKSTATUS_VALUE);
+        textViewResponseTime = findViewById(R.id.TXV___DEVICEINFOVIEW___RESPONSETIME_VALUE);
         textViewSystemLoad = findViewById(R.id.TXV___DEVICEINFOVIEW___SYSLOAD_VALUE);
         textViewPublicIP = findViewById(R.id.TXV___DEVICEINFOVIEW___PRIVATEIP_VALUE);
         textViewLocalIP = findViewById(R.id.TXV___DEVICEINFOVIEW___PUBLICIP_VALUE);
@@ -107,54 +185,121 @@ public class DeviceInfoViewActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
 
+        handler.removeCallbacks(sendRequest);
+
         super.onDestroy();
-        unbindService(connection);
 
     }
 
-    private ServiceConnection connection = new ServiceConnection() {
 
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            FirebaseDBComm.LocalBinder binder = (FirebaseDBComm.LocalBinder) service;
-            firebaseDBComm = binder.getService();
+    private void refreshUI(int flag) {
 
-            groupName = firebaseDBComm.getGroupName();
-            remoteDeviceName = firebaseDBComm.getRemoteDeviceName();
+        switch (flag) {
 
-            deviceInfo = FirebaseDatabase.getInstance().getReference(String.format("Devices/%s/%s", groupName, remoteDeviceName));
-            deviceInfo.addValueEventListener(deviceStatusData);
+            case REFRESH_GENERAL:
+
+                textViewResponseTime.setText(String.format("%d ms", responseTime));
+
+                textViewSystemLoad.setText(String.format("%d%%", deviceGeneralStatus.getAverageLoad()));
+                textViewFreeDiskSpace.setText(String.format("%.0f MB", deviceGeneralStatus.getFreeSpace()));
+                textViewRunningSince.setText(GeneralUtilitiesLibrary.getTimeElapsed(deviceGeneralStatus.getRunningSince(), this));
+                //textViewLastUpdate.setText(GeneralUtilitiesLibrary.getTimeElapsed(deviceData.getLastUpdate(), this));
+
+                break;
+
+            case REFRESH_NETWORK:
+
+                textViewPublicIP.setText(deviceNetworkStatus.getPublicIPAddress());
+                textViewLocalIP.setText(deviceNetworkStatus.getLocalIPAddresses());
+
+                break;
+
+
+            case REFRESH_NAME:
+                toolbar.setTitle(remoteDeviceName);
+                break;
 
         }
 
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
 
-        }
 
-    };
-
-    private void refreshUI(){
-
-        toolbar.setTitle(deviceData.getDeviceName());
-        textViewSystemLoad.setText(String.format("%d%%",deviceData.getAverageLoad()));
-        textViewFreeDiskSpace.setText(String.format("%.0f MB",deviceData.getAvailableDiskSpace()));
-        textViewPublicIP.setText(deviceData.getPublicIPAddress());
-        textViewLocalIP.setText(deviceData.getLocalIPAddresses());
-        textViewRunningSince.setText(GeneralUtilitiesLibrary.getTimeElapsed(deviceData.getRunningSince(),this));
-        textViewLastUpdate.setText(GeneralUtilitiesLibrary.getTimeElapsed(deviceData.getLastUpdate(),this));
 
     }
 
-    private void shutdownHost(){
-        firebaseDBComm.sendCommandToDevice(new MessageStructure("__execcmd", "shutdown -h now", firebaseDBComm.getThisDeviceName()));
+    private void sendShutdownCommand() {
+        if (tcpCommAvailable && tcpComm != null)
+            tcpComm.sendData(new MessageStructure("__execcmd", "shutdown -h now", "-").getMessageAsJSONString());
     }
 
-    private void rebootHost(){
-        firebaseDBComm.sendCommandToDevice(new MessageStructure("__execcmd", "reboot", firebaseDBComm.getThisDeviceName()));
+    private void sendRebootCommand() {
+        if (tcpCommAvailable && tcpComm != null)
+            tcpComm.sendData(new MessageStructure("__execcmd", "reboot", "-").getMessageAsJSONString());
     }
 
+    public void rebootHost() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // Add the buttons
+        builder.setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+
+                // send the reboot command to the remote host
+                sendRebootCommand();
+
+                finish();
+                return;
+
+            }
+
+        });
+
+        builder.setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+
+            }
+        });
+
+        builder.setMessage(R.string.ALERTDIALOG_MESSAGE_REBOOT);
+
+        // Create the AlertDialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
+
+    public void shutdownHost() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // Add the buttons
+        builder.setPositiveButton(R.string.ALERTDIALOG_YES, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+
+                // send the shutdown command to the remote host
+                sendShutdownCommand();
+
+                finish();
+                return;
+
+            }
+
+        });
+        builder.setNegativeButton(R.string.ALERTDIALOG_NO, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.setMessage(R.string.ALERTDIALOG_MESSAGE_SHUTDOWN);
+
+        // Create the AlertDialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
 
 }

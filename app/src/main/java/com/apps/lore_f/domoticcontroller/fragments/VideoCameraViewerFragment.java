@@ -148,7 +148,7 @@ public class VideoCameraViewerFragment /*extends Fragment*/ {
 
             if (dataSnapshot.getValue() != null) {
 
-                CameraFrame shotData = dataSnapshot.getValue(CameraFrame.class);
+                CameraData shotData = dataSnapshot.getValue(CameraData.class);
 
                 if (shotData != null) {
 

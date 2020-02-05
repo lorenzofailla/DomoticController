@@ -30,9 +30,9 @@ import java.util.zip.DataFormatException;
 import static android.content.ContentValues.TAG;
 import static apps.android.loref.GeneralUtilitiesLibrary.decompress;
 
-public class VideoSurveillanceCameraListFragment extends Fragment {
+public class VideoSurveillanceCameraListFragment /*extends Fragment*/ {
 
-    public boolean viewCreated = false;
+    /*public boolean viewCreated = false;
 
     public DatabaseReference camerasNode = null;
     public String deviceName;
@@ -112,7 +112,7 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
 
         firebaseAdapter = new FirebaseRecyclerAdapter<VSCameraDevice, CamerasHolder>(
                 VSCameraDevice.class,
-                R.layout.row_holder_vscamera_element,
+                R.layout.row_holder_camera_element,
                 CamerasHolder.class,
                 availableCameras) {
 
@@ -142,9 +142,9 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
 
                 });
 
-                /*
+                *//*
                 Aggiorna l'immagine imagePreviewIWV con i dati dell'ultimo frame acquisito
-                 */
+                 *//*
 
                 HashMap<String,Object> lastShotData = camera.getLastShotData();
                 if(lastShotData!=null) {
@@ -180,9 +180,9 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
 
                 }
 
-                /*
+                *//*
                 Aggoprma l'immagine
-                 */
+                 *//*
                 String cameraStatus=camera.getMoDetStatus();
                 int resId;
                 switch (cameraStatus){
@@ -226,6 +226,6 @@ public class VideoSurveillanceCameraListFragment extends Fragment {
         camerasRecyclerView.setLayoutManager(linearLayoutManager);
         camerasRecyclerView.setAdapter(firebaseAdapter);
 
-    }
+    }*/
 
 }

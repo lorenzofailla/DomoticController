@@ -75,6 +75,7 @@
     <string name="DEVICEVIEW_LABEL_AVAILABLESERVICES">Available services:</string>
     <string name="DEVICEVIEW_LABEL_SYSTEM_LOAD">System load:</string>
     <string name="DEVICEVIEW_LABEL_FREE_DISK_SPACE">Free disk space:</string>
+    <string name="DEVICEVIEW_LABEL_RESPONSETIME">Response time:</string>
     <string name="DEVICEVIEW_LABEL_PUBLICIPADDR">Public IP address:</string>
     <string name="DEVICEVIEW_LABEL_PRIVATEIPADDR">Local IP address:</string>
     <string name="DEVICEVIEW_LABEL_VPN_STATUS">VPN Status:</string>
@@ -90,7 +91,7 @@
     <string name="DEVICEVIEW_MENU_REBOOT">Reboot system</string>
     <string name="DEVICEVIEW_MENU_SHUTDOWN">Shutdown system</string>
 
-    <!-- ***   - Torrents management fragment -->
+    <!-- ***   - Torrents management (transmission-remote) Activity -->
     <string name="TRANSMISSIONREMOTE_LABEL_AVAILABLETORRENTS">%d available torrents.</string>
     <string name="TRANSMISSIONREMOTE_LABEL_NOTORRENTS">No available Torrent.</string>
     <string name="TRANSMISSIONREMOTE_MENU_ADD">Add Torrent</string>
@@ -98,6 +99,17 @@
     <string name="TRANSMISSIONREMOTE_MENU_STARTALL">Start ALL</string>
     <string name="TRANSMISSIONREMOTE_MENU_PAUSEALL">Stop ALL</string>
 
+    <!-- ***   - CameraSelectionActivity -->
+    <string name="CAMERASELECTION_LABEL_AVAILABLECAMERA">%d available camera.</string>
+    <string name="CAMERASELECTION_LABEL_AVAILABLECAMERAS">%d available cameras.</string>
+    <string name="CAMERASELECTION_LABEL_NOAVAILABLECAMERA">No camera available.</string>
+
+    <!-- ***   - ThermostatActivity -->
+    <string name="THERMOSTAT_LABEL_GENERIC_PLACEHOLDER">99.9 °C</string>
+    <string name="THERMOSTAT_TOOLBAR_TITLE">Thermostats settings</string>
+
+    <!-- ***   - CameraViewActivity -->
+    <string name="CAMERAVIEW_LABEL_SHOTTIME">Shot taken: </string>
 
     <string name="CLOUDSTORAGE_LABEL_REQUESTOR">Uploaded by: </string>
     <string name="CLOUDSTORAGE_LABEL_SIZE">Size: </string>

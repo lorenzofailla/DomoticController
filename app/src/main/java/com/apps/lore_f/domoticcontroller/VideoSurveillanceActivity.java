@@ -14,9 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.apps.lore_f.domoticcontroller.activities.GroupSelection;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class VideoSurveillanceActivity extends AppCompatActivity {
+public class VideoSurveillanceActivity /*extends AppCompatActivity*/ {
 
-    private ViewPager viewPager;
+    /*private ViewPager viewPager;
     private CollectionPagerAdapter collectionPagerAdapter;
 
     private String groupName;
@@ -37,9 +37,9 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
 
         if(groupName==null){
 
-            /*
+            *//*
             questa parte di codice non dovrebbe essere mai eseguita, viene tenuta per evitare eccezioni
-             */
+             *//*
 
             // nome del gruppo non impostato, lancia l'Activity GroupSelection per selezionare il gruppo a cui connettersi
             startActivity(new Intent(this, GroupSelection.class));
@@ -50,7 +50,7 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
 
         }
 
-        /* visualizza il layout */
+        *//* visualizza il layout *//*
         setContentView(R.layout.activity_videosurveillance);
 
     }
@@ -78,7 +78,7 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
         public CollectionPagerAdapter(FragmentManager fm) {
             super(fm);
 
-            /* inizializza i fragment */
+            *//* inizializza i fragment *//*
             //
             // VideoSurveillanceCameraListFragment
 
@@ -121,6 +121,6 @@ public class VideoSurveillanceActivity extends AppCompatActivity {
             return pageTitle[position];
         }
 
-    }
+    }*/
 
 }

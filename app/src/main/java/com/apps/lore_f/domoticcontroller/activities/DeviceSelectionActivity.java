@@ -1,13 +1,9 @@
 package com.apps.lore_f.domoticcontroller.activities;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -20,8 +16,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.apps.lore_f.domoticcontroller.CloudStorageActivity;
 import com.apps.lore_f.domoticcontroller.R;
+import com.apps.lore_f.domoticcontroller.asynctask.TCPComm;
+import com.apps.lore_f.domoticcontroller.asynctask.TCPCommListener;
 import com.apps.lore_f.domoticcontroller.firebase.dataobjects.DeviceData;
-import com.apps.lore_f.domoticcontroller.services.FirebaseDBComm;
+import com.apps.lore_f.domoticcontroller.generic.classes.MessageStructure;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,6 +27,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class DeviceSelectionActivity extends AppCompatActivity {
 
@@ -40,12 +41,54 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     private Query onlineDevices;
     private String groupName;
-    private String selectedRemoteDeviceName;
+    private String selectedTCPHost;
+    private int selectedTCPPort;
     private Intent selectedIntent;
 
     private boolean serviceBound=false;
 
-    private FirebaseDBComm firebaseDBComm;
+    private TCPComm tcpComm;
+    private boolean isTCPCommActive = false;
+    private String replyCode;
+
+    private TCPCommListener tcpCommListener = new TCPCommListener() {
+        @Override
+        public void onSocketCreated() {
+            isTCPCommActive = true;
+            tcpComm.sendData(composeRequest());
+        }
+
+        @Override
+        public void onSocketClosed() {
+            isTCPCommActive = false;
+        }
+
+        @Override
+        public void onDataReceived(String data) {
+            Log.i(TAG, "data received from tcp comm interface:" + data);
+
+            try {
+                JSONObject reply = new JSONObject(data);
+                switch (reply.getString("header")){
+
+                    case "__handshake_reply":
+
+                        if (reply.getString("body").equals(replyCode)){
+
+                            manageIntent();
+
+                        }
+                        break;
+                }
+
+
+            } catch (JSONException e) {
+                Log.d(TAG, "NOT A JSON REPLY!" + data);
+            }
+
+        }
+
+    };
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -84,6 +127,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
         public ImageButton buttonGoToTorrent;
         public ImageButton buttonGoToDeviceInfo;
         public ImageButton buttonGoToWakeOnLAN;
+        public ImageButton buttonGoToCamera;
+        public ImageButton buttonGoToThermostat;
 
         public TextView deviceRunningSinceTxv;
         public TextView deviceLastUpdateTxv;
@@ -99,6 +144,8 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             buttonGoToTorrent = itemView.findViewById(R.id.BTN___ROWDEVICE___TORRENT);
             buttonGoToDeviceInfo = itemView.findViewById(R.id.BTN___ROWDEVICE___DEVICEINFO);
             buttonGoToWakeOnLAN = itemView.findViewById(R.id.BTN___ROWDEVICE___WAKEONLAN);
+            buttonGoToCamera = itemView.findViewById(R.id.BTN___ROWDEVICE___CAMERA);
+            buttonGoToThermostat = itemView.findViewById(R.id.BTN___ROWDEVICE___THERMOSTAT);
 
             buttonShowAdditionalData.setOnClickListener(new View.OnClickListener() {
 
@@ -203,11 +250,6 @@ public class DeviceSelectionActivity extends AppCompatActivity {
     protected void onResume() {
 
         super.onResume();
-
-        if(serviceBound){
-            unbindService(connection);
-        }
-
         refreshAdapter();
 
     }
@@ -230,8 +272,9 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
         onlineDevices.removeEventListener(valueEventListener);
 
-        if(serviceBound){
-            unbindService(connection);
+        if (isTCPCommActive) {
+            tcpComm.terminate();
+            tcpComm.removeListener();
         }
 
     }
@@ -251,7 +294,6 @@ public class DeviceSelectionActivity extends AppCompatActivity {
             protected void populateViewHolder(DevicesHolder holder, final DeviceData deviceData, int position) {
 
                 holder.deviceNameTxv.setText(deviceData.getDeviceName());
-                selectedRemoteDeviceName = deviceData.getDeviceName();
 
                 // gestisce la visualizzazione delle immagini in funzione della capability del dispositivo
                 //
@@ -264,8 +306,14 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
                             selectedIntent = new Intent(DeviceSelectionActivity.this, TransmissionRemoteActivity.class);
 
-                            // Bind to LocalService
-                            bindService();
+                            selectedIntent.putExtra("__host", deviceData.getTCPServiceHost());
+                            selectedIntent.putExtra("__port", deviceData.getTCPServicePort());
+
+                            selectedTCPHost = deviceData.getTCPServiceHost();
+                            selectedTCPPort = deviceData.getTCPServicePort();
+
+                            manageTCPComm();
+
                         }
 
                     });
@@ -281,27 +329,64 @@ public class DeviceSelectionActivity extends AppCompatActivity {
                             selectedIntent = new Intent(DeviceSelectionActivity.this, WakeOnLANActivity.class);
 
                             // Bind to LocalService
-                            bindService();
                         }
 
                     });
 
                 }
 
+                if (deviceData.hasCamera()) {
+                    //
+
+                    holder.buttonGoToCamera.setVisibility(View.VISIBLE);
+                    holder.buttonGoToCamera.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            selectedIntent = new Intent(DeviceSelectionActivity.this, CameraSelectionActivity.class);
+                            selectedIntent.putExtra("_filter_by_owner", true);
+
+                            // Bind to LocalService
+                        }
+
+                    });
+
+                }
+
+                if (deviceData.hasThermostat()) {
+
+                    holder.buttonGoToThermostat.setVisibility(View.VISIBLE);
+                    holder.buttonGoToThermostat.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            selectedIntent = new Intent(DeviceSelectionActivity.this, ThermostatActivity.class);
+
+                            // Bind to LocalService
+                        }
+
+                    });
+
+                }
+
+
+
                 holder.buttonGoToDeviceInfo.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
                         selectedIntent = new Intent(DeviceSelectionActivity.this, DeviceInfoViewActivity.class);
+                        selectedIntent.putExtra("__host", deviceData.getTCPServiceHost());
+                        selectedIntent.putExtra("__port", deviceData.getTCPServicePort());
 
-                        // Bind to LocalService
-                        bindService();
+                        selectedTCPHost = deviceData.getTCPServiceHost();
+                        selectedTCPPort = deviceData.getTCPServicePort();
+
+                        manageTCPComm();
 
                     }
 
                 });
-
-                // aggiorna la label con l'informazione sull'ultimo update
 
             }
 
@@ -329,40 +414,29 @@ public class DeviceSelectionActivity extends AppCompatActivity {
 
     }
 
-    private void bindService(){
+    private void manageTCPComm() {
 
-        // Bind to LocalService
-        Intent intent = new Intent(DeviceSelectionActivity.this, FirebaseDBComm.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        if (!isTCPCommActive) {
+            tcpComm = new TCPComm(selectedTCPHost, selectedTCPPort, tcpCommListener);
+        } else {
+            tcpComm.sendData(composeRequest());
+        }
+
     }
 
-    private ServiceConnection connection = new ServiceConnection() {
+    private String composeRequest(){
 
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
+        replyCode = ""+System.currentTimeMillis();
+        return new MessageStructure("__handshake",replyCode,"").getMessageAsJSONString();
 
-            serviceBound=true;
+    }
 
-            FirebaseDBComm.LocalBinder binder = (FirebaseDBComm.LocalBinder) service;
-            firebaseDBComm = binder.getService();
+    private void manageIntent(){
 
-            firebaseDBComm.setGroupName(groupName);
-            firebaseDBComm.setRemoteDeviceName(selectedRemoteDeviceName);
-            firebaseDBComm.setThisDeviceName(Settings.Secure.getString(getContentResolver(), "bluetooth_name") + "_" + System.currentTimeMillis());
+        startActivity(selectedIntent);
+        finish();
 
-            startActivity(selectedIntent);
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-
-            serviceBound=false;
-
-        }
-
-    };
+    }
 
 
 }

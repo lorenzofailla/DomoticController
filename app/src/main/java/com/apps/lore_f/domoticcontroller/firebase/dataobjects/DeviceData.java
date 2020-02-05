@@ -12,6 +12,7 @@ public class DeviceData {
 
     private String DeviceName;
     private boolean Online;
+    private HashMap<String, Object> ExposedServices;
     private HashMap<String, Object> StaticData;
     private HashMap<String, Object> NetworkData;
     private HashMap<String, Object> StatusData;
@@ -20,7 +21,7 @@ public class DeviceData {
     public DeviceData() {
     }
 
-    public DeviceData(String DeviceName, boolean Online, HashMap<String, Object> StaticData,HashMap<String, Object> NetworkData, HashMap<String, Object> StatusData){
+    public DeviceData(String DeviceName, boolean Online, HashMap<String, Object> ExposedServices, HashMap<String, Object> StaticData,HashMap<String, Object> NetworkData, HashMap<String, Object> StatusData){
         this.DeviceName=DeviceName;
         this.Online=Online;
         this.StaticData=StaticData;
@@ -48,19 +49,11 @@ public class DeviceData {
         return this.Online;
     }
 
-    public String getLocalIPAddresses() {
-
-        HashMap<String, Object> network = (HashMap<String, Object>) getNetworkData().get("NetworkStatus");
-        return network.get("LocalIP").toString();
-
+    public HashMap<String, Object> getExposedServices() {
+        return this.ExposedServices;
     }
 
-    public String getPublicIPAddress() {
 
-        HashMap<String, Object> network = (HashMap<String, Object>) getNetworkData().get("NetworkStatus");
-        return network.get("PublicIP").toString();
-
-    }
 
     public float getTotalDiskSpace() {
         return Float.parseFloat(getGeneralStatus().get("TotalSpace").toString());
@@ -78,40 +71,7 @@ public class DeviceData {
         return Long.parseLong(getGeneralStatus().get("LastUpdate").toString());
     }
 
-    public int getConnectedUsersCount() {
 
-        String[] data = getUptime();
-
-        if (data.length == 2) {
-
-            try {
-                return Integer.parseInt(data[0].split(",")[2].trim().split(" ")[0]);
-            } catch (IndexOutOfBoundsException | NumberFormatException e) {
-                return -1;
-            }
-
-        } else {
-            return -1;
-        }
-
-    }
-
-    public int getAverageLoad() {
-
-        String[] data = getUptime();
-
-        if (data.length == 2) {
-
-            try {
-                return (int) (Double.parseDouble(data[1].split(", ")[0].replaceAll(",", ".")) * 100.0);
-            } catch (IndexOutOfBoundsException | NumberFormatException e) {
-                return -1;
-            }
-
-        } else {
-            return -1;
-        }
-    }
 
     private HashMap<String, Object> getGeneralStatus() {
         return (HashMap<String, Object>) getStatusData().get("GeneralStatus");
@@ -133,12 +93,45 @@ public class DeviceData {
         return (HashMap<String, Object>) getStaticData().get("WakeOnLAN");
     }
 
-    private HashMap<String, Object> getVideoSurveillanceParameters() {
-        return (HashMap<String, Object>) getStaticData().get("VideoSurveillance");
+    private HashMap<String, Object> getCameraParameters() {
+        return (HashMap<String, Object>) getStaticData().get("Camera");
     }
 
     private HashMap<String, Object> getFileManagerParameters() {
         return (HashMap<String, Object>) getStaticData().get("FileManager");
+    }
+
+    private HashMap<String, Object> getThermostatData() {
+        return (HashMap<String, Object>) getStaticData().get("Thermostat");
+    }
+
+    private String getTCPService() {
+        return getExposedServices().get("TCP").toString();
+    }
+
+    public String getTCPServiceHost(){
+        if( getTCPService() != null){
+            return getTCPService().split("//")[1].split(":")[0];
+        } else {
+            return null;
+        }
+    }
+
+    public int getTCPServicePort(){
+        if( getTCPService() != null){
+            return Integer.parseInt (getTCPService().split("//")[1].split(":")[1]);
+        } else {
+            return -1;
+        }
+    }
+
+
+    public boolean hasThermostat() {
+        if (getThermostatData() != null) {
+            return (boolean) getThermostatData().get("Enabled");
+        } else {
+            return false;
+        }
     }
 
     public boolean hasTransmission() {
@@ -157,9 +150,9 @@ public class DeviceData {
         }
     }
 
-    public boolean hasVideoSurveillance() {
-        if( getVideoSurveillanceParameters() != null) {
-            return (boolean) getVideoSurveillanceParameters().get("Enabled");
+    public boolean hasCamera() {
+        if( getCameraParameters() != null) {
+            return (boolean) getCameraParameters().get("Enabled");
         } else {
             return false;
         }

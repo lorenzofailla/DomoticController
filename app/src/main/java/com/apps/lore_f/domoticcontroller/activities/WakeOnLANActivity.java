@@ -58,9 +58,9 @@ public class WakeOnLANActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
+    protected void onDestroy(){
 
-        super.onPause();
+        super.onDestroy();
         unbindService(connection);
 
     }

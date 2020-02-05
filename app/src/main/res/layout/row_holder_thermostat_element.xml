@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/TXV___THERMOSTATDEVICE___DEVICENAME"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:text="@string/GENERIC_PLACEHOLDER_WAITING"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TXV___THERMOSTATDEVICE___DEVICENAME"
+        android:id="@+id/CLA___THERMOSTATDEVICE___STATUS">
+
+            <TextView
+                android:id="@+id/TXV___THERMOSTATDEVICE___DEVICEACTUALROOMTEMP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="3dp"
+                android:text="@string/THERMOSTAT_LABEL_GENERIC_PLACEHOLDER"
+                android:textSize="80dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TableLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintRight_toRightOf="parent">
+
+                <TableRow>
+
+                    <ImageView
+                        android:id="@+id/IVW___THERMOSTATDEVICE___HEATING"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:padding="10dp"
+                        android:src="@drawable/flame_faded"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/TXV___THERMOSTATDEVICE___DEVICEACTUALROOMTEMP" />
+
+                    <ImageView
+                        android:id="@+id/IVW___THERMOSTATDEVICE___FREEZE"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:padding="10dp"
+                        android:src="@drawable/freeze_faded"
+                        app:layout_constraintRight_toLeftOf="@+id/IVW___THERMOSTATDEVICE___HEATING"
+                        app:layout_constraintTop_toTopOf="@+id/TXV___THERMOSTATDEVICE___DEVICEACTUALROOMTEMP" />
+                </TableRow>
+
+                <TableRow>
+                    <ImageView />
+
+                    <ImageView
+                        android:id="@+id/IVW___THERMOSTATDEVICE___MODE"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:padding="10dp"
+                        android:src="@drawable/automatic"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/IVW___THERMOSTATDEVICE___HEATING" />
+
+                </TableRow>
+
+            </TableLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/CLA___THERMOSTATDEVICE___STATUS"
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+    <ImageButton
+        android:id="@+id/BTN___THERMOSTATDEVICE___ACTIVATIONSTATUS"
+        android:layout_width="@dimen/normal_button_width"
+        android:layout_height="@dimen/normal_button_height"
+        android:src="@drawable/off_red"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TXV___THERMOSTATDEVICE___DEVICEACTUALROOMTEMP" />
+
+    <ImageButton
+        android:id="@+id/BTN___THERMOSTATDEVICE___OPERATIVE_MODE"
+        android:layout_width="@dimen/normal_button_width"
+        android:layout_height="@dimen/normal_button_height"
+        android:src="@drawable/flash"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/BTN___THERMOSTATDEVICE___ACTIVATIONSTATUS" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+    <TextView
+        android:id="@+id/TXV___THERMOSTATDEVICE___DEVICESETPOINTTEMP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:text="@string/THERMOSTAT_LABEL_GENERIC_PLACEHOLDER"
+        android:textSize="36dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TXV___THERMOSTATDEVICE___DEVICEACTUALROOMTEMP" />
+
+    <ImageButton
+        android:id="@+id/BTN___THERMOSTATDEVICE___DECREASE_TEMP"
+        android:layout_width="@dimen/normal_button_width"
+        android:layout_height="@dimen/normal_button_height"
+        android:src="@drawable/up"
+        app:layout_constraintRight_toLeftOf="@+id/BTN___THERMOSTATDEVICE___INCREASE_TEMP"
+        app:layout_constraintTop_toTopOf="@+id/TXV___THERMOSTATDEVICE___DEVICESETPOINTTEMP" />
+
+    <ImageButton
+        android:id="@+id/BTN___THERMOSTATDEVICE___INCREASE_TEMP"
+        android:layout_width="@dimen/normal_button_width"
+        android:layout_height="@dimen/normal_button_height"
+        android:src="@drawable/down"
+        app:layout_constraintRight_toLeftOf="@+id/TXV___THERMOSTATDEVICE___DEVICESETPOINTTEMP"
+        app:layout_constraintTop_toTopOf="@+id/TXV___THERMOSTATDEVICE___DEVICESETPOINTTEMP" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
